@@ -11,8 +11,12 @@ import {
   Building2,
   Users,
   MapPin,
-  Loader2
+  Loader2,
+  Clock,
+  Settings
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,6 +86,12 @@ export default function Departments() {
   const { data: employees = [] } = useQuery({
     queryKey: ['employees', companyId],
     queryFn: () => base44.entities.EmployeeProfile.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  const { data: dayparts = [] } = useQuery({
+    queryKey: ['dayparts', companyId],
+    queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId }),
     enabled: !!companyId
   });
 
@@ -157,6 +167,10 @@ export default function Departments() {
 
   const getEmployeeCount = (deptId) => {
     return employees.filter(e => e.departmentIds?.includes(deptId)).length;
+  };
+
+  const getDaypartCount = (deptId) => {
+    return dayparts.filter(d => d.departmentId === deptId).length;
   };
 
   const getLocationNames = (ids) => {
@@ -272,7 +286,18 @@ export default function Departments() {
                       <Users className="w-4 h-4 text-slate-400" />
                       <span>{getEmployeeCount(department.id)} medewerkers</span>
                     </div>
+                    <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                      <Clock className="w-4 h-4 text-slate-400" />
+                      <span>{getDaypartCount(department.id)} dagdelen</span>
+                    </div>
                   </div>
+                  
+                  <Link to={createPageUrl('DepartmentDetails') + `?id=${department.id}`}>
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Dagdelen & Bezetting
+                    </Button>
+                  </Link>
 
                   {department.locationIds?.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
