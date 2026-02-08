@@ -1,0 +1,53 @@
+import React from 'react';
+import { CompanyProvider, useCompany } from './components/providers/CompanyProvider';
+import Sidebar from './components/layout/Sidebar';
+import TopBar from './components/layout/TopBar';
+import { Loader2 } from 'lucide-react';
+
+// Pages that don't need company context
+const publicPages = ['CompanySelect', 'CompanyOnboarding'];
+
+function LayoutContent({ children, currentPageName }) {
+  const { currentCompany, loading, userMemberships } = useCompany();
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-slate-600">Laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Public pages or company selection needed
+  if (publicPages.includes(currentPageName) || !currentCompany) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+        {children}
+      </div>
+    );
+  }
+
+  // Main app layout with sidebar
+  return (
+    <div className="min-h-screen bg-slate-50 flex">
+      <Sidebar currentPage={currentPageName} />
+      <main className="flex-1 min-w-0">
+        {children}
+      </main>
+    </div>
+  );
+}
+
+export default function Layout({ children, currentPageName }) {
+  return (
+    <CompanyProvider>
+      <LayoutContent currentPageName={currentPageName}>
+        {children}
+      </LayoutContent>
+    </CompanyProvider>
+  );
+}
