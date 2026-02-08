@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Trash2 } from 'lucide-react';
+import { Loader2, Trash2, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -34,6 +34,7 @@ const shiftTypes = [
 const defaultFormData = {
   employeeId: '',
   departmentId: '',
+  daypartId: '',
   locationId: '',
   functionId: '',
   date: '',
@@ -51,8 +52,10 @@ export default function ShiftDialog({
   scheduleId,
   employeeId,
   date,
+  daypartId,
   employees,
   departments,
+  dayparts = [],
   locations,
   functions
 }) {
@@ -65,6 +68,7 @@ export default function ShiftDialog({
       setFormData({
         employeeId: shift.employeeId || '',
         departmentId: shift.departmentId || '',
+        daypartId: shift.daypartId || '',
         locationId: shift.locationId || '',
         functionId: shift.functionId || '',
         date: shift.date || '',
@@ -75,13 +79,29 @@ export default function ShiftDialog({
         notes: shift.notes || ''
       });
     } else {
+      // Find the daypart to get default times
+      const selectedDaypart = dayparts.find(dp => dp.id === daypartId);
       setFormData({
         ...defaultFormData,
         employeeId: employeeId || '',
-        date: date || ''
+        date: date || '',
+        daypartId: daypartId || '',
+        start_time: selectedDaypart?.startTime || '09:00',
+        end_time: selectedDaypart?.endTime || '17:00'
       });
     }
-  }, [shift, employeeId, date, open]);
+  }, [shift, employeeId, date, daypartId, dayparts, open]);
+
+  // Update times when daypart changes
+  const handleDaypartChange = (newDaypartId) => {
+    const selectedDaypart = dayparts.find(dp => dp.id === newDaypartId);
+    setFormData(prev => ({
+      ...prev,
+      daypartId: newDaypartId,
+      start_time: selectedDaypart?.startTime || prev.start_time,
+      end_time: selectedDaypart?.endTime || prev.end_time
+    }));
+  };
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Shift.create(data),
@@ -136,6 +156,8 @@ export default function ShiftDialog({
     ? format(parseISO(formData.date), 'EEEE d MMMM yyyy', { locale: nl })
     : '';
 
+  const sortedDayparts = [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
@@ -167,6 +189,34 @@ export default function ShiftDialog({
               </SelectContent>
             </Select>
           </div>
+
+          {sortedDayparts.length > 0 && (
+            <div>
+              <Label htmlFor="daypartId">Dagdeel</Label>
+              <Select 
+                value={formData.daypartId} 
+                onValueChange={handleDaypartChange}
+              >
+                <SelectTrigger>
+                  <Clock className="w-4 h-4 mr-2 text-slate-400" />
+                  <SelectValue placeholder="Selecteer dagdeel" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortedDayparts.map((dp) => (
+                    <SelectItem key={dp.id} value={dp.id}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: dp.color || '#E5E7EB' }}
+                        />
+                        {dp.name} ({dp.startTime}-{dp.endTime})
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
