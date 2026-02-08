@@ -47,38 +47,40 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import CompanySelect from './pages/CompanySelect';
-import CompanyOnboarding from './pages/CompanyOnboarding';
-import Dashboard from './pages/Dashboard';
-import Employees from './pages/Employees';
-import Departments from './pages/Departments';
-import Locations from './pages/Locations';
-import FunctionsSkills from './pages/FunctionsSkills';
-import Schedules from './pages/Schedules';
-import ScheduleEditor from './pages/ScheduleEditor';
 import AIAssistant from './pages/AIAssistant';
-import VacationRequests from './pages/VacationRequests';
-import SwapRequests from './pages/SwapRequests';
-import CompanySettings from './pages/CompanySettings';
 import Billing from './pages/Billing';
+import CompanyOnboarding from './pages/CompanyOnboarding';
+import CompanySelect from './pages/CompanySelect';
+import CompanySettings from './pages/CompanySettings';
+import Dashboard from './pages/Dashboard';
+import Departments from './pages/Departments';
+import Employees from './pages/Employees';
+import FunctionsSkills from './pages/FunctionsSkills';
+import Locations from './pages/Locations';
+import ScheduleEditor from './pages/ScheduleEditor';
+import Schedules from './pages/Schedules';
+import SwapRequests from './pages/SwapRequests';
+import VacationRequests from './pages/VacationRequests';
+import LocationTypes from './pages/LocationTypes';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "CompanySelect": CompanySelect,
-    "CompanyOnboarding": CompanyOnboarding,
-    "Dashboard": Dashboard,
-    "Employees": Employees,
-    "Departments": Departments,
-    "Locations": Locations,
-    "FunctionsSkills": FunctionsSkills,
-    "Schedules": Schedules,
-    "ScheduleEditor": ScheduleEditor,
     "AIAssistant": AIAssistant,
-    "VacationRequests": VacationRequests,
-    "SwapRequests": SwapRequests,
-    "CompanySettings": CompanySettings,
     "Billing": Billing,
+    "CompanyOnboarding": CompanyOnboarding,
+    "CompanySelect": CompanySelect,
+    "CompanySettings": CompanySettings,
+    "Dashboard": Dashboard,
+    "Departments": Departments,
+    "Employees": Employees,
+    "FunctionsSkills": FunctionsSkills,
+    "Locations": Locations,
+    "ScheduleEditor": ScheduleEditor,
+    "Schedules": Schedules,
+    "SwapRequests": SwapRequests,
+    "VacationRequests": VacationRequests,
+    "LocationTypes": LocationTypes,
 }
 
 export const pagesConfig = {
