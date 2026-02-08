@@ -62,6 +62,7 @@ import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
 import LocationTypes from './pages/LocationTypes';
+import DepartmentDetails from './pages/DepartmentDetails';
 import __Layout from './Layout.jsx';
 
 
@@ -81,6 +82,7 @@ export const PAGES = {
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
     "LocationTypes": LocationTypes,
+    "DepartmentDetails": DepartmentDetails,
 }
 
 export const pagesConfig = {

@@ -62,6 +62,12 @@ const navItems = [
     permission: 'manage_schedules' 
   },
   { 
+    label: 'Locatie Types', 
+    icon: MapPin, 
+    page: 'LocationTypes',
+    permission: 'manage_schedules' 
+  },
+  { 
     label: 'Functies & Skills', 
     icon: Briefcase, 
     page: 'FunctionsSkills',

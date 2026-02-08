@@ -39,16 +39,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const locationTypes = [
-  { value: 'office', label: 'Kantoor' },
-  { value: 'warehouse', label: 'Magazijn' },
-  { value: 'store', label: 'Winkel' },
-  { value: 'hospital', label: 'Ziekenhuis' },
-  { value: 'clinic', label: 'Kliniek' },
-  { value: 'home_care', label: 'Thuiszorg' },
-  { value: 'other', label: 'Anders' },
-];
-
 export default function Locations() {
   const { currentCompany, hasPermission } = useCompany();
   const companyId = currentCompany?.id;
@@ -59,7 +49,7 @@ export default function Locations() {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
-    location_type: 'office',
+    locationTypeId: '',
     address: '',
     city: '',
     postal_code: '',
@@ -71,6 +61,12 @@ export default function Locations() {
   const { data: locations = [], isLoading } = useQuery({
     queryKey: ['locations', companyId],
     queryFn: () => base44.entities.Location.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  const { data: locationTypes = [] } = useQuery({
+    queryKey: ['location-types', companyId],
+    queryFn: () => base44.entities.LocationType.filter({ companyId, status: 'active' }),
     enabled: !!companyId
   });
 
@@ -103,7 +99,7 @@ export default function Locations() {
       setFormData({
         name: location.name || '',
         code: location.code || '',
-        location_type: location.location_type || 'office',
+        locationTypeId: location.locationTypeId || '',
         address: location.address || '',
         city: location.city || '',
         postal_code: location.postal_code || '',
@@ -116,7 +112,7 @@ export default function Locations() {
       setFormData({
         name: '',
         code: '',
-        location_type: 'office',
+        locationTypeId: '',
         address: '',
         city: '',
         postal_code: '',
@@ -154,8 +150,14 @@ export default function Locations() {
     }
   };
 
-  const getTypeLabel = (type) => {
-    return locationTypes.find(t => t.value === type)?.label || type;
+  const getTypeName = (typeId) => {
+    const type = locationTypes.find(t => t.id === typeId);
+    return type?.name || 'Geen type';
+  };
+
+  const getTypeColor = (typeId) => {
+    const type = locationTypes.find(t => t.id === typeId);
+    return type?.color || '#6B7280';
   };
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
@@ -210,8 +212,11 @@ export default function Locations() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                        <MapPin className="w-5 h-5 text-green-600" />
+                      <div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: `${getTypeColor(location.locationTypeId)}20` }}
+                      >
+                        <MapPin className="w-5 h-5" style={{ color: getTypeColor(location.locationTypeId) }} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-slate-900">{location.name}</h3>
@@ -245,8 +250,15 @@ export default function Locations() {
                     )}
                   </div>
 
-                  <Badge variant="secondary" className="mb-4">
-                    {getTypeLabel(location.location_type)}
+                  <Badge 
+                    variant="secondary" 
+                    className="mb-4"
+                    style={{ 
+                      backgroundColor: `${getTypeColor(location.locationTypeId)}20`,
+                      color: getTypeColor(location.locationTypeId)
+                    }}
+                  >
+                    {getTypeName(location.locationTypeId)}
                   </Badge>
 
                   <div className="space-y-2 text-sm text-slate-600">
@@ -309,20 +321,24 @@ export default function Locations() {
             </div>
 
             <div>
-              <Label htmlFor="location_type">Type</Label>
+              <Label htmlFor="locationTypeId">Type</Label>
               <Select 
-                value={formData.location_type} 
-                onValueChange={(v) => setFormData({ ...formData, location_type: v })}
+                value={formData.locationTypeId} 
+                onValueChange={(v) => setFormData({ ...formData, locationTypeId: v })}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Selecteer een type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {locationTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
+                  {locationTypes.length === 0 ? (
+                    <SelectItem value={null} disabled>Geen types beschikbaar</SelectItem>
+                  ) : (
+                    locationTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
