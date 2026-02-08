@@ -54,6 +54,9 @@ import Employees from './pages/Employees';
 import Departments from './pages/Departments';
 import Locations from './pages/Locations';
 import FunctionsSkills from './pages/FunctionsSkills';
+import Schedules from './pages/Schedules';
+import ScheduleEditor from './pages/ScheduleEditor';
+import AIAssistant from './pages/AIAssistant';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +68,9 @@ export const PAGES = {
     "Departments": Departments,
     "Locations": Locations,
     "FunctionsSkills": FunctionsSkills,
+    "Schedules": Schedules,
+    "ScheduleEditor": ScheduleEditor,
+    "AIAssistant": AIAssistant,
 }
 
 export const pagesConfig = {
