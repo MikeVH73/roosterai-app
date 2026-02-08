@@ -1,0 +1,586 @@
+import React, { useState, useEffect } from 'react';
+import { useCompany } from '@/components/providers/CompanyProvider';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import TopBar from '@/components/layout/TopBar';
+import {
+  Building2,
+  Settings,
+  Bell,
+  Sparkles,
+  Clock,
+  Save,
+  Loader2,
+  Users,
+  Mail,
+  UserPlus
+} from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+
+export default function CompanySettings() {
+  const { currentCompany, refreshCompany, hasPermission } = useCompany();
+  const companyId = currentCompany?.id;
+  const queryClient = useQueryClient();
+
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('employee');
+  const [isInviting, setIsInviting] = useState(false);
+
+  const [companyData, setCompanyData] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    billing_email: ''
+  });
+
+  const [settingsData, setSettingsData] = useState({
+    planning_rules: {
+      min_rest_hours: 11,
+      max_hours_per_week: 40,
+      max_consecutive_days: 6,
+      min_break_duration: 30
+    },
+    ai_preferences: {
+      auto_suggest: true,
+      prefer_fulltime_first: true,
+      consider_travel_time: false,
+      balance_workload: true
+    },
+    notification_settings: {
+      email_new_schedule: true,
+      email_shift_changes: true,
+      email_vacation_updates: true
+    }
+  });
+
+  const { data: companySettings } = useQuery({
+    queryKey: ['company-settings', companyId],
+    queryFn: async () => {
+      const settings = await base44.entities.CompanySettings.filter({ companyId });
+      return settings[0];
+    },
+    enabled: !!companyId
+  });
+
+  const { data: companyMembers = [] } = useQuery({
+    queryKey: ['company-members', companyId],
+    queryFn: () => base44.entities.CompanyMember.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  useEffect(() => {
+    if (currentCompany) {
+      setCompanyData({
+        name: currentCompany.name || '',
+        address: currentCompany.address || '',
+        phone: currentCompany.phone || '',
+        billing_email: currentCompany.billing_email || ''
+      });
+    }
+  }, [currentCompany]);
+
+  useEffect(() => {
+    if (companySettings) {
+      setSettingsData({
+        planning_rules: { ...settingsData.planning_rules, ...companySettings.planning_rules },
+        ai_preferences: { ...settingsData.ai_preferences, ...companySettings.ai_preferences },
+        notification_settings: { ...settingsData.notification_settings, ...companySettings.notification_settings }
+      });
+    }
+  }, [companySettings]);
+
+  const updateCompanyMutation = useMutation({
+    mutationFn: (data) => base44.entities.Company.update(companyId, data),
+    onSuccess: () => {
+      refreshCompany();
+      toast.success('Bedrijfsgegevens opgeslagen');
+    }
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (data) => {
+      if (companySettings) {
+        return base44.entities.CompanySettings.update(companySettings.id, data);
+      } else {
+        return base44.entities.CompanySettings.create({ ...data, companyId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['company-settings', companyId]);
+      toast.success('Instellingen opgeslagen');
+    }
+  });
+
+  const handleSaveCompany = () => {
+    updateCompanyMutation.mutate(companyData);
+  };
+
+  const handleSaveSettings = () => {
+    updateSettingsMutation.mutate(settingsData);
+  };
+
+  const handleInvite = async () => {
+    setIsInviting(true);
+    try {
+      await base44.users.inviteUser(inviteEmail, 'user');
+      
+      await base44.entities.CompanyMember.create({
+        companyId,
+        email: inviteEmail,
+        company_role: inviteRole,
+        status: 'invited',
+        invited_at: new Date().toISOString()
+      });
+      
+      queryClient.invalidateQueries(['company-members', companyId]);
+      setInviteDialogOpen(false);
+      setInviteEmail('');
+      setInviteRole('employee');
+      toast.success('Uitnodiging verstuurd');
+    } catch (error) {
+      console.error('Invite error:', error);
+      toast.error('Er ging iets mis bij het versturen van de uitnodiging');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const roleLabels = {
+    company_admin: 'Administrator',
+    planner: 'Planner',
+    employee: 'Medewerker'
+  };
+
+  const statusLabels = {
+    active: 'Actief',
+    invited: 'Uitgenodigd',
+    inactive: 'Inactief'
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <TopBar 
+        title="Instellingen" 
+        subtitle={currentCompany?.name}
+      />
+
+      <div className="p-6 max-w-4xl mx-auto">
+        <Tabs defaultValue="company">
+          <TabsList className="mb-6">
+            <TabsTrigger value="company" className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Bedrijf
+            </TabsTrigger>
+            <TabsTrigger value="planning" className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Planning
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              AI
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notificaties
+            </TabsTrigger>
+            <TabsTrigger value="team" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Team
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="company">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Bedrijfsgegevens</CardTitle>
+                <CardDescription>Basis informatie over je organisatie</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Bedrijfsnaam</Label>
+                  <Input
+                    id="name"
+                    value={companyData.name}
+                    onChange={(e) => setCompanyData({ ...companyData, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">Adres</Label>
+                  <Input
+                    id="address"
+                    value={companyData.address}
+                    onChange={(e) => setCompanyData({ ...companyData, address: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="phone">Telefoonnummer</Label>
+                    <Input
+                      id="phone"
+                      value={companyData.phone}
+                      onChange={(e) => setCompanyData({ ...companyData, phone: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="billing_email">Facturatie e-mail</Label>
+                    <Input
+                      id="billing_email"
+                      type="email"
+                      value={companyData.billing_email}
+                      onChange={(e) => setCompanyData({ ...companyData, billing_email: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSaveCompany}
+                    disabled={updateCompanyMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateCompanyMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Opslaan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="planning">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Planning regels</CardTitle>
+                <CardDescription>Stel regels in voor de roosterplanning</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="min_rest_hours">Minimale rust tussen diensten (uren)</Label>
+                    <Input
+                      id="min_rest_hours"
+                      type="number"
+                      value={settingsData.planning_rules.min_rest_hours}
+                      onChange={(e) => setSettingsData({
+                        ...settingsData,
+                        planning_rules: { ...settingsData.planning_rules, min_rest_hours: parseInt(e.target.value) }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max_hours_per_week">Maximale uren per week</Label>
+                    <Input
+                      id="max_hours_per_week"
+                      type="number"
+                      value={settingsData.planning_rules.max_hours_per_week}
+                      onChange={(e) => setSettingsData({
+                        ...settingsData,
+                        planning_rules: { ...settingsData.planning_rules, max_hours_per_week: parseInt(e.target.value) }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max_consecutive_days">Maximaal opeenvolgende werkdagen</Label>
+                    <Input
+                      id="max_consecutive_days"
+                      type="number"
+                      value={settingsData.planning_rules.max_consecutive_days}
+                      onChange={(e) => setSettingsData({
+                        ...settingsData,
+                        planning_rules: { ...settingsData.planning_rules, max_consecutive_days: parseInt(e.target.value) }
+                      })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="min_break_duration">Minimale pauze (minuten)</Label>
+                    <Input
+                      id="min_break_duration"
+                      type="number"
+                      value={settingsData.planning_rules.min_break_duration}
+                      onChange={(e) => setSettingsData({
+                        ...settingsData,
+                        planning_rules: { ...settingsData.planning_rules, min_break_duration: parseInt(e.target.value) }
+                      })}
+                    />
+                  </div>
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={updateSettingsMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateSettingsMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Opslaan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ai">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>AI Voorkeuren</CardTitle>
+                <CardDescription>Pas aan hoe de AI assistent werkt</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Automatisch suggesties geven</Label>
+                    <p className="text-sm text-slate-500">De AI geeft proactief suggesties voor verbeteringen</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.ai_preferences.auto_suggest}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      ai_preferences: { ...settingsData.ai_preferences, auto_suggest: checked }
+                    })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Fulltime medewerkers eerst</Label>
+                    <p className="text-sm text-slate-500">Geef voorrang aan fulltime medewerkers bij het invullen van diensten</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.ai_preferences.prefer_fulltime_first}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      ai_preferences: { ...settingsData.ai_preferences, prefer_fulltime_first: checked }
+                    })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Werklast balanceren</Label>
+                    <p className="text-sm text-slate-500">Verdeel diensten gelijkmatig over medewerkers</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.ai_preferences.balance_workload}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      ai_preferences: { ...settingsData.ai_preferences, balance_workload: checked }
+                    })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Reistijd meenemen</Label>
+                    <p className="text-sm text-slate-500">Houd rekening met reistijd tussen locaties</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.ai_preferences.consider_travel_time}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      ai_preferences: { ...settingsData.ai_preferences, consider_travel_time: checked }
+                    })}
+                  />
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={updateSettingsMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateSettingsMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Opslaan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Notificatie voorkeuren</CardTitle>
+                <CardDescription>Bepaal welke e-mails medewerkers ontvangen</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Nieuw rooster gepubliceerd</Label>
+                    <p className="text-sm text-slate-500">Medewerkers krijgen een e-mail als een nieuw rooster gepubliceerd wordt</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.notification_settings.email_new_schedule}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      notification_settings: { ...settingsData.notification_settings, email_new_schedule: checked }
+                    })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Dienstwijzigingen</Label>
+                    <p className="text-sm text-slate-500">Medewerkers krijgen een e-mail bij wijzigingen in hun diensten</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.notification_settings.email_shift_changes}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      notification_settings: { ...settingsData.notification_settings, email_shift_changes: checked }
+                    })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Verlofupdates</Label>
+                    <p className="text-sm text-slate-500">Medewerkers krijgen een e-mail over de status van hun verlofaanvragen</p>
+                  </div>
+                  <Switch
+                    checked={settingsData.notification_settings.email_vacation_updates}
+                    onCheckedChange={(checked) => setSettingsData({
+                      ...settingsData,
+                      notification_settings: { ...settingsData.notification_settings, email_vacation_updates: checked }
+                    })}
+                  />
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    onClick={handleSaveSettings}
+                    disabled={updateSettingsMutation.isPending}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    {updateSettingsMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Opslaan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="team">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Team beheer</CardTitle>
+                    <CardDescription>Beheer teamleden en hun rollen</CardDescription>
+                  </div>
+                  <Button onClick={() => setInviteDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Uitnodigen
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {companyMembers.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{member.email}</p>
+                          <p className="text-sm text-slate-500">{roleLabels[member.company_role]}</p>
+                        </div>
+                      </div>
+                      <span className={`text-sm px-2 py-1 rounded ${
+                        member.status === 'active' 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {statusLabels[member.status]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Teamlid uitnodigen</DialogTitle>
+            <DialogDescription>
+              Stuur een uitnodiging per e-mail naar een nieuw teamlid
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="inviteEmail">E-mailadres</Label>
+              <Input
+                id="inviteEmail"
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="naam@bedrijf.nl"
+              />
+            </div>
+            <div>
+              <Label htmlFor="inviteRole">Rol</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">Medewerker</SelectItem>
+                  <SelectItem value="planner">Planner</SelectItem>
+                  <SelectItem value="company_admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+                Annuleren
+              </Button>
+              <Button 
+                onClick={handleInvite}
+                disabled={isInviting || !inviteEmail}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {isInviting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Mail className="w-4 h-4 mr-2" />
+                )}
+                Uitnodiging versturen
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

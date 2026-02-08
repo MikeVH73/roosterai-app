@@ -57,6 +57,10 @@ import FunctionsSkills from './pages/FunctionsSkills';
 import Schedules from './pages/Schedules';
 import ScheduleEditor from './pages/ScheduleEditor';
 import AIAssistant from './pages/AIAssistant';
+import VacationRequests from './pages/VacationRequests';
+import SwapRequests from './pages/SwapRequests';
+import CompanySettings from './pages/CompanySettings';
+import Billing from './pages/Billing';
 import __Layout from './Layout.jsx';
 
 
@@ -71,6 +75,10 @@ export const PAGES = {
     "Schedules": Schedules,
     "ScheduleEditor": ScheduleEditor,
     "AIAssistant": AIAssistant,
+    "VacationRequests": VacationRequests,
+    "SwapRequests": SwapRequests,
+    "CompanySettings": CompanySettings,
+    "Billing": Billing,
 }
 
 export const pagesConfig = {
