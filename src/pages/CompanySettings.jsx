@@ -36,16 +36,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import InvitationManager from '@/components/settings/InvitationManager';
 
 export default function CompanySettings() {
   const { currentCompany, refreshCompany, hasPermission } = useCompany();
   const companyId = currentCompany?.id;
   const queryClient = useQueryClient();
-
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('employee');
-  const [isInviting, setIsInviting] = useState(false);
 
   const [companyData, setCompanyData] = useState({
     name: '',
@@ -83,11 +79,7 @@ export default function CompanySettings() {
     enabled: !!companyId
   });
 
-  const { data: companyMembers = [] } = useQuery({
-    queryKey: ['company-members', companyId],
-    queryFn: () => base44.entities.CompanyMember.filter({ companyId }),
-    enabled: !!companyId
-  });
+
 
   useEffect(() => {
     if (currentCompany) {
@@ -138,44 +130,6 @@ export default function CompanySettings() {
 
   const handleSaveSettings = () => {
     updateSettingsMutation.mutate(settingsData);
-  };
-
-  const handleInvite = async () => {
-    setIsInviting(true);
-    try {
-      await base44.users.inviteUser(inviteEmail, 'user');
-      
-      await base44.entities.CompanyMember.create({
-        companyId,
-        email: inviteEmail,
-        company_role: inviteRole,
-        status: 'invited',
-        invited_at: new Date().toISOString()
-      });
-      
-      queryClient.invalidateQueries(['company-members', companyId]);
-      setInviteDialogOpen(false);
-      setInviteEmail('');
-      setInviteRole('employee');
-      toast.success('Uitnodiging verstuurd');
-    } catch (error) {
-      console.error('Invite error:', error);
-      toast.error('Er ging iets mis bij het versturen van de uitnodiging');
-    } finally {
-      setIsInviting(false);
-    }
-  };
-
-  const roleLabels = {
-    company_admin: 'Administrator',
-    planner: 'Planner',
-    employee: 'Medewerker'
-  };
-
-  const statusLabels = {
-    active: 'Actief',
-    invited: 'Uitgenodigd',
-    inactive: 'Inactief'
   };
 
   return (
@@ -487,100 +441,10 @@ export default function CompanySettings() {
           </TabsContent>
 
           <TabsContent value="team">
-            <Card className="border-0 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Team beheer</CardTitle>
-                    <CardDescription>Beheer teamleden en hun rollen</CardDescription>
-                  </div>
-                  <Button onClick={() => setInviteDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Uitnodigen
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {companyMembers.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <Mail className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-900">{member.email}</p>
-                          <p className="text-sm text-slate-500">{roleLabels[member.company_role]}</p>
-                        </div>
-                      </div>
-                      <span className={`text-sm px-2 py-1 rounded ${
-                        member.status === 'active' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
-                        {statusLabels[member.status]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <InvitationManager />
           </TabsContent>
         </Tabs>
       </div>
-
-      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Teamlid uitnodigen</DialogTitle>
-            <DialogDescription>
-              Stuur een uitnodiging per e-mail naar een nieuw teamlid
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="inviteEmail">E-mailadres</Label>
-              <Input
-                id="inviteEmail"
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="naam@bedrijf.nl"
-              />
-            </div>
-            <div>
-              <Label htmlFor="inviteRole">Rol</Label>
-              <Select value={inviteRole} onValueChange={setInviteRole}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="employee">Medewerker</SelectItem>
-                  <SelectItem value="planner">Planner</SelectItem>
-                  <SelectItem value="company_admin">Administrator</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end gap-3 pt-4">
-              <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
-                Annuleren
-              </Button>
-              <Button 
-                onClick={handleInvite}
-                disabled={isInviting || !inviteEmail}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isInviting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Mail className="w-4 h-4 mr-2" />
-                )}
-                Uitnodiging versturen
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
