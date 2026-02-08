@@ -50,6 +50,10 @@
 import CompanySelect from './pages/CompanySelect';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import Dashboard from './pages/Dashboard';
+import Employees from './pages/Employees';
+import Departments from './pages/Departments';
+import Locations from './pages/Locations';
+import FunctionsSkills from './pages/FunctionsSkills';
 import __Layout from './Layout.jsx';
 
 
@@ -57,6 +61,10 @@ export const PAGES = {
     "CompanySelect": CompanySelect,
     "CompanyOnboarding": CompanyOnboarding,
     "Dashboard": Dashboard,
+    "Employees": Employees,
+    "Departments": Departments,
+    "Locations": Locations,
+    "FunctionsSkills": FunctionsSkills,
 }
 
 export const pagesConfig = {
