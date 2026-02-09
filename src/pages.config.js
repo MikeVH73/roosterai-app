@@ -53,16 +53,17 @@ import CompanyOnboarding from './pages/CompanyOnboarding';
 import CompanySelect from './pages/CompanySelect';
 import CompanySettings from './pages/CompanySettings';
 import Dashboard from './pages/Dashboard';
+import DepartmentDetails from './pages/DepartmentDetails';
 import Departments from './pages/Departments';
 import Employees from './pages/Employees';
 import FunctionsSkills from './pages/FunctionsSkills';
+import LocationTypes from './pages/LocationTypes';
 import Locations from './pages/Locations';
 import ScheduleEditor from './pages/ScheduleEditor';
 import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
-import LocationTypes from './pages/LocationTypes';
-import DepartmentDetails from './pages/DepartmentDetails';
+import ScheduleOverview from './pages/ScheduleOverview';
 import __Layout from './Layout.jsx';
 
 
@@ -73,16 +74,17 @@ export const PAGES = {
     "CompanySelect": CompanySelect,
     "CompanySettings": CompanySettings,
     "Dashboard": Dashboard,
+    "DepartmentDetails": DepartmentDetails,
     "Departments": Departments,
     "Employees": Employees,
     "FunctionsSkills": FunctionsSkills,
+    "LocationTypes": LocationTypes,
     "Locations": Locations,
     "ScheduleEditor": ScheduleEditor,
     "Schedules": Schedules,
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
-    "LocationTypes": LocationTypes,
-    "DepartmentDetails": DepartmentDetails,
+    "ScheduleOverview": ScheduleOverview,
 }
 
 export const pagesConfig = {

@@ -11,8 +11,15 @@ function calculateShiftHours(shift) {
   const [endH, endM] = shift.end_time.split(':').map(Number);
   let hours = (endH * 60 + endM - startH * 60 - startM) / 60;
   if (hours < 0) hours += 24; // overnight shift
-  const breakHours = (shift.break_duration || 0) / 60;
-  return Math.max(0, hours - breakHours);
+  return hours;
+}
+
+function calculateBreakHours(shift) {
+  return (shift.break_duration || 0) / 60;
+}
+
+function calculateNetHours(shift) {
+  return Math.max(0, calculateShiftHours(shift) - calculateBreakHours(shift));
 }
 
 function StaffingIndicator({ scheduledHours, targetHours }) {
@@ -87,11 +94,25 @@ export default function DaypartScheduleGrid({
     const map = {};
     shifts.forEach(shift => {
       const key = `${shift.date}_${shift.daypartId}`;
-      const hours = calculateShiftHours(shift);
+      const hours = calculateNetHours(shift);
       map[key] = (map[key] || 0) + hours;
     });
     return map;
   }, [shifts]);
+
+  // Calculate total hours per day (all dayparts combined)
+  const dailyTotalsMap = useMemo(() => {
+    const map = {};
+    weekDays.forEach(day => {
+      const dateStr = typeof day === 'string' ? day : format(day, 'yyyy-MM-dd');
+      let total = 0;
+      sortedDayparts.forEach(dp => {
+        total += scheduledHoursMap[`${dateStr}_${dp.id}`] || 0;
+      });
+      map[dateStr] = total;
+    });
+    return map;
+  }, [weekDays, sortedDayparts, scheduledHoursMap]);
 
   // Get target hours for a daypart on a specific day
   const getTargetHours = (daypartId, date) => {
@@ -184,6 +205,8 @@ export default function DaypartScheduleGrid({
               </td>
             </tr>
           ) : (
+            <>
+              {/* Employee rows */}
             employees.map((employee) => (
               <tr key={employee.id} className="border-t border-slate-100 hover:bg-slate-50/50">
                 <td className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200">
@@ -218,24 +241,34 @@ export default function DaypartScheduleGrid({
                         onClick={() => onCellClick?.(employee.id, dateStr, daypart.id)}
                       >
                         <div className="space-y-1 min-h-12 p-1">
-                          {cellShifts.map((shift) => (
-                            <div
-                              key={shift.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onShiftClick?.(shift);
-                              }}
-                              className="px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 shadow-sm"
-                              style={{ 
-                                backgroundColor: `${getFunctionColor(shift.functionId)}15`,
-                                borderLeft: `3px solid ${getFunctionColor(shift.functionId)}`
-                              }}
-                            >
-                              <p className="font-medium" style={{ color: getFunctionColor(shift.functionId) }}>
-                                {shift.start_time}-{shift.end_time}
-                              </p>
-                            </div>
-                          ))}
+                          {cellShifts.map((shift) => {
+                            const breakHours = calculateBreakHours(shift);
+                            return (
+                              <div key={shift.id} className="space-y-0.5">
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShiftClick?.(shift);
+                                  }}
+                                  className="px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 shadow-sm"
+                                  style={{ 
+                                    backgroundColor: `${getFunctionColor(shift.functionId)}15`,
+                                    borderLeft: `3px solid ${getFunctionColor(shift.functionId)}`
+                                  }}
+                                >
+                                  <p className="font-medium" style={{ color: getFunctionColor(shift.functionId) }}>
+                                    {shift.start_time}-{shift.end_time}
+                                  </p>
+                                </div>
+                                {breakHours > 0 && (
+                                  <div className="px-2 py-0.5 rounded text-[10px] bg-amber-50 border border-amber-200 text-amber-700 flex items-center gap-1">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                                    Pauze {breakHours.toFixed(1)}u
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                           {cellShifts.length === 0 && (
                             <div className="h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                               <Plus className="w-3 h-3 text-slate-300" />
@@ -248,6 +281,61 @@ export default function DaypartScheduleGrid({
                 ))}
               </tr>
             ))
+              {/* Subtotal rows per daypart */}
+              <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
+                <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm text-slate-700">
+                  Subtotaal per dagdeel
+                </td>
+                {weekDays.map((day) => (
+                  sortedDayparts.map((daypart, dpIndex) => {
+                    const dateStr = format(day, 'yyyy-MM-dd');
+                    const scheduledHours = scheduledHoursMap[`${dateStr}_${daypart.id}`] || 0;
+                    const targetHours = getTargetHours(daypart.id, dateStr);
+                    
+                    let statusColor = 'text-slate-700';
+                    if (targetHours) {
+                      const percentage = (scheduledHours / targetHours) * 100;
+                      if (percentage < 80 || percentage > 120) statusColor = 'text-red-600';
+                      else if (percentage < 95 || percentage > 105) statusColor = 'text-amber-600';
+                      else statusColor = 'text-green-600';
+                    }
+                    
+                    return (
+                      <td 
+                        key={`${day.toISOString()}_${daypart.id}_subtotal`}
+                        className={`p-2 text-center text-sm ${statusColor} ${
+                          dpIndex < sortedDayparts.length - 1 ? 'border-r border-slate-100' : 'border-r border-slate-200'
+                        }`}
+                        style={{ backgroundColor: `${daypart.color}50` || '#F8FAFC' }}
+                      >
+                        {scheduledHours.toFixed(1)}u
+                      </td>
+                    );
+                  })
+                ))}
+              </tr>
+
+              {/* Daily total row */}
+              <tr className="border-t-2 border-slate-400 bg-slate-100 font-bold">
+                <td className="sticky left-0 bg-slate-100 z-10 p-3 border-r border-slate-200 text-sm text-slate-900">
+                  Totaal per dag
+                </td>
+                {weekDays.map((day) => {
+                  const dateStr = format(day, 'yyyy-MM-dd');
+                  const dailyTotal = dailyTotalsMap[dateStr] || 0;
+                  
+                  return (
+                    <td 
+                      key={`${day.toISOString()}_total`}
+                      colSpan={sortedDayparts.length}
+                      className="p-2 text-center text-sm text-slate-900 border-r border-slate-200 last:border-r-0"
+                    >
+                      {dailyTotal.toFixed(1)}u totaal
+                    </td>
+                  );
+                })}
+              </tr>
+            </>
           )}
         </tbody>
       </table>

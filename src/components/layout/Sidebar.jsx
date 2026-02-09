@@ -38,10 +38,16 @@ const navItems = [
     permission: null 
   },
   { 
-    label: 'Roosters', 
+    label: 'Roosters Overzicht', 
     icon: CalendarDays, 
-    page: 'Schedules',
+    page: 'ScheduleOverview',
     permission: null 
+  },
+  { 
+    label: 'Alle Roosters', 
+    icon: Calendar, 
+    page: 'Schedules',
+    permission: 'manage_schedules' 
   },
   { 
     label: 'Medewerkers', 
