@@ -209,7 +209,7 @@ export default function DaypartScheduleGrid({
           ) : (
             <>
               {/* Employee rows */}
-            employees.map((employee) => (
+              {employees.map((employee) => (
               <tr key={employee.id} className="border-t border-slate-100 hover:bg-slate-50/50">
                 <td className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200">
                   <div className="flex items-center gap-3">
@@ -282,7 +282,7 @@ export default function DaypartScheduleGrid({
                   })
                 ))}
               </tr>
-            ))
+              ))}
               {/* Subtotal rows per daypart */}
               <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
                 <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm text-slate-700">
