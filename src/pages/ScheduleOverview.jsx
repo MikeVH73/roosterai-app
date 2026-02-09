@@ -5,6 +5,7 @@ import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
+import ScheduleWeekView from '@/components/schedules/ScheduleWeekView';
 import { 
   Calendar,
   AlertTriangle,
@@ -62,6 +63,12 @@ export default function ScheduleOverview() {
   const { data: employees = [] } = useQuery({
     queryKey: ['employees', companyId],
     queryFn: () => base44.entities.EmployeeProfile.filter({ companyId, status: 'active' }),
+    enabled: !!companyId
+  });
+
+  const { data: functions = [] } = useQuery({
+    queryKey: ['functions', companyId],
+    queryFn: () => base44.entities.Function.filter({ companyId, status: 'active' }),
     enabled: !!companyId
   });
 
@@ -319,6 +326,14 @@ export default function ScheduleOverview() {
                             <p className="text-2xl font-bold text-slate-900">{stats.shiftCount}</p>
                           </div>
                         </div>
+
+                        <ScheduleWeekView 
+                          schedule={schedule}
+                          shifts={allShifts.filter(s => s.scheduleId === schedule.id)}
+                          employees={employees}
+                          functions={functions}
+                          dayparts={dayparts}
+                        />
                       </div>
                     </div>
                   );
