@@ -214,36 +214,57 @@ export default function ScheduleOverview() {
               </div>
             ) : (
               <Tabs value={selectedScheduleId || activeSchedules[0]?.id} onValueChange={setSelectedScheduleId}>
-                <div className="border-b border-slate-200 px-4 pt-4 overflow-x-auto">
-                  <TabsList className="bg-transparent">
+                <div className="px-4 pt-4 pb-2 overflow-x-auto bg-gradient-to-b from-slate-50 to-white">
+                  <div className="flex gap-2">
                     {activeSchedules.map(schedule => {
                       const hasConflicts = scheduleConflicts[schedule.id];
+                      const isActive = (selectedScheduleId || activeSchedules[0]?.id) === schedule.id;
+                      
                       return (
-                        <TabsTrigger 
-                          key={schedule.id} 
-                          value={schedule.id}
-                          className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                        <button
+                          key={schedule.id}
+                          onClick={() => setSelectedScheduleId(schedule.id)}
+                          className={`
+                            relative min-w-[180px] max-w-[220px] px-4 py-3 rounded-t-xl font-medium text-sm transition-all
+                            ${isActive 
+                              ? 'bg-white shadow-lg -mb-px z-10 text-slate-900' 
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                            }
+                          `}
                         >
-                          {hasConflicts && (
-                            <AlertTriangle className="w-4 h-4 text-red-500" />
+                          <div className="flex flex-col items-start gap-1.5">
+                            <div className="flex items-center gap-2 w-full">
+                              {hasConflicts && (
+                                <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                              )}
+                              <span className="truncate flex-1 text-left">{schedule.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={`${statusConfig[schedule.status].color} text-[10px] px-1.5 py-0`}>
+                                {statusConfig[schedule.status].label}
+                              </Badge>
+                              <span className="text-xs text-slate-400">
+                                {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })}
+                              </span>
+                            </div>
+                          </div>
+                          {isActive && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-xl" />
                           )}
-                          {schedule.name}
-                          <Badge className={statusConfig[schedule.status].color}>
-                            {statusConfig[schedule.status].label}
-                          </Badge>
-                        </TabsTrigger>
+                        </button>
                       );
                     })}
-                  </TabsList>
+                  </div>
                 </div>
 
                 {activeSchedules.map(schedule => {
                   const stats = getScheduleStats(schedule);
                   const hasConflicts = scheduleConflicts[schedule.id];
+                  const isVisible = (selectedScheduleId || activeSchedules[0]?.id) === schedule.id;
                   
                   return (
-                    <div key={schedule.id} className={selectedScheduleId === schedule.id || (!selectedScheduleId && schedule === activeSchedules[0]) ? 'block' : 'hidden'}>
-                      <div className="p-6">
+                    <div key={schedule.id} className={isVisible ? 'block' : 'hidden'}>
+                      <div className="p-6 border-t-2 border-slate-200">
                         <div className="flex items-start justify-between mb-6">
                           <div>
                             <h3 className="text-xl font-semibold text-slate-900 mb-2">{schedule.name}</h3>
