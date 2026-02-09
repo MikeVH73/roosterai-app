@@ -17,7 +17,8 @@ import {
   Loader2,
   Calendar,
   ArrowRight,
-  Info
+  Info,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -249,8 +250,8 @@ export default function AIAssistant() {
         }
       });
 
-      // Create AI suggestion record
-      await createSuggestionMutation.mutateAsync({
+      // Create AI suggestion record with WhatsApp info
+      const suggestionData = {
         companyId,
         scheduleId: actionParams.scheduleId,
         context_type: selectedAction.id,
@@ -261,7 +262,25 @@ export default function AIAssistant() {
         impact_score: response.impact_score || 50,
         confidence_score: response.confidence_score || 70,
         status: 'pending'
-      });
+      };
+
+      // Add WhatsApp data for replacement actions
+      if (selectedAction.id === 'replacement' && response.suggested_changes?.length > 0) {
+        const replacement = response.suggested_changes[0];
+        if (replacement.employeeId) {
+          const employee = employees.find(e => e.id === replacement.employeeId);
+          suggestionData.suggested_patch = {
+            ...suggestionData.suggested_patch,
+            targetEmployee: {
+              id: employee?.id,
+              name: `${employee?.first_name} ${employee?.last_name}`,
+              phone: employee?.phone
+            }
+          };
+        }
+      }
+
+      await createSuggestionMutation.mutateAsync(suggestionData);
 
       await incrementAIUsage();
       closeDialog();
@@ -432,6 +451,27 @@ export default function AIAssistant() {
                           <CheckCircle2 className="w-4 h-4 mr-2" />
                           Accepteren
                         </Button>
+                        {suggestion.suggested_patch?.targetEmployee?.phone && (
+                          <Button 
+                            onClick={() => {
+                              const employee = suggestion.suggested_patch.targetEmployee;
+                              const message = `Hoi ${employee.name.split(' ')[0]}, 
+                              
+${suggestion.description}
+
+Kun je aangeven of je beschikbaar bent? Reageer met JA of NEE.
+
+Groet,
+${currentCompany?.name}`;
+                              const whatsappUrl = `https://wa.me/${employee.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+                              window.open(whatsappUrl, '_blank');
+                            }}
+                            className="bg-green-500 hover:bg-green-600"
+                          >
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            Vraag via WhatsApp
+                          </Button>
+                        )}
                         <Button 
                           variant="outline"
                           onClick={() => handleSuggestionAction(suggestion, 'rejected')}
