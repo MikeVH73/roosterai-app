@@ -89,6 +89,10 @@ export default function DaypartScheduleGrid({
     return func?.color || '#3B82F6';
   };
 
+  const sortedDayparts = useMemo(() => {
+    return [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }, [dayparts]);
+
   // Calculate scheduled hours per daypart per day
   const scheduledHoursMap = useMemo(() => {
     const map = {};
@@ -133,8 +137,6 @@ export default function DaypartScheduleGrid({
       s.daypartId === daypartId
     );
   };
-
-  const sortedDayparts = [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
   if (sortedDayparts.length === 0) {
     return (
