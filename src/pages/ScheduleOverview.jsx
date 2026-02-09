@@ -6,13 +6,16 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ScheduleWeekView from '@/components/schedules/ScheduleWeekView';
+import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
 import { 
   Calendar,
   AlertTriangle,
   Loader2,
   TrendingUp,
   Users,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +38,7 @@ export default function ScheduleOverview() {
   const { currentCompany } = useCompany();
   const companyId = currentCompany?.id;
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
+  const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
 
   const { data: schedules = [], isLoading: schedulesLoading } = useQuery({
     queryKey: ['schedules', companyId],
@@ -69,6 +73,18 @@ export default function ScheduleOverview() {
   const { data: functions = [] } = useQuery({
     queryKey: ['functions', companyId],
     queryFn: () => base44.entities.Function.filter({ companyId, status: 'active' }),
+    enabled: !!companyId
+  });
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ['departments', companyId],
+    queryFn: () => base44.entities.Department.filter({ companyId, status: 'active' }),
+    enabled: !!companyId
+  });
+
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations', companyId],
+    queryFn: () => base44.entities.Location.filter({ companyId, status: 'active' }),
     enabled: !!companyId
   });
 
@@ -269,71 +285,118 @@ export default function ScheduleOverview() {
                   const hasConflicts = scheduleConflicts[schedule.id];
                   const isVisible = (selectedScheduleId || activeSchedules[0]?.id) === schedule.id;
                   
+                  if (!isVisible) return null;
+
+                  const scheduleStart = parseISO(schedule.start_date);
+                  const scheduleEnd = parseISO(schedule.end_date);
+                  
+                  // Calculate week days
+                  const weekDays = [];
+                  for (let i = 0; i < 7; i++) {
+                    const day = new Date(currentWeekStart);
+                    day.setDate(day.getDate() + i);
+                    if (day >= scheduleStart && day <= scheduleEnd) {
+                      weekDays.push(day);
+                    }
+                  }
+
+                  // Get relevant departments and dayparts
+                  const relevantDepartmentIds = schedule.departmentIds || [];
+                  const relevantDayparts = dayparts.filter(dp => 
+                    relevantDepartmentIds.includes(dp.departmentId)
+                  );
+
+                  // Filter employees for this schedule
+                  const scheduleEmployees = employees.filter(emp => 
+                    emp.departmentIds?.some(deptId => relevantDepartmentIds.includes(deptId))
+                  );
+
+                  const scheduleShifts = allShifts.filter(s => s.scheduleId === schedule.id);
+
+                  const handlePrevWeek = () => {
+                    const newStart = new Date(currentWeekStart);
+                    newStart.setDate(newStart.getDate() - 7);
+                    setCurrentWeekStart(newStart);
+                  };
+
+                  const handleNextWeek = () => {
+                    const newStart = new Date(currentWeekStart);
+                    newStart.setDate(newStart.getDate() + 7);
+                    setCurrentWeekStart(newStart);
+                  };
+                  
                   return (
-                    <div key={schedule.id} className={isVisible ? 'block' : 'hidden'}>
+                    <div key={schedule.id}>
                       <div className="p-6 border-t-2 border-slate-200">
-                        <div className="flex items-start justify-between mb-6">
-                          <div>
-                            <h3 className="text-xl font-semibold text-slate-900 mb-2">{schedule.name}</h3>
-                            <p className="text-slate-500">
-                              {format(parseISO(schedule.start_date), 'd MMMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMMM yyyy', { locale: nl })}
-                            </p>
-                            {schedule.description && (
-                              <p className="text-sm text-slate-600 mt-2">{schedule.description}</p>
-                            )}
+                        {/* Header with navigation */}
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-4">
+                            <div>
+                              <h3 className="text-xl font-semibold text-slate-900">{schedule.name}</h3>
+                              <p className="text-sm text-slate-500">
+                                {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}
+                              </p>
+                            </div>
                           </div>
-                          <Button 
-                            onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            Open rooster
-                          </Button>
+                          
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handlePrevWeek}
+                                className="h-8"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </Button>
+                              <span className="text-sm font-medium px-3">
+                                Week {format(currentWeekStart, 'w', { locale: nl })}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleNextWeek}
+                                className="h-8"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <Button 
+                              onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
+                              className="bg-blue-600 hover:bg-blue-700"
+                            >
+                              Bewerken
+                            </Button>
+                          </div>
                         </div>
 
                         {hasConflicts && (
-                          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                            <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
                             <div>
-                              <h4 className="font-medium text-red-900 mb-1">Bezettingsproblemen gedetecteerd</h4>
                               <p className="text-sm text-red-700">
-                                Dit rooster heeft dagen waar de bezetting significant onder of boven de norm ligt. 
-                                Bekijk het rooster voor details of gebruik de AI Assistent voor suggesties.
+                                Bezettingsproblemen gedetecteerd - bekijk details in de rooster editor
                               </p>
                             </div>
                           </div>
                         )}
 
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="flex items-center gap-2 text-slate-600 mb-1">
-                              <Clock className="w-4 h-4" />
-                              <span className="text-sm">Totaal uren</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-900">{stats.totalHours.toFixed(0)}</p>
+                        {/* Schedule Grid */}
+                        {weekDays.length === 0 ? (
+                          <div className="p-12 text-center text-slate-500">
+                            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                            <p>Geen dagen in deze week vallen binnen de rooster periode</p>
                           </div>
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="flex items-center gap-2 text-slate-600 mb-1">
-                              <Users className="w-4 h-4" />
-                              <span className="text-sm">Medewerkers</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-900">{stats.employeeCount}</p>
-                          </div>
-                          <div className="p-4 bg-slate-50 rounded-lg">
-                            <div className="flex items-center gap-2 text-slate-600 mb-1">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-sm">Diensten</span>
-                            </div>
-                            <p className="text-2xl font-bold text-slate-900">{stats.shiftCount}</p>
-                          </div>
-                        </div>
-
-                        <ScheduleWeekView 
-                          schedule={schedule}
-                          shifts={allShifts.filter(s => s.scheduleId === schedule.id)}
-                          employees={employees}
-                          functions={functions}
-                          dayparts={dayparts}
-                        />
+                        ) : (
+                          <DaypartScheduleGrid
+                            dayparts={relevantDayparts}
+                            employees={scheduleEmployees}
+                            shifts={scheduleShifts}
+                            weekDays={weekDays}
+                            staffingRequirements={staffingRequirements}
+                            functions={functions}
+                          />
+                        )}
                       </div>
                     </div>
                   );
