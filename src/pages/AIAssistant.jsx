@@ -235,12 +235,19 @@ export default function AIAssistant() {
               description: "Lijst met overwegingen"
             },
             suggested_changes: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  type: { type: "string" },
-                  description: { type: "string" }
+              type: "object",
+              description: "Voorgestelde wijzigingen als object",
+              properties: {
+                replacements: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      type: { type: "string" },
+                      description: { type: "string" }
+                    }
+                  }
                 }
               }
             },
@@ -257,28 +264,12 @@ export default function AIAssistant() {
         context_type: selectedAction.id,
         trigger: 'manual',
         description: response.description || `AI suggestie voor ${selectedAction.title}`,
-        suggested_patch: response.suggested_changes || [],
+        suggested_patch: response.suggested_changes || {},
         considerations: response.considerations || [],
         impact_score: response.impact_score || 50,
         confidence_score: response.confidence_score || 70,
         status: 'pending'
       };
-
-      // Add WhatsApp data for replacement actions
-      if (selectedAction.id === 'replacement' && response.suggested_changes?.length > 0) {
-        const replacement = response.suggested_changes[0];
-        if (replacement.employeeId) {
-          const employee = employees.find(e => e.id === replacement.employeeId);
-          suggestionData.suggested_patch = {
-            ...suggestionData.suggested_patch,
-            targetEmployee: {
-              id: employee?.id,
-              name: `${employee?.first_name} ${employee?.last_name}`,
-              phone: employee?.phone
-            }
-          };
-        }
-      }
 
       await createSuggestionMutation.mutateAsync(suggestionData);
 
