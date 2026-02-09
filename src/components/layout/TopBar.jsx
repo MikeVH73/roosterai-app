@@ -7,8 +7,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function TopBar({ title, subtitle, actions }) {
@@ -16,16 +16,16 @@ export default function TopBar({ title, subtitle, actions }) {
 
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-slate-200 px-6 h-16 border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
-        {subtitle && (
-          <p className="text-sm text-slate-500">{subtitle}</p>
-        )}
+        {subtitle &&
+        <p className="text-sm text-slate-500">{subtitle}</p>
+        }
       </div>
 
       <div className="flex items-center gap-3">
@@ -33,10 +33,10 @@ export default function TopBar({ title, subtitle, actions }) {
         
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input 
-            placeholder="Zoeken..." 
-            className="pl-9 w-64 bg-slate-50 border-slate-200 focus:bg-white"
-          />
+          <Input
+            placeholder="Zoeken..."
+            className="pl-9 w-64 bg-slate-50 border-slate-200 focus:bg-white" />
+
         </div>
 
         <Button variant="ghost" size="icon" className="text-slate-500">
@@ -63,6 +63,6 @@ export default function TopBar({ title, subtitle, actions }) {
           </AvatarFallback>
         </Avatar>
       </div>
-    </header>
-  );
+    </header>);
+
 }
