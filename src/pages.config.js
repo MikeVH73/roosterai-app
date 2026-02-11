@@ -60,10 +60,10 @@ import FunctionsSkills from './pages/FunctionsSkills';
 import LocationTypes from './pages/LocationTypes';
 import Locations from './pages/Locations';
 import ScheduleEditor from './pages/ScheduleEditor';
+import ScheduleOverview from './pages/ScheduleOverview';
 import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
-import ScheduleOverview from './pages/ScheduleOverview';
 import __Layout from './Layout.jsx';
 
 
@@ -81,10 +81,10 @@ export const PAGES = {
     "LocationTypes": LocationTypes,
     "Locations": Locations,
     "ScheduleEditor": ScheduleEditor,
+    "ScheduleOverview": ScheduleOverview,
     "Schedules": Schedules,
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
-    "ScheduleOverview": ScheduleOverview,
 }
 
 export const pagesConfig = {

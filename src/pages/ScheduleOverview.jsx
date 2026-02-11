@@ -15,13 +15,24 @@ import {
   Users,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  CalendarDays,
+  Settings2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, parseISO, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { format, parseISO, isWithinInterval, startOfDay, endOfDay, startOfWeek, startOfMonth, endOfMonth, addDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
 function calculateNetHours(shift) {
@@ -39,6 +50,8 @@ export default function ScheduleOverview() {
   const companyId = currentCompany?.id;
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
+  const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month', 'year'
+  const [visibleDays, setVisibleDays] = useState([0, 1, 2, 3, 4, 5, 6]); // 0=zondag, 6=zaterdag
 
   const { data: schedules = [], isLoading: schedulesLoading } = useQuery({
     queryKey: ['schedules', companyId],
@@ -170,49 +183,37 @@ export default function ScheduleOverview() {
       />
 
       <div className="p-6 max-w-7xl mx-auto">
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Gepubliceerde roosters</p>
-                  <p className="text-3xl font-bold text-slate-900">{publishedSchedules.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Concepten</p>
-                  <p className="text-3xl font-bold text-slate-900">{draftSchedules.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-slate-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">Actieve medewerkers</p>
-                  <p className="text-3xl font-bold text-slate-900">{employees.length}</p>
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Users className="w-6 h-6 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Compact Statistics Bar */}
+        <div className="flex items-center gap-6 mb-4 px-4 py-3 bg-white rounded-lg shadow-sm border border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+              <Calendar className="w-4 h-4 text-green-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Gepubliceerd</p>
+              <p className="text-lg font-bold text-slate-900">{publishedSchedules.length}</p>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-slate-200" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-slate-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Concepten</p>
+              <p className="text-lg font-bold text-slate-900">{draftSchedules.length}</p>
+            </div>
+          </div>
+          <div className="w-px h-8 bg-slate-200" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Users className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-slate-500">Medewerkers</p>
+              <p className="text-lg font-bold text-slate-900">{employees.length}</p>
+            </div>
+          </div>
         </div>
 
         {/* Schedule Tabs */}
@@ -290,15 +291,36 @@ export default function ScheduleOverview() {
                   const scheduleStart = parseISO(schedule.start_date);
                   const scheduleEnd = parseISO(schedule.end_date);
                   
-                  // Calculate week days
-                  const weekDays = [];
-                  for (let i = 0; i < 7; i++) {
-                    const day = new Date(currentWeekStart);
-                    day.setDate(day.getDate() + i);
-                    if (day >= scheduleStart && day <= scheduleEnd) {
-                      weekDays.push(day);
+                  // Calculate visible days based on view mode
+                  const calculateVisibleDays = () => {
+                    let days = [];
+                    
+                    if (viewMode === 'day') {
+                      days = [currentWeekStart];
+                    } else if (viewMode === 'week') {
+                      for (let i = 0; i < 7; i++) {
+                        const day = new Date(currentWeekStart);
+                        day.setDate(day.getDate() + i);
+                        if (visibleDays.includes(day.getDay())) {
+                          days.push(day);
+                        }
+                      }
+                    } else if (viewMode === 'month') {
+                      const monthStart = startOfMonth(currentWeekStart);
+                      const monthEnd = endOfMonth(currentWeekStart);
+                      let current = monthStart;
+                      while (current <= monthEnd) {
+                        if (visibleDays.includes(current.getDay())) {
+                          days.push(new Date(current));
+                        }
+                        current = addDays(current, 1);
+                      }
                     }
-                  }
+                    
+                    return days.filter(day => day >= scheduleStart && day <= scheduleEnd);
+                  };
+                  
+                  const weekDays = calculateVisibleDays();
 
                   // Get relevant departments and dayparts
                   const relevantDepartmentIds = schedule.departmentIds || [];
@@ -313,61 +335,141 @@ export default function ScheduleOverview() {
 
                   const scheduleShifts = allShifts.filter(s => s.scheduleId === schedule.id);
 
-                  const handlePrevWeek = () => {
+                  const handlePrev = () => {
                     const newStart = new Date(currentWeekStart);
-                    newStart.setDate(newStart.getDate() - 7);
+                    if (viewMode === 'day') {
+                      newStart.setDate(newStart.getDate() - 1);
+                    } else if (viewMode === 'week') {
+                      newStart.setDate(newStart.getDate() - 7);
+                    } else if (viewMode === 'month') {
+                      newStart.setMonth(newStart.getMonth() - 1);
+                    }
                     setCurrentWeekStart(newStart);
                   };
 
-                  const handleNextWeek = () => {
+                  const handleNext = () => {
                     const newStart = new Date(currentWeekStart);
-                    newStart.setDate(newStart.getDate() + 7);
+                    if (viewMode === 'day') {
+                      newStart.setDate(newStart.getDate() + 1);
+                    } else if (viewMode === 'week') {
+                      newStart.setDate(newStart.getDate() + 7);
+                    } else if (viewMode === 'month') {
+                      newStart.setMonth(newStart.getMonth() + 1);
+                    }
                     setCurrentWeekStart(newStart);
+                  };
+                  
+                  const toggleDay = (dayIndex) => {
+                    if (visibleDays.includes(dayIndex)) {
+                      if (visibleDays.length > 1) {
+                        setVisibleDays(visibleDays.filter(d => d !== dayIndex));
+                      }
+                    } else {
+                      setVisibleDays([...visibleDays, dayIndex].sort());
+                    }
+                  };
+                  
+                  const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+                  
+                  const getViewLabel = () => {
+                    if (viewMode === 'day') {
+                      return format(currentWeekStart, 'd MMMM yyyy', { locale: nl });
+                    } else if (viewMode === 'week') {
+                      return `Week ${format(currentWeekStart, 'w', { locale: nl })}`;
+                    } else if (viewMode === 'month') {
+                      return format(currentWeekStart, 'MMMM yyyy', { locale: nl });
+                    }
+                    return '';
                   };
                   
                   return (
                     <div key={schedule.id}>
                       <div className="p-6 border-t-2 border-slate-200">
-                        {/* Header with navigation */}
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-4">
-                            <div>
-                              <h3 className="text-xl font-semibold text-slate-900">{schedule.name}</h3>
-                              <p className="text-sm text-slate-500">
-                                {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}
-                              </p>
-                            </div>
-                          </div>
-                          
+                        {/* Compact Header with Controls */}
+                        <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
+                            {/* View Mode Selector */}
+                            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+                              <Button
+                                variant={viewMode === 'day' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setViewMode('day')}
+                                className={`h-7 px-3 text-xs ${viewMode === 'day' ? 'bg-white shadow-sm' : ''}`}
+                              >
+                                Dag
+                              </Button>
+                              <Button
+                                variant={viewMode === 'week' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setViewMode('week')}
+                                className={`h-7 px-3 text-xs ${viewMode === 'week' ? 'bg-white shadow-sm' : ''}`}
+                              >
+                                Week
+                              </Button>
+                              <Button
+                                variant={viewMode === 'month' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setViewMode('month')}
+                                className={`h-7 px-3 text-xs ${viewMode === 'month' ? 'bg-white shadow-sm' : ''}`}
+                              >
+                                Maand
+                              </Button>
+                            </div>
+                            
+                            {/* Navigation */}
                             <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handlePrevWeek}
-                                className="h-8"
+                                onClick={handlePrev}
+                                className="h-7"
                               >
-                                <ChevronLeft className="w-4 h-4" />
+                                <ChevronLeft className="w-3 h-3" />
                               </Button>
-                              <span className="text-sm font-medium px-3">
-                                Week {format(currentWeekStart, 'w', { locale: nl })}
+                              <span className="text-xs font-medium px-3 min-w-[140px] text-center">
+                                {getViewLabel()}
                               </span>
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handleNextWeek}
-                                className="h-8"
+                                onClick={handleNext}
+                                className="h-7"
                               >
-                                <ChevronRight className="w-4 h-4" />
+                                <ChevronRight className="w-3 h-3" />
                               </Button>
                             </div>
-                            <Button 
-                              onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
-                              className="bg-blue-600 hover:bg-blue-700"
-                            >
-                              Bewerken
-                            </Button>
+                            
+                            {/* Day Selector */}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs">
+                                  <Settings2 className="w-3 h-3 mr-1" />
+                                  Dagen ({visibleDays.length})
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start">
+                                <DropdownMenuLabel className="text-xs">Zichtbare dagen</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {dayNames.map((name, idx) => (
+                                  <DropdownMenuCheckboxItem
+                                    key={idx}
+                                    checked={visibleDays.includes(idx)}
+                                    onCheckedChange={() => toggleDay(idx)}
+                                  >
+                                    {name === 'Zo' ? 'Zondag' : name === 'Ma' ? 'Maandag' : name === 'Di' ? 'Dinsdag' : name === 'Wo' ? 'Woensdag' : name === 'Do' ? 'Donderdag' : name === 'Vr' ? 'Vrijdag' : 'Zaterdag'}
+                                  </DropdownMenuCheckboxItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
+                          
+                          <Button 
+                            size="sm"
+                            onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
+                            className="bg-blue-600 hover:bg-blue-700 h-7 px-3 text-xs"
+                          >
+                            Bewerken
+                          </Button>
                         </div>
 
                         {hasConflicts && (
