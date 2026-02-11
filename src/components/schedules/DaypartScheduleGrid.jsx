@@ -45,28 +45,18 @@ export default function DaypartScheduleGrid({
     return [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   }, [dayparts]);
 
-  // Get shifts for a specific employee, day, and daypart
-  const getShiftsForCell = (employeeId, date, daypartId) => {
+  // Get shifts for a specific daypart and day
+  const getShiftsForCell = (date, daypartId) => {
     const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
     return shifts.filter(s => 
-      s.employeeId === employeeId && 
       s.date === dateStr && 
       s.daypartId === daypartId
     );
   };
 
-  // Calculate total hours per employee per day
-  const calculateEmployeeDayTotal = (employeeId, date) => {
-    const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
-    const dayShifts = shifts.filter(s => s.employeeId === employeeId && s.date === dateStr);
-    return dayShifts.reduce((sum, s) => sum + calculateNetHours(s), 0);
-  };
-
-  // Calculate total hours per day (all employees)
-  const calculateDayTotal = (date) => {
-    const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
-    const dayShifts = shifts.filter(s => s.date === dateStr);
-    return dayShifts.reduce((sum, s) => sum + calculateNetHours(s), 0);
+  // Get employee by ID
+  const getEmployee = (employeeId) => {
+    return employees.find(e => e.id === employeeId);
   };
 
   // Calculate subtotal per daypart per day
@@ -74,6 +64,13 @@ export default function DaypartScheduleGrid({
     const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
     const daypartShifts = shifts.filter(s => s.date === dateStr && s.daypartId === daypartId);
     return daypartShifts.reduce((sum, s) => sum + calculateNetHours(s), 0);
+  };
+
+  // Calculate total hours per day (all dayparts)
+  const calculateDayTotal = (date) => {
+    const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
+    const dayShifts = shifts.filter(s => s.date === dateStr);
+    return dayShifts.reduce((sum, s) => sum + calculateNetHours(s), 0);
   };
 
   // Get target hours for a daypart on a specific day
@@ -100,124 +97,117 @@ export default function DaypartScheduleGrid({
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-slate-50">
-            <th className="sticky left-0 bg-slate-50 z-20 p-3 text-left text-sm font-medium text-slate-600 border-r border-slate-200 min-w-[180px]">
+            <th className="sticky left-0 bg-slate-50 z-20 p-3 text-left text-sm font-medium text-slate-600 border-r border-slate-200 min-w-[200px]">
               Medewerker
             </th>
             {weekDays.map((day) => (
               <th 
                 key={day.toISOString()} 
-                className="p-3 text-center text-sm font-medium text-slate-600 border-r border-slate-200 last:border-r-0 min-w-[200px]"
+                className="p-3 text-center text-sm font-medium text-slate-600 border-r border-slate-200 last:border-r-0 min-w-[180px]"
               >
-                <div>{format(day, 'EEEE', { locale: nl })}</div>
+                <div className="text-sm">{format(day, 'EEEE', { locale: nl })}</div>
                 <div className="text-lg font-semibold text-slate-900">{format(day, 'd MMM', { locale: nl })}</div>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {employees.length === 0 ? (
+          {sortedDayparts.length === 0 ? (
             <tr>
               <td colSpan={1 + weekDays.length} className="p-8 text-center text-slate-500">
-                Geen medewerkers gevonden voor dit rooster
+                Geen dagdelen gedefinieerd
               </td>
             </tr>
           ) : (
             <>
-              {/* Employee rows */}
-              {employees.map((employee) => (
-                <tr key={employee.id} className="border-t border-slate-100 hover:bg-slate-50/50">
-                  <td className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200 min-w-[180px]">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8 flex-shrink-0">
-                        <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
-                          {getInitials(employee.first_name, employee.last_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-slate-900 text-sm truncate">
-                          {employee.first_name} {employee.last_name}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {employee.contract_hours ? `${employee.contract_hours}u/week` : 'Flex'}
-                        </p>
-                      </div>
+              {/* Daypart rows */}
+              {sortedDayparts.map((daypart) => (
+                <tr key={daypart.id} className="border-t border-slate-200 hover:bg-slate-50/30">
+                  <td 
+                    className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200 min-w-[200px]"
+                    style={{ 
+                      backgroundColor: `${daypart.color}08` || '#FAFAFA',
+                      borderLeft: `4px solid ${daypart.color}` || '#3B82F6'
+                    }}
+                  >
+                    <div className="flex flex-col gap-1">
+                      <p className="font-medium text-sm text-slate-900">{daypart.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {daypart.startTime} - {daypart.endTime}
+                      </p>
                     </div>
                   </td>
                   {weekDays.map((day) => {
                     const dateStr = format(day, 'yyyy-MM-dd');
-                    const employeeDayTotal = calculateEmployeeDayTotal(employee.id, dateStr);
+                    const cellShifts = getShiftsForCell(dateStr, daypart.id);
+                    const subtotal = calculateDaypartSubtotal(daypart.id, dateStr);
+                    const targetHours = getTargetHours(daypart.id, dateStr);
 
                     return (
                       <td 
-                        key={`${day.toISOString()}_${employee.id}`}
-                        className="p-2 align-top border-r border-slate-200 last:border-r-0 bg-white min-w-[200px]"
+                        key={`${day.toISOString()}_${daypart.id}`}
+                        className="p-2 align-top border-r border-slate-200 last:border-r-0 min-h-[80px] group/cell cursor-pointer hover:bg-slate-50"
+                        style={{ backgroundColor: `${daypart.color}05` || '#FAFAFA' }}
+                        onClick={() => onCellClick?.(null, dateStr, daypart.id)}
                       >
-                        <div className="space-y-2">
-                          {sortedDayparts.map((daypart) => {
-                            const cellShifts = getShiftsForCell(employee.id, dateStr, daypart.id);
-                            
-                            if (cellShifts.length === 0) return null;
+                        <div className="space-y-1.5 min-h-[60px]">
+                          {cellShifts.map((shift) => {
+                            const employee = getEmployee(shift.employeeId);
+                            if (!employee) return null;
+
+                            const netHours = calculateNetHours(shift);
 
                             return (
-                              <div 
-                                key={daypart.id}
-                                className="rounded-lg p-2 border border-slate-200"
+                              <div
+                                key={shift.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onShiftClick?.(shift);
+                                }}
+                                className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-all hover:scale-[1.02] shadow-sm border"
                                 style={{ 
-                                  backgroundColor: `${daypart.color}10` || '#F8FAFC',
-                                  borderColor: `${daypart.color}40` || '#E2E8F0'
+                                  backgroundColor: `${getFunctionColor(shift.functionId)}15`,
+                                  borderColor: `${getFunctionColor(shift.functionId)}40`
                                 }}
                               >
-                                <div className="flex items-center justify-between mb-1">
-                                  <span 
+                                <Avatar className="w-6 h-6 flex-shrink-0">
+                                  <AvatarFallback 
                                     className="text-xs font-medium"
-                                    style={{ color: daypart.color || '#64748B' }}
+                                    style={{ 
+                                      backgroundColor: `${getFunctionColor(shift.functionId)}30`,
+                                      color: getFunctionColor(shift.functionId)
+                                    }}
                                   >
-                                    {daypart.name}
-                                  </span>
-                                  <span className="text-[10px] text-slate-500">
-                                    {daypart.startTime}-{daypart.endTime}
-                                  </span>
+                                    {getInitials(employee.first_name, employee.last_name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-medium text-slate-900 truncate">
+                                    {employee.first_name} {employee.last_name}
+                                  </p>
+                                  <p className="text-[10px] text-slate-500">
+                                    {employee.contract_hours ? `${employee.contract_hours}u/week` : 'Flex'}
+                                  </p>
                                 </div>
-
-                                <div className="space-y-1">
-                                  {cellShifts.map((shift) => {
-                                    const breakHours = calculateBreakHours(shift);
-                                    const netHours = calculateNetHours(shift);
-                                    return (
-                                      <div
-                                        key={shift.id}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onShiftClick?.(shift);
-                                        }}
-                                        className="px-2 py-1.5 rounded text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm"
-                                        style={{ 
-                                          backgroundColor: `${getFunctionColor(shift.functionId)}20`,
-                                          borderLeft: `3px solid ${getFunctionColor(shift.functionId)}`
-                                        }}
-                                      >
-                                        <div className="flex items-center justify-between">
-                                          <span className="font-medium" style={{ color: getFunctionColor(shift.functionId) }}>
-                                            {shift.start_time}-{shift.end_time}
-                                          </span>
-                                          <span className="text-[10px] text-slate-600 font-medium">
-                                            {netHours.toFixed(1)}u
-                                          </span>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
+                                <div className="text-right flex-shrink-0">
+                                  <p className="text-xs font-medium" style={{ color: getFunctionColor(shift.functionId) }}>
+                                    {shift.start_time}-{shift.end_time}
+                                  </p>
+                                  <p className="text-[10px] text-slate-600 font-medium">
+                                    {netHours.toFixed(1)}u
+                                  </p>
                                 </div>
                               </div>
                             );
                           })}
-
-                          {employeeDayTotal > 0 && (
-                            <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
-                              <span className="text-xs text-slate-500">Totaal</span>
-                              <span className="text-xs font-semibold text-slate-700">
-                                {employeeDayTotal.toFixed(1)}u
-                              </span>
+                          
+                          {/* Add button - shows on hover */}
+                          {cellShifts.length === 0 && (
+                            <div className="h-full min-h-[60px] flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-2 text-slate-400 text-xs">
+                                <Plus className="w-4 h-4" />
+                                <span>Voeg medewerker toe</span>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -227,9 +217,9 @@ export default function DaypartScheduleGrid({
                 </tr>
               ))}
 
-              {/* Subtotal per dagdeel */}
-              <tr className="border-t-2 border-slate-300 bg-slate-50">
-                <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm font-semibold text-slate-700">
+              {/* Subtotal per dagdeel row */}
+              <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
+                <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm text-slate-700">
                   Subtotaal per dagdeel
                 </td>
                 {weekDays.map((day) => {
@@ -257,11 +247,10 @@ export default function DaypartScheduleGrid({
                           return (
                             <div 
                               key={daypart.id}
-                              className="text-xs flex items-center justify-between px-2 py-1 rounded"
-                              style={{ backgroundColor: `${daypart.color}20` || '#F8FAFC' }}
+                              className="text-xs flex items-center justify-between gap-2"
                             >
-                              <span style={{ color: daypart.color || '#64748B' }}>
-                                {daypart.name}
+                              <span className="text-[10px] text-slate-600 truncate">
+                                {daypart.name.substring(0, 12)}
                               </span>
                               <span className={`font-semibold ${statusColor}`}>
                                 {subtotal.toFixed(1)}u
