@@ -59,7 +59,8 @@ export default function ShiftDialog({
   departments,
   dayparts = [],
   locations,
-  functions
+  functions,
+  schedule
 }) {
   const { currentCompany } = useCompany();
   const queryClient = useQueryClient();
@@ -134,10 +135,16 @@ export default function ShiftDialog({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Auto-populate department and location from schedule
+    const departmentId = formData.departmentId || schedule?.departmentIds?.[0] || null;
+    const locationId = formData.locationId || schedule?.locationIds?.[0] || null;
+    
     const submitData = {
       ...formData,
       companyId: currentCompany?.id,
       scheduleId,
+      departmentId,
+      locationId,
       break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
     };
     
@@ -298,46 +305,7 @@ export default function ShiftDialog({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="departmentId">Afdeling</Label>
-              <Select 
-                value={formData.departmentId} 
-                onValueChange={(v) => setFormData({ ...formData, departmentId: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecteer afdeling" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>Geen</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="locationId">Locatie</Label>
-              <Select 
-                value={formData.locationId} 
-                onValueChange={(v) => setFormData({ ...formData, locationId: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecteer locatie" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={null}>Geen</SelectItem>
-                  {locations.map((loc) => (
-                    <SelectItem key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+
 
           <div>
             <Label htmlFor="functionId">Functie</Label>

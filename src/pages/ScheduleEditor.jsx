@@ -475,6 +475,7 @@ export default function ScheduleEditor() {
         dayparts={relevantDayparts}
         locations={locations}
         functions={functions}
+        schedule={schedule}
       />
     </div>
   );
