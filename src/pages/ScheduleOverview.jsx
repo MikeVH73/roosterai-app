@@ -7,6 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ScheduleWeekView from '@/components/schedules/ScheduleWeekView';
 import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
+import MiniCalendar from '@/components/schedules/MiniCalendar';
+import MonthCalendarGrid from '@/components/schedules/MonthCalendarGrid';
 import { 
   Calendar,
   AlertTriangle,
@@ -17,7 +19,9 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarDays,
-  Settings2
+  Settings2,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { format, parseISO, isWithinInterval, startOfDay, endOfDay, startOfWeek, startOfMonth, endOfMonth, addDays } from 'date-fns';
+import { format, parseISO, isWithinInterval, startOfDay, endOfDay, startOfWeek, startOfMonth, endOfMonth, addDays, addWeeks } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
 function calculateNetHours(shift) {
@@ -49,9 +53,10 @@ export default function ScheduleOverview() {
   const { currentCompany } = useCompany();
   const companyId = currentCompany?.id;
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
-  const [currentWeekStart, setCurrentWeekStart] = useState(new Date());
+  const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 })); // Week starts on Monday
   const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month', 'year'
-  const [visibleDays, setVisibleDays] = useState([0, 1, 2, 3, 4, 5, 6]); // 0=zondag, 6=zaterdag
+  const [visibleDays, setVisibleDays] = useState([1, 2, 3, 4, 5, 6, 0]); // 1=maandag, 0=zondag
+  const [miniCalendarOpen, setMiniCalendarOpen] = useState(true);
 
   const { data: schedules = [], isLoading: schedulesLoading } = useQuery({
     queryKey: ['schedules', companyId],
@@ -298,10 +303,11 @@ export default function ScheduleOverview() {
                     if (viewMode === 'day') {
                       days = [currentWeekStart];
                     } else if (viewMode === 'week') {
+                      const weekStart = startOfWeek(currentWeekStart, { weekStartsOn: 1 });
                       for (let i = 0; i < 7; i++) {
-                        const day = new Date(currentWeekStart);
-                        day.setDate(day.getDate() + i);
-                        if (visibleDays.includes(day.getDay())) {
+                        const day = addDays(weekStart, i);
+                        const dayOfWeek = day.getDay();
+                        if (visibleDays.includes(dayOfWeek)) {
                           days.push(day);
                         }
                       }
@@ -336,27 +342,33 @@ export default function ScheduleOverview() {
                   const scheduleShifts = allShifts.filter(s => s.scheduleId === schedule.id);
 
                   const handlePrev = () => {
-                    const newStart = new Date(currentWeekStart);
                     if (viewMode === 'day') {
-                      newStart.setDate(newStart.getDate() - 1);
+                      setCurrentWeekStart(addDays(currentWeekStart, -1));
                     } else if (viewMode === 'week') {
-                      newStart.setDate(newStart.getDate() - 7);
+                      setCurrentWeekStart(addWeeks(currentWeekStart, -1));
                     } else if (viewMode === 'month') {
-                      newStart.setMonth(newStart.getMonth() - 1);
+                      setCurrentWeekStart(addDays(startOfMonth(currentWeekStart), -1));
                     }
-                    setCurrentWeekStart(newStart);
                   };
 
                   const handleNext = () => {
-                    const newStart = new Date(currentWeekStart);
                     if (viewMode === 'day') {
-                      newStart.setDate(newStart.getDate() + 1);
+                      setCurrentWeekStart(addDays(currentWeekStart, 1));
                     } else if (viewMode === 'week') {
-                      newStart.setDate(newStart.getDate() + 7);
+                      setCurrentWeekStart(addWeeks(currentWeekStart, 1));
                     } else if (viewMode === 'month') {
-                      newStart.setMonth(newStart.getMonth() + 1);
+                      setCurrentWeekStart(addDays(endOfMonth(currentWeekStart), 1));
                     }
-                    setCurrentWeekStart(newStart);
+                  };
+
+                  const handleDateSelect = (date) => {
+                    if (viewMode === 'day') {
+                      setCurrentWeekStart(date);
+                    } else if (viewMode === 'week') {
+                      setCurrentWeekStart(startOfWeek(date, { weekStartsOn: 1 }));
+                    } else if (viewMode === 'month') {
+                      setCurrentWeekStart(startOfMonth(date));
+                    }
                   };
                   
                   const toggleDay = (dayIndex) => {
@@ -369,7 +381,8 @@ export default function ScheduleOverview() {
                     }
                   };
                   
-                  const dayNames = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+                  const dayNames = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+                  const dayNamesFull = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
                   
                   const getViewLabel = () => {
                     if (viewMode === 'day') {
@@ -383,11 +396,31 @@ export default function ScheduleOverview() {
                   };
                   
                   return (
-                    <div key={schedule.id}>
-                      <div className="p-6 border-t-2 border-slate-200">
+                    <div key={schedule.id} className="flex">
+                      {/* Mini Calendar Sidebar */}
+                      {miniCalendarOpen && (
+                        <div className="w-64 border-r border-slate-200 p-4 bg-slate-50">
+                          <MiniCalendar
+                            selectedDate={currentWeekStart}
+                            onDateSelect={handleDateSelect}
+                          />
+                        </div>
+                      )}
+
+                      {/* Main Content */}
+                      <div className="flex-1 p-6 border-t-2 border-slate-200">
                         {/* Compact Header with Controls */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
+                            {/* Toggle Mini Calendar */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setMiniCalendarOpen(!miniCalendarOpen)}
+                              className="h-7 px-2"
+                            >
+                              {miniCalendarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                            </Button>
                             {/* View Mode Selector */}
                             <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
                               <Button
@@ -450,13 +483,13 @@ export default function ScheduleOverview() {
                               <DropdownMenuContent align="start">
                                 <DropdownMenuLabel className="text-xs">Zichtbare dagen</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                {dayNames.map((name, idx) => (
+                                {[1, 2, 3, 4, 5, 6, 0].map((dayIdx, idx) => (
                                   <DropdownMenuCheckboxItem
-                                    key={idx}
-                                    checked={visibleDays.includes(idx)}
-                                    onCheckedChange={() => toggleDay(idx)}
+                                    key={dayIdx}
+                                    checked={visibleDays.includes(dayIdx)}
+                                    onCheckedChange={() => toggleDay(dayIdx)}
                                   >
-                                    {name === 'Zo' ? 'Zondag' : name === 'Ma' ? 'Maandag' : name === 'Di' ? 'Dinsdag' : name === 'Wo' ? 'Woensdag' : name === 'Do' ? 'Donderdag' : name === 'Vr' ? 'Vrijdag' : 'Zaterdag'}
+                                    {dayNamesFull[idx]}
                                   </DropdownMenuCheckboxItem>
                                 ))}
                               </DropdownMenuContent>
@@ -484,10 +517,18 @@ export default function ScheduleOverview() {
                         )}
 
                         {/* Schedule Grid */}
-                        {weekDays.length === 0 ? (
+                        {viewMode === 'month' ? (
+                          <MonthCalendarGrid
+                            currentDate={currentWeekStart}
+                            shifts={scheduleShifts}
+                            dayparts={relevantDayparts}
+                            staffingRequirements={staffingRequirements}
+                            onDayClick={handleDateSelect}
+                          />
+                        ) : weekDays.length === 0 ? (
                           <div className="p-12 text-center text-slate-500">
                             <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                            <p>Geen dagen in deze week vallen binnen de rooster periode</p>
+                            <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
                           </div>
                         ) : (
                           <DaypartScheduleGrid
