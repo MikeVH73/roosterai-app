@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ScheduleWeekView from '@/components/schedules/ScheduleWeekView';
 import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
 import MiniCalendar from '@/components/schedules/MiniCalendar';
 import MonthCalendarGrid from '@/components/schedules/MonthCalendarGrid';
+import ShiftDialog from '@/components/schedules/ShiftDialog';
 import { 
   Calendar,
   AlertTriangle,
@@ -52,11 +53,18 @@ export default function ScheduleOverview() {
   const navigate = useNavigate();
   const { currentCompany } = useCompany();
   const companyId = currentCompany?.id;
+  const queryClient = useQueryClient();
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 })); // Week starts on Monday
   const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month', 'year'
   const [visibleDays, setVisibleDays] = useState([1, 2, 3, 4, 5, 6, 0]); // 1=maandag, 0=zondag
   const [miniCalendarOpen, setMiniCalendarOpen] = useState(true);
+  const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
+  const [selectedShift, setSelectedShift] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+  const [selectedDaypartId, setSelectedDaypartId] = useState(null);
+  const [currentScheduleId, setCurrentScheduleId] = useState(null);
 
   const { data: schedules = [], isLoading: schedulesLoading } = useQuery({
     queryKey: ['schedules', companyId],
@@ -170,6 +178,33 @@ export default function ScheduleOverview() {
     draft: { label: 'Concept', color: 'bg-slate-100 text-slate-700' },
     published: { label: 'Gepubliceerd', color: 'bg-green-100 text-green-700' },
     archived: { label: 'Gearchiveerd', color: 'bg-gray-100 text-gray-500' }
+  };
+
+  const handleCellClick = (employeeId, date, daypartId, scheduleId) => {
+    setSelectedShift(null);
+    setSelectedEmployeeId(employeeId);
+    setSelectedDate(typeof date === 'string' ? date : format(date, 'yyyy-MM-dd'));
+    setSelectedDaypartId(daypartId);
+    setCurrentScheduleId(scheduleId);
+    setShiftDialogOpen(true);
+  };
+
+  const handleShiftClick = (shift, scheduleId) => {
+    setSelectedShift(shift);
+    setSelectedEmployeeId(shift.employeeId);
+    setSelectedDate(shift.date);
+    setSelectedDaypartId(shift.daypartId);
+    setCurrentScheduleId(scheduleId);
+    setShiftDialogOpen(true);
+  };
+
+  const handleCloseShiftDialog = () => {
+    setShiftDialogOpen(false);
+    setSelectedShift(null);
+    setSelectedEmployeeId(null);
+    setSelectedDate(null);
+    setSelectedDaypartId(null);
+    setCurrentScheduleId(null);
   };
 
   if (schedulesLoading) {
@@ -295,6 +330,13 @@ export default function ScheduleOverview() {
 
                   const scheduleStart = parseISO(schedule.start_date);
                   const scheduleEnd = parseISO(schedule.end_date);
+
+                  const handleDaypartOrderChange = async (newOrder) => {
+                    await base44.entities.Schedule.update(schedule.id, {
+                      daypart_order: newOrder
+                    });
+                    queryClient.invalidateQueries(['schedules', companyId]);
+                  };
                   
                   // Calculate visible days based on view mode
                   const calculateVisibleDays = () => {
@@ -550,6 +592,10 @@ export default function ScheduleOverview() {
                               weekDays={weekDays}
                               staffingRequirements={staffingRequirements}
                               functions={functions}
+                              onCellClick={(employeeId, date, daypartId) => handleCellClick(employeeId, date, daypartId, schedule.id)}
+                              onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
+                              onDaypartOrderChange={handleDaypartOrderChange}
+                              schedule={schedule}
                             />
                           )}
                         </div>
@@ -563,6 +609,28 @@ export default function ScheduleOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {currentScheduleId && (
+        <ShiftDialog
+          open={shiftDialogOpen}
+          onClose={handleCloseShiftDialog}
+          shift={selectedShift}
+          scheduleId={currentScheduleId}
+          employeeId={selectedEmployeeId}
+          date={selectedDate}
+          daypartId={selectedDaypartId}
+          employees={employees.filter(emp => 
+            emp.departmentIds?.some(deptId => 
+              schedules.find(s => s.id === currentScheduleId)?.departmentIds?.includes(deptId)
+            )
+          )}
+          departments={departments}
+          dayparts={dayparts}
+          locations={locations}
+          functions={functions}
+          schedule={schedules.find(s => s.id === currentScheduleId)}
+        />
+      )}
     </div>
   );
 }

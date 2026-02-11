@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useCompany } from '@/components/providers/CompanyProvider';
@@ -124,6 +124,15 @@ export default function ScheduleEditor() {
     }
   });
 
+  const updateDaypartOrderMutation = useMutation({
+    mutationFn: (daypartOrder) => base44.entities.Schedule.update(scheduleId, {
+      daypart_order: daypartOrder
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['schedule', scheduleId]);
+    }
+  });
+
   // Get the days to display
   const weekDays = useMemo(() => {
     if (!schedule) {
@@ -211,6 +220,10 @@ export default function ScheduleEditor() {
     setSelectedDate(null);
     setSelectedDaypartId(null);
   };
+
+  const handleDaypartOrderChange = useCallback((newOrder) => {
+    updateDaypartOrderMutation.mutate(newOrder);
+  }, [updateDaypartOrderMutation]);
 
   const navigateWeek = (direction) => {
     setCurrentWeekStart(prev => 
@@ -358,6 +371,8 @@ export default function ScheduleEditor() {
                 functions={functions}
                 onCellClick={handleCellClick}
                 onShiftClick={handleShiftClick}
+                onDaypartOrderChange={handleDaypartOrderChange}
+                schedule={schedule}
               />
             ) : (
               <div className="overflow-x-auto">

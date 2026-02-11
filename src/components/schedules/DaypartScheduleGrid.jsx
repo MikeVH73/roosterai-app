@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Plus, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle2, GripVertical } from 'lucide-react';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function calculateShiftHours(shift) {
   const [startH, startM] = shift.start_time.split(':').map(Number);
@@ -30,7 +31,9 @@ export default function DaypartScheduleGrid({
   staffingRequirements,
   functions,
   onCellClick,
-  onShiftClick
+  onShiftClick,
+  onDaypartOrderChange,
+  schedule
 }) {
   const getInitials = (first, last) => {
     return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
@@ -42,8 +45,24 @@ export default function DaypartScheduleGrid({
   };
 
   const sortedDayparts = useMemo(() => {
+    // If schedule has custom order, use that
+    if (schedule?.daypart_order?.length) {
+      const orderedDayparts = [];
+      schedule.daypart_order.forEach(id => {
+        const dp = dayparts.find(d => d.id === id);
+        if (dp) orderedDayparts.push(dp);
+      });
+      // Add any dayparts not in the custom order
+      dayparts.forEach(dp => {
+        if (!schedule.daypart_order.includes(dp.id)) {
+          orderedDayparts.push(dp);
+        }
+      });
+      return orderedDayparts;
+    }
+    // Otherwise use default sortOrder
     return [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-  }, [dayparts]);
+  }, [dayparts, schedule?.daypart_order]);
 
   // Get shifts for a specific daypart and day
   const getShiftsForCell = (date, daypartId) => {
@@ -83,6 +102,17 @@ export default function DaypartScheduleGrid({
     return req?.targetHours || null;
   };
 
+  const handleDragEnd = (result) => {
+    if (!result.destination || !onDaypartOrderChange) return;
+
+    const items = Array.from(sortedDayparts);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    const newOrder = items.map(dp => dp.id);
+    onDaypartOrderChange(newOrder);
+  };
+
   if (sortedDayparts.length === 0) {
     return (
       <div className="p-8 text-center text-slate-500">
@@ -111,32 +141,58 @@ export default function DaypartScheduleGrid({
             ))}
           </tr>
         </thead>
-        <tbody>
-          {sortedDayparts.length === 0 ? (
-            <tr>
-              <td colSpan={1 + weekDays.length} className="p-8 text-center text-slate-500">
-                Geen dagdelen gedefinieerd
-              </td>
-            </tr>
-          ) : (
-            <>
-              {/* Daypart rows */}
-              {sortedDayparts.map((daypart) => (
-                <tr key={daypart.id} className="border-t border-slate-200 hover:bg-slate-50/30">
-                  <td 
-                    className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200 min-w-[200px]"
-                    style={{ 
-                      backgroundColor: `${daypart.color}08` || '#FAFAFA',
-                      borderLeft: `4px solid ${daypart.color}` || '#3B82F6'
-                    }}
-                  >
-                    <div className="flex flex-col gap-1">
-                      <p className="font-medium text-sm text-slate-900">{daypart.name}</p>
-                      <p className="text-xs text-slate-500">
-                        {daypart.startTime} - {daypart.endTime}
-                      </p>
-                    </div>
-                  </td>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="dayparts">
+            {(provided) => (
+              <tbody {...provided.droppableProps} ref={provided.innerRef}>
+                {sortedDayparts.length === 0 ? (
+                  <tr>
+                    <td colSpan={1 + weekDays.length} className="p-8 text-center text-slate-500">
+                      Geen dagdelen gedefinieerd
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {/* Daypart rows */}
+                    {sortedDayparts.map((daypart, index) => (
+                      <Draggable 
+                        key={daypart.id} 
+                        draggableId={daypart.id} 
+                        index={index}
+                        isDragDisabled={!onDaypartOrderChange}
+                      >
+                        {(provided, snapshot) => (
+                          <tr 
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`border-t border-slate-200 hover:bg-slate-50/30 ${
+                              snapshot.isDragging ? 'bg-blue-50 shadow-lg' : ''
+                            }`}
+                          >
+                            <td 
+                              className="sticky left-0 bg-white z-10 border-r border-slate-200 min-w-[200px]"
+                              style={{ 
+                                backgroundColor: snapshot.isDragging ? `${daypart.color}20` : `${daypart.color}08` || '#FAFAFA',
+                                borderLeft: `4px solid ${daypart.color}` || '#3B82F6'
+                              }}
+                            >
+                              <div className="flex items-center gap-2 p-3">
+                                {onDaypartOrderChange && (
+                                  <div 
+                                    {...provided.dragHandleProps}
+                                    className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600"
+                                  >
+                                    <GripVertical className="w-4 h-4" />
+                                  </div>
+                                )}
+                                <div className="flex flex-col gap-1 flex-1">
+                                  <p className="font-medium text-sm text-slate-900">{daypart.name}</p>
+                                  <p className="text-xs text-slate-500">
+                                    {daypart.startTime} - {daypart.endTime}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
                   {weekDays.map((day) => {
                     const dateStr = format(day, 'yyyy-MM-dd');
                     const cellShifts = getShiftsForCell(dateStr, daypart.id);
@@ -212,10 +268,12 @@ export default function DaypartScheduleGrid({
                           )}
                         </div>
                       </td>
-                    );
-                  })}
-                </tr>
-              ))}
+                            );
+                          })}
+                          </tr>
+                        )}
+                      </Draggable>
+                    ))}
 
               {/* Subtotal per dagdeel row */}
               <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
@@ -282,10 +340,14 @@ export default function DaypartScheduleGrid({
                     </td>
                   );
                 })}
-              </tr>
-            </>
-          )}
-        </tbody>
+                    </tr>
+                  </>
+                )}
+                {provided.placeholder}
+              </tbody>
+            )}
+          </Droppable>
+        </DragDropContext>
       </table>
     </div>
   );
