@@ -45,8 +45,8 @@ function calculateNetHours(shift) {
   const [endH, endM] = shift.end_time.split(':').map(Number);
   let hours = (endH * 60 + endM - startH * 60 - startM) / 60;
   if (hours < 0) hours += 24;
-  const breakHours = (shift.break_duration || 0) / 60;
-  return Math.max(0, hours - breakHours);
+  // Pauze komt BOVENOP de dienst, dus we trekken het NIET af
+  return hours;
 }
 
 export default function ScheduleOverview() {

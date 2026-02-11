@@ -20,7 +20,8 @@ function calculateBreakHours(shift) {
 }
 
 function calculateNetHours(shift) {
-  return Math.max(0, calculateShiftHours(shift) - calculateBreakHours(shift));
+  // Pauze komt BOVENOP de dienst, dus we trekken het NIET af
+  return calculateShiftHours(shift);
 }
 
 export default function DaypartScheduleGrid({
