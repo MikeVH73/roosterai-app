@@ -246,7 +246,7 @@ export default function DaypartScheduleGrid({
                           {cellShifts.map((shift) => {
                             const breakHours = calculateBreakHours(shift);
                             return (
-                              <div key={shift.id} className="space-y-0.5">
+                              <div key={shift.id}>
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -260,14 +260,13 @@ export default function DaypartScheduleGrid({
                                 >
                                   <p className="font-medium" style={{ color: getFunctionColor(shift.functionId) }}>
                                     {shift.start_time}-{shift.end_time}
+                                    {breakHours > 0 && (
+                                      <span className="ml-1 text-[10px] opacity-70">
+                                        +{breakHours.toFixed(1)}u pauze
+                                      </span>
+                                    )}
                                   </p>
                                 </div>
-                                {breakHours > 0 && (
-                                  <div className="px-2 py-0.5 rounded text-[10px] bg-amber-50 border border-amber-200 text-amber-700 flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                    Pauze {breakHours.toFixed(1)}u
-                                  </div>
-                                )}
                               </div>
                             );
                           })}

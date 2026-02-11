@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -40,9 +41,10 @@ const defaultFormData = {
   date: '',
   start_time: '09:00',
   end_time: '17:00',
-  break_duration: 30,
+  break_duration: 0,
   shift_type: 'regular',
-  notes: ''
+  notes: '',
+  has_break: false
 };
 
 export default function ShiftDialog({
@@ -65,6 +67,7 @@ export default function ShiftDialog({
 
   useEffect(() => {
     if (shift) {
+      const hasBreak = shift.break_duration && shift.break_duration > 0;
       setFormData({
         employeeId: shift.employeeId || '',
         departmentId: shift.departmentId || '',
@@ -76,7 +79,8 @@ export default function ShiftDialog({
         end_time: shift.end_time || '17:00',
         break_duration: shift.break_duration || 30,
         shift_type: shift.shift_type || 'regular',
-        notes: shift.notes || ''
+        notes: shift.notes || '',
+        has_break: hasBreak
       });
     } else {
       // Find the daypart to get default times
@@ -134,8 +138,11 @@ export default function ShiftDialog({
       ...formData,
       companyId: currentCompany?.id,
       scheduleId,
-      break_duration: parseInt(formData.break_duration)
+      break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
     };
+    
+    // Remove has_break from the data sent to the backend
+    delete submitData.has_break;
 
     if (shift) {
       await updateMutation.mutateAsync({ id: shift.id, data: submitData });
@@ -241,35 +248,54 @@ export default function ShiftDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="break_duration">Pauze (minuten)</Label>
-              <Input
-                id="break_duration"
-                type="number"
-                value={formData.break_duration}
-                onChange={(e) => setFormData({ ...formData, break_duration: e.target.value })}
-                min={0}
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <Checkbox 
+                id="has_break"
+                checked={formData.has_break}
+                onCheckedChange={(checked) => setFormData({ 
+                  ...formData, 
+                  has_break: checked,
+                  break_duration: checked ? (formData.break_duration || 30) : 0
+                })}
               />
+              <Label htmlFor="has_break" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Pauze toevoegen (komt bovenop de dienst)
+              </Label>
             </div>
-            <div>
-              <Label htmlFor="shift_type">Type dienst</Label>
-              <Select 
-                value={formData.shift_type} 
-                onValueChange={(v) => setFormData({ ...formData, shift_type: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {shiftTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
+            {formData.has_break && (
+              <div className="ml-6 mb-4">
+                <Label htmlFor="break_duration" className="text-sm">Pauze duur (minuten)</Label>
+                <Input
+                  id="break_duration"
+                  type="number"
+                  value={formData.break_duration}
+                  onChange={(e) => setFormData({ ...formData, break_duration: e.target.value })}
+                  min={0}
+                  className="mt-1 w-32"
+                />
+              </div>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="shift_type">Type dienst</Label>
+            <Select 
+              value={formData.shift_type} 
+              onValueChange={(v) => setFormData({ ...formData, shift_type: v })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {shiftTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
