@@ -149,10 +149,10 @@ export default function DaypartScheduleGrid({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse">
+      <table className="w-full min-w-full border-collapse table-fixed">
         <thead>
           <tr className="bg-slate-50">
-            <th className="sticky left-0 bg-slate-50 z-20 p-3 text-left text-sm font-medium text-slate-600 w-48 border-r border-slate-200">
+            <th className="sticky left-0 bg-slate-50 z-20 p-3 text-left text-sm font-medium text-slate-600 border-r border-slate-200" style={{ width: '200px' }}>
               Medewerker
             </th>
             {weekDays.map((day) => (
@@ -168,7 +168,7 @@ export default function DaypartScheduleGrid({
           </tr>
           {/* Daypart Headers */}
           <tr className="bg-slate-100/50">
-            <th className="sticky left-0 bg-slate-100/50 z-20 p-2 border-r border-slate-200">
+            <th className="sticky left-0 bg-slate-100/50 z-20 p-2 border-r border-slate-200" style={{ width: '200px' }}>
               <span className="text-xs text-slate-500">Dagdeel →</span>
             </th>
             {weekDays.map((day) => (
@@ -180,7 +180,7 @@ export default function DaypartScheduleGrid({
                 return (
                   <th 
                     key={`${day.toISOString()}_${daypart.id}`}
-                    className={`p-2 text-center min-w-28 ${
+                    className={`p-2 text-center ${
                       dpIndex < sortedDayparts.length - 1 ? 'border-r border-slate-100' : 'border-r border-slate-200'
                     }`}
                     style={{ backgroundColor: daypart.color || '#F8FAFC' }}
@@ -211,14 +211,14 @@ export default function DaypartScheduleGrid({
               {/* Employee rows */}
               {employees.map((employee) => (
               <tr key={employee.id} className="border-t border-slate-100 hover:bg-slate-50/50">
-                <td className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200">
+                <td className="sticky left-0 bg-white z-10 p-3 border-r border-slate-200" style={{ width: '200px' }}>
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-8 h-8">
+                    <Avatar className="w-8 h-8 flex-shrink-0">
                       <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-medium">
                         {getInitials(employee.first_name, employee.last_name)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium text-slate-900 text-sm truncate">
                         {employee.first_name} {employee.last_name}
                       </p>
@@ -285,7 +285,7 @@ export default function DaypartScheduleGrid({
               ))}
               {/* Subtotal rows per daypart */}
               <tr className="border-t-2 border-slate-300 bg-slate-50 font-semibold">
-                <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm text-slate-700">
+                <td className="sticky left-0 bg-slate-50 z-10 p-3 border-r border-slate-200 text-sm text-slate-700" style={{ width: '200px' }}>
                   Subtotaal per dagdeel
                 </td>
                 {weekDays.map((day) => (
@@ -319,7 +319,7 @@ export default function DaypartScheduleGrid({
 
               {/* Daily total row */}
               <tr className="border-t-2 border-slate-400 bg-slate-100 font-bold">
-                <td className="sticky left-0 bg-slate-100 z-10 p-3 border-r border-slate-200 text-sm text-slate-900">
+                <td className="sticky left-0 bg-slate-100 z-10 p-3 border-r border-slate-200 text-sm text-slate-900" style={{ width: '200px' }}>
                   Totaal per dag
                 </td>
                 {weekDays.map((day) => {

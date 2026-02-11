@@ -396,30 +396,41 @@ export default function ScheduleOverview() {
                   };
                   
                   return (
-                    <div key={schedule.id} className="flex">
-                      {/* Mini Calendar Sidebar */}
-                      {miniCalendarOpen && (
-                        <div className="w-64 border-r border-slate-200 p-4 bg-slate-50">
-                          <MiniCalendar
-                            selectedDate={currentWeekStart}
-                            onDateSelect={handleDateSelect}
-                          />
-                        </div>
-                      )}
+                    <div key={schedule.id} className="border-t-2 border-slate-200">
+                      <div className="flex">
+                        {/* Mini Calendar Sidebar */}
+                        {miniCalendarOpen && (
+                          <div className="w-80 border-r border-slate-200 p-6 bg-slate-50 flex-shrink-0">
+                            <MiniCalendar
+                              selectedDate={currentWeekStart}
+                              onDateSelect={handleDateSelect}
+                            />
+                          </div>
+                        )}
 
-                      {/* Main Content */}
-                      <div className="flex-1 p-6 border-t-2 border-slate-200">
+                        {/* Main Content */}
+                        <div className="flex-1 p-6 min-w-0">
                         {/* Compact Header with Controls */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
                             {/* Toggle Mini Calendar */}
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
                               onClick={() => setMiniCalendarOpen(!miniCalendarOpen)}
-                              className="h-7 px-2"
+                              className="h-7 px-2 border-slate-300"
                             >
-                              {miniCalendarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                              {miniCalendarOpen ? (
+                                <>
+                                  <X className="w-4 h-4 mr-1" />
+                                  <span className="text-xs">Verberg kalender</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Menu className="w-4 h-4 mr-1" />
+                                  <span className="text-xs">Toon kalender</span>
+                                </>
+                              )}
                             </Button>
                             {/* View Mode Selector */}
                             <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
@@ -517,29 +528,32 @@ export default function ScheduleOverview() {
                         )}
 
                         {/* Schedule Grid */}
-                        {viewMode === 'month' ? (
-                          <MonthCalendarGrid
-                            currentDate={currentWeekStart}
-                            shifts={scheduleShifts}
-                            dayparts={relevantDayparts}
-                            staffingRequirements={staffingRequirements}
-                            onDayClick={handleDateSelect}
-                          />
-                        ) : weekDays.length === 0 ? (
-                          <div className="p-12 text-center text-slate-500">
-                            <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                            <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
-                          </div>
-                        ) : (
-                          <DaypartScheduleGrid
-                            dayparts={relevantDayparts}
-                            employees={scheduleEmployees}
-                            shifts={scheduleShifts}
-                            weekDays={weekDays}
-                            staffingRequirements={staffingRequirements}
-                            functions={functions}
-                          />
-                        )}
+                        <div className="w-full overflow-auto">
+                          {viewMode === 'month' ? (
+                            <MonthCalendarGrid
+                              currentDate={currentWeekStart}
+                              shifts={scheduleShifts}
+                              dayparts={relevantDayparts}
+                              staffingRequirements={staffingRequirements}
+                              onDayClick={handleDateSelect}
+                            />
+                          ) : weekDays.length === 0 ? (
+                            <div className="p-12 text-center text-slate-500">
+                              <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                              <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
+                            </div>
+                          ) : (
+                            <DaypartScheduleGrid
+                              dayparts={relevantDayparts}
+                              employees={scheduleEmployees}
+                              shifts={scheduleShifts}
+                              weekDays={weekDays}
+                              staffingRequirements={staffingRequirements}
+                              functions={functions}
+                            />
+                          )}
+                        </div>
+                      </div>
                       </div>
                     </div>
                   );
