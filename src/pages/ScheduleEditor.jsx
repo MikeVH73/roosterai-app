@@ -17,17 +17,12 @@ import {
   AlertTriangle,
   Users,
   Loader2,
-  Building2,
-  LayoutGrid,
-  List,
-  Calendar,
-  Filter
+  Building2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -35,12 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { 
   format, 
   parseISO, 
@@ -69,7 +59,6 @@ export default function ScheduleEditor() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
-  const [viewMode, setViewMode] = useState('dayparts');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState(['morning', 'afternoon', 'evening', 'night']);
 
@@ -124,12 +113,8 @@ export default function ScheduleEditor() {
     enabled: !!companyId
   });
 
-  // Update view mode when schedule loads
-  useEffect(() => {
-    if (schedule?.default_view_mode) {
-      setViewMode(schedule.default_view_mode);
-    }
-  }, [schedule?.default_view_mode]);
+  // Use schedule's default view mode
+  const viewMode = schedule?.default_view_mode || 'dayparts';
 
   const publishMutation = useMutation({
     mutationFn: () => base44.entities.Schedule.update(scheduleId, {
@@ -365,74 +350,64 @@ export default function ScheduleEditor() {
                 )}
 
                 {viewMode === 'timeline' && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Dagdelen ({selectedTimelineDayparts.length})
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuCheckboxItem
-                        checked={selectedTimelineDayparts.includes('morning')}
-                        onCheckedChange={(checked) => {
-                          setSelectedTimelineDayparts(prev => 
-                            checked ? [...prev, 'morning'] : prev.filter(d => d !== 'morning')
-                          );
-                        }}
-                      >
-                        Ochtend (06:00 - 12:00)
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={selectedTimelineDayparts.includes('afternoon')}
-                        onCheckedChange={(checked) => {
-                          setSelectedTimelineDayparts(prev => 
-                            checked ? [...prev, 'afternoon'] : prev.filter(d => d !== 'afternoon')
-                          );
-                        }}
-                      >
-                        Middag (12:00 - 18:00)
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={selectedTimelineDayparts.includes('evening')}
-                        onCheckedChange={(checked) => {
-                          setSelectedTimelineDayparts(prev => 
-                            checked ? [...prev, 'evening'] : prev.filter(d => d !== 'evening')
-                          );
-                        }}
-                      >
-                        Avond (18:00 - 24:00)
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={selectedTimelineDayparts.includes('night')}
-                        onCheckedChange={(checked) => {
-                          setSelectedTimelineDayparts(prev => 
-                            checked ? [...prev, 'night'] : prev.filter(d => d !== 'night')
-                          );
-                        }}
-                      >
-                        Nacht (00:00 - 06:00)
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
+                    <span className="text-sm text-slate-600 font-medium">Dagdelen:</span>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedTimelineDayparts.includes('morning')}
+                          onChange={(e) => {
+                            setSelectedTimelineDayparts(prev => 
+                              e.target.checked ? [...prev, 'morning'] : prev.filter(d => d !== 'morning')
+                            );
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-slate-700">Ochtend</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedTimelineDayparts.includes('afternoon')}
+                          onChange={(e) => {
+                            setSelectedTimelineDayparts(prev => 
+                              e.target.checked ? [...prev, 'afternoon'] : prev.filter(d => d !== 'afternoon')
+                            );
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-slate-700">Middag</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedTimelineDayparts.includes('evening')}
+                          onChange={(e) => {
+                            setSelectedTimelineDayparts(prev => 
+                              e.target.checked ? [...prev, 'evening'] : prev.filter(d => d !== 'evening')
+                            );
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-slate-700">Avond</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedTimelineDayparts.includes('night')}
+                          onChange={(e) => {
+                            setSelectedTimelineDayparts(prev => 
+                              e.target.checked ? [...prev, 'night'] : prev.filter(d => d !== 'night')
+                            );
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-slate-700">Nacht</span>
+                      </label>
+                    </div>
+                  </div>
                 )}
-
-                <Tabs value={viewMode} onValueChange={setViewMode}>
-                  <TabsList>
-                    <TabsTrigger value="dayparts" className="flex items-center gap-1">
-                      <LayoutGrid className="w-4 h-4" />
-                      Dagdelen
-                    </TabsTrigger>
-                    <TabsTrigger value="simple" className="flex items-center gap-1">
-                      <List className="w-4 h-4" />
-                      Simpel
-                    </TabsTrigger>
-                    <TabsTrigger value="timeline" className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      Tijdlijn
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
               </div>
             </div>
 

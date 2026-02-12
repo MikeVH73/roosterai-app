@@ -289,7 +289,7 @@ export default function TimelineView({
 
             {/* Days */}
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="flex-1 min-w-[600px] border-r border-slate-300">
+              <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${filteredDayparts.length * 160}px`, minWidth: `${filteredDayparts.length * 160}px` }}>
                 <div className="text-center border-b border-slate-200 bg-slate-50 py-2">
                   <div className="font-semibold text-slate-800">
                     {format(day, 'EEEE', { locale: nl })}
