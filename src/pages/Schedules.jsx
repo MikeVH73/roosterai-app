@@ -36,6 +36,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -54,7 +61,8 @@ export default function Schedules() {
     end_date: '',
     departmentIds: [],
     locationIds: [],
-    status: 'draft'
+    status: 'draft',
+    default_view_mode: 'dayparts'
   });
 
   const { data: schedules = [], isLoading } = useQuery({
@@ -115,7 +123,8 @@ export default function Schedules() {
         end_date: schedule.end_date || '',
         departmentIds: schedule.departmentIds || [],
         locationIds: schedule.locationIds || [],
-        status: schedule.status || 'draft'
+        status: schedule.status || 'draft',
+        default_view_mode: schedule.default_view_mode || 'dayparts'
       });
     } else {
       setSelectedSchedule(null);
@@ -133,7 +142,8 @@ export default function Schedules() {
         end_date: format(nextSunday, 'yyyy-MM-dd'),
         departmentIds: [],
         locationIds: [],
-        status: 'draft'
+        status: 'draft',
+        default_view_mode: 'dayparts'
       });
     }
     setDialogOpen(true);
@@ -468,6 +478,23 @@ export default function Schedules() {
                 </div>
               </div>
             )}
+
+            <div>
+              <Label htmlFor="default_view_mode">Standaard weergave</Label>
+              <Select 
+                value={formData.default_view_mode} 
+                onValueChange={(v) => setFormData({ ...formData, default_view_mode: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dayparts">Dagdelen</SelectItem>
+                  <SelectItem value="simple">Simpel</SelectItem>
+                  <SelectItem value="timeline">Tijdlijn</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
