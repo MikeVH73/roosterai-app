@@ -60,7 +60,7 @@ export default function ScheduleEditor() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
-  const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState(['morning', 'afternoon', 'evening', 'night']);
+  const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState([]);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -194,6 +194,13 @@ export default function ScheduleEditor() {
     }
     return staffingRequirements.filter(r => r.departmentId === selectedDepartmentId);
   }, [staffingRequirements, selectedDepartmentId]);
+
+  // Initialize selected timeline dayparts
+  useEffect(() => {
+    if (relevantDayparts.length > 0 && selectedTimelineDayparts.length === 0) {
+      setSelectedTimelineDayparts(relevantDayparts.map(dp => dp.id));
+    }
+  }, [relevantDayparts, selectedTimelineDayparts.length]);
 
   const getInitials = (first, last) => {
     return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
@@ -349,62 +356,25 @@ export default function ScheduleEditor() {
                   </Select>
                 )}
 
-                {viewMode === 'timeline' && (
+                {viewMode === 'timeline' && relevantDayparts.length > 0 && (
                   <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
                     <span className="text-sm text-slate-600 font-medium">Dagdelen:</span>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedTimelineDayparts.includes('morning')}
-                          onChange={(e) => {
-                            setSelectedTimelineDayparts(prev => 
-                              e.target.checked ? [...prev, 'morning'] : prev.filter(d => d !== 'morning')
-                            );
-                          }}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-slate-700">Ochtend</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedTimelineDayparts.includes('afternoon')}
-                          onChange={(e) => {
-                            setSelectedTimelineDayparts(prev => 
-                              e.target.checked ? [...prev, 'afternoon'] : prev.filter(d => d !== 'afternoon')
-                            );
-                          }}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-slate-700">Middag</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedTimelineDayparts.includes('evening')}
-                          onChange={(e) => {
-                            setSelectedTimelineDayparts(prev => 
-                              e.target.checked ? [...prev, 'evening'] : prev.filter(d => d !== 'evening')
-                            );
-                          }}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-slate-700">Avond</span>
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedTimelineDayparts.includes('night')}
-                          onChange={(e) => {
-                            setSelectedTimelineDayparts(prev => 
-                              e.target.checked ? [...prev, 'night'] : prev.filter(d => d !== 'night')
-                            );
-                          }}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-slate-700">Nacht</span>
-                      </label>
+                      {relevantDayparts.map(dp => (
+                        <label key={dp.id} className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedTimelineDayparts.includes(dp.id)}
+                            onChange={(e) => {
+                              setSelectedTimelineDayparts(prev => 
+                                e.target.checked ? [...prev, dp.id] : prev.filter(id => id !== dp.id)
+                              );
+                            }}
+                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-slate-700">{dp.name}</span>
+                        </label>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -419,10 +389,11 @@ export default function ScheduleEditor() {
                 locations={locations}
                 employees={relevantEmployees}
                 functions={functions}
+                dayparts={relevantDayparts}
                 currentWeekStart={currentWeekStart}
                 selectedDayparts={selectedTimelineDayparts}
                 onShiftClick={handleShiftClick}
-                onCellClick={(locationId, date, daypart) => {
+                onCellClick={(locationId, date) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));

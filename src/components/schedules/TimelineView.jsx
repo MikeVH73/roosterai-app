@@ -1,16 +1,9 @@
 import React, { useState, useRef, useMemo } from 'react';
-import { format, addDays, startOfWeek, isSameDay, parseISO, differenceInMinutes, addMinutes } from 'date-fns';
+import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { GripVertical, Clock } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-
-const DAYPARTS = [
-  { id: 'morning', name: 'Ochtend', start: '06:00', end: '12:00', hours: 6 },
-  { id: 'afternoon', name: 'Middag', start: '12:00', end: '18:00', hours: 6 },
-  { id: 'evening', name: 'Avond', start: '18:00', end: '24:00', hours: 6 },
-  { id: 'night', name: 'Nacht', start: '00:00', end: '06:00', hours: 6 }
-];
 
 // Helper: Convert time string to minutes since midnight
 const timeToMinutes = (timeStr) => {
@@ -23,37 +16,6 @@ const minutesToTime = (mins) => {
   const hours = Math.floor(mins / 60) % 24;
   const minutes = mins % 60;
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-};
-
-// Helper: Calculate position percentage within daypart
-const getShiftPosition = (shiftStart, daypartStart, daypartHours) => {
-  const shiftMins = timeToMinutes(shiftStart);
-  const daypartMins = timeToMinutes(daypartStart);
-  const daypartTotalMins = daypartHours * 60;
-  
-  let offsetMins = shiftMins - daypartMins;
-  if (offsetMins < 0) offsetMins += 24 * 60; // Handle overnight
-  
-  // Clamp to 0 if shift starts before daypart
-  return Math.max(0, (offsetMins / daypartTotalMins) * 100);
-};
-
-// Helper: Calculate width percentage within specific daypart
-const getShiftWidth = (start, end, daypartStart, daypartHours) => {
-  const startMins = timeToMinutes(start);
-  let endMins = timeToMinutes(end);
-  if (endMins <= startMins) endMins += 24 * 60;
-  
-  const daypartMins = timeToMinutes(daypartStart);
-  let daypartEndMins = daypartMins + (daypartHours * 60);
-  
-  // Calculate visible portion of shift within this daypart
-  const visibleStart = Math.max(startMins, daypartMins);
-  const visibleEnd = Math.min(endMins, daypartEndMins);
-  const visibleDuration = Math.max(0, visibleEnd - visibleStart);
-  
-  const daypartTotalMins = daypartHours * 60;
-  return Math.min((visibleDuration / daypartTotalMins) * 100, 100);
 };
 
 // Helper: Get shift duration in hours
@@ -70,10 +32,11 @@ export default function TimelineView({
   locations, 
   employees, 
   functions: allFunctions,
+  dayparts = [],
   onShiftClick,
   onCellClick,
   currentWeekStart,
-  selectedDayparts = ['morning', 'afternoon', 'evening', 'night']
+  selectedDayparts = []
 }) {
   const queryClient = useQueryClient();
   const [draggedLocation, setDraggedLocation] = useState(null);
@@ -82,7 +45,7 @@ export default function TimelineView({
     schedule?.location_order || locations.map(l => l.id)
   );
   const [resizingShift, setResizingShift] = useState(null);
-  const resizeRef = useRef({ initialX: 0, initialWidth: 0, edge: null });
+  const resizeRef = useRef({});
 
   // Use provided week start or default
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -91,10 +54,33 @@ export default function TimelineView({
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
 
-  // Filter dayparts based on selection
+  // Filter and sort dayparts
   const filteredDayparts = useMemo(() => {
-    return DAYPARTS.filter(dp => selectedDayparts.includes(dp.id));
-  }, [selectedDayparts]);
+    if (!dayparts.length) return [];
+    const filtered = selectedDayparts.length 
+      ? dayparts.filter(dp => selectedDayparts.includes(dp.id))
+      : dayparts;
+    return filtered.sort((a, b) => {
+      const aStart = timeToMinutes(a.startTime);
+      const bStart = timeToMinutes(b.startTime);
+      return aStart - bStart;
+    });
+  }, [dayparts, selectedDayparts]);
+
+  // Calculate total minutes for the day view
+  const { totalMinutes, daypartRanges } = useMemo(() => {
+    if (!filteredDayparts.length) return { totalMinutes: 0, daypartRanges: [] };
+    
+    const ranges = filteredDayparts.map(dp => {
+      const start = timeToMinutes(dp.startTime);
+      let end = timeToMinutes(dp.endTime);
+      if (end <= start) end += 24 * 60;
+      return { id: dp.id, name: dp.name, start, end, duration: end - start };
+    });
+    
+    const total = ranges.reduce((sum, r) => sum + r.duration, 0);
+    return { totalMinutes: total, daypartRanges: ranges };
+  }, [filteredDayparts]);
 
   // Sort locations by custom order
   const sortedLocations = useMemo(() => {
@@ -106,23 +92,11 @@ export default function TimelineView({
     });
   }, [locations, locationOrder]);
 
-  // Get shifts for specific location, date, and daypart
-  const getShiftsForCell = (locationId, date, daypart) => {
-    return shifts.filter(shift => {
-      if (shift.locationId !== locationId) return false;
-      if (!isSameDay(parseISO(shift.date), date)) return false;
-      
-      const shiftStart = timeToMinutes(shift.start_time);
-      let shiftEnd = timeToMinutes(shift.end_time);
-      if (shiftEnd <= shiftStart) shiftEnd += 24 * 60; // Handle overnight
-      
-      const daypartStart = timeToMinutes(daypart.start);
-      let daypartEnd = timeToMinutes(daypart.end);
-      if (daypartEnd <= daypartStart) daypartEnd += 24 * 60; // Handle overnight
-      
-      // Check if shift overlaps with daypart
-      return shiftStart < daypartEnd && shiftEnd > daypartStart;
-    });
+  // Get all shifts for a day/location
+  const getShiftsForDay = (locationId, date) => {
+    return shifts.filter(shift => 
+      shift.locationId === locationId && isSameDay(parseISO(shift.date), date)
+    );
   };
 
   // Get employee info
@@ -163,7 +137,6 @@ export default function TimelineView({
     setDraggedLocation(null);
     setDragOverLocation(null);
 
-    // Save to backend
     try {
       await base44.entities.Schedule.update(schedule.id, {
         location_order: newOrder
@@ -181,7 +154,7 @@ export default function TimelineView({
     e.dataTransfer.setData('shiftId', shift.id);
   };
 
-  const handleCellDrop = async (e, locationId, date, daypart) => {
+  const handleDayDrop = async (e, locationId, date) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -191,7 +164,6 @@ export default function TimelineView({
     const shift = shifts.find(s => s.id === shiftId);
     if (!shift) return;
 
-    // Update shift with new location and date, but keep original times
     try {
       await base44.entities.Shift.update(shift.id, {
         locationId,
@@ -209,14 +181,15 @@ export default function TimelineView({
     e.preventDefault();
     
     setResizingShift(shift.id);
-    const daypartCells = document.querySelectorAll(`[data-daypart]`);
+    const dayContainer = e.currentTarget.closest('[data-day-container]');
     
     resizeRef.current = {
       initialX: e.clientX,
       initialStart: shift.start_time,
       initialEnd: shift.end_time,
       edge,
-      daypartCells: Array.from(daypartCells)
+      containerWidth: dayContainer?.offsetWidth || 1,
+      totalMinutes
     };
 
     const handleMouseMove = (moveEvent) => {
@@ -236,12 +209,7 @@ export default function TimelineView({
         return;
       }
       
-      // Calculate average cell width and minutes per pixel across all dayparts
-      const totalWidth = resizeRef.current.daypartCells.reduce((sum, cell) => sum + cell.offsetWidth, 0);
-      const totalMinutes = resizeRef.current.daypartCells.reduce((sum, cell) => {
-        return sum + (parseFloat(cell.dataset.daypartHours) * 60);
-      }, 0);
-      const minutesPerPixel = totalMinutes / totalWidth;
+      const minutesPerPixel = resizeRef.current.totalMinutes / resizeRef.current.containerWidth;
       const deltaMinutes = Math.round(deltaX * minutesPerPixel / 15) * 15;
 
       let newStart = resizeRef.current.initialStart;
@@ -252,7 +220,7 @@ export default function TimelineView({
         newStart = minutesToTime(Math.max(0, Math.min(startMins, timeToMinutes(newEnd) - 15)));
       } else {
         const endMins = timeToMinutes(resizeRef.current.initialEnd) + deltaMinutes;
-        newEnd = minutesToTime(Math.max(timeToMinutes(newStart) + 15, endMins));
+        newEnd = minutesToTime(Math.max(timeToMinutes(newStart) + 15, Math.min(endMins, 24 * 60 - 15)));
       }
 
       try {
@@ -282,6 +250,16 @@ export default function TimelineView({
     );
   }
 
+  if (!filteredDayparts.length) {
+    return (
+      <div className="flex items-center justify-center h-64 text-slate-500">
+        Selecteer minimaal één dagdeel
+      </div>
+    );
+  }
+
+  const gridLineCount = Math.ceil(totalMinutes / 15);
+
   return (
     <div className="w-full overflow-auto bg-white rounded-lg border border-slate-200">
       <div className="min-w-max">
@@ -295,7 +273,7 @@ export default function TimelineView({
 
             {/* Days */}
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${filteredDayparts.length * 160}px`, minWidth: `${filteredDayparts.length * 160}px` }}>
+              <div key={dayIdx} className="border-r border-slate-300" style={{ width: '800px', minWidth: '800px' }}>
                 <div className="text-center border-b border-slate-200 bg-slate-50 py-2">
                   <div className="font-semibold text-slate-800">
                     {format(day, 'EEEE', { locale: nl })}
@@ -305,21 +283,27 @@ export default function TimelineView({
                   </div>
                 </div>
                 
-                {/* Dayparts header */}
+                {/* Dayparts header - continuous */}
                 <div className="flex border-b border-slate-200 bg-slate-50">
-                  {filteredDayparts.map((daypart) => (
-                    <div 
-                      key={daypart.id} 
-                      className="flex-1 text-center py-1.5 border-r border-slate-200 last:border-r-0"
-                    >
-                      <div className="text-[10px] font-semibold text-slate-700 uppercase">
-                        {daypart.name}
+                  {filteredDayparts.map((daypart, idx) => {
+                    const range = daypartRanges[idx];
+                    const widthPercent = (range.duration / totalMinutes) * 100;
+                    
+                    return (
+                      <div 
+                        key={daypart.id} 
+                        className="text-center py-1.5 border-r border-slate-200 last:border-r-0"
+                        style={{ width: `${widthPercent}%` }}
+                      >
+                        <div className="text-[10px] font-semibold text-slate-700 uppercase">
+                          {daypart.name}
+                        </div>
+                        <div className="text-[9px] text-slate-500 mt-0.5">
+                          {daypart.startTime} - {daypart.endTime}
+                        </div>
                       </div>
-                      <div className="text-[9px] text-slate-500 mt-0.5">
-                        {daypart.start} - {daypart.end}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -354,126 +338,135 @@ export default function TimelineView({
             </div>
 
             {/* Days */}
-            {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${filteredDayparts.length * 160}px`, minWidth: `${filteredDayparts.length * 160}px` }}>
-                <div className="flex" style={{ minHeight: '120px' }}>
-                  {filteredDayparts.map((daypart) => {
-                    const cellShifts = getShiftsForCell(location.id, day, daypart);
-                    
-                    return (
-                      <div
-                        key={daypart.id}
-                        className="flex-1 border-r border-slate-200 last:border-r-0 relative bg-white hover:bg-slate-50/30 transition-colors cursor-pointer"
-                        data-daypart={daypart.id}
-                        data-daypart-hours={daypart.hours}
-                        onClick={(e) => {
-                          if (e.target === e.currentTarget || e.target.closest('.empty-cell-click')) {
-                            onCellClick?.(location.id, day, daypart);
-                          }
-                        }}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => handleCellDrop(e, location.id, day, daypart)}
-                      >
-                        {/* 15-minute grid lines (subtle) */}
-                        <div className="absolute inset-0 flex pointer-events-none">
-                          {[...Array(daypart.hours * 4)].map((_, i) => (
-                            <div 
-                              key={i} 
-                              className={`flex-1 ${i % 4 === 0 ? 'border-r border-slate-200' : 'border-r border-slate-100'}`}
-                              style={{ minWidth: '1px' }}
-                            />
-                          ))}
+            {weekDays.map((day, dayIdx) => {
+              const dayShifts = getShiftsForDay(location.id, day);
+
+              return (
+                <div 
+                  key={dayIdx} 
+                  className="border-r border-slate-300 relative" 
+                  style={{ width: '800px', minWidth: '800px', minHeight: '120px' }}
+                  data-day-container
+                  onClick={(e) => {
+                    if (e.target.dataset.dayContainer !== undefined || e.target.closest('[data-empty-area]')) {
+                      onCellClick?.(location.id, day, null);
+                    }
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => handleDayDrop(e, location.id, day)}
+                >
+                  {/* Continuous 15-minute grid lines */}
+                  <div className="absolute inset-0 flex pointer-events-none">
+                    {[...Array(gridLineCount)].map((_, i) => {
+                      const isHourLine = (i * 15) % 60 === 0;
+                      return (
+                        <div 
+                          key={i} 
+                          className={`flex-1 ${isHourLine ? 'border-r border-slate-300' : 'border-r border-slate-100'}`}
+                          style={{ minWidth: '1px' }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Empty click area */}
+                  <div className="absolute inset-0" data-empty-area />
+
+                  {/* Shifts - rendered continuously across the entire day */}
+                  <div className="absolute inset-0 p-1 pointer-events-none">
+                    {dayShifts.map((shift, shiftIdx) => {
+                      const employee = getEmployee(shift.employeeId);
+                      const func = getFunction(shift.functionId);
+                      
+                      // Calculate shift position as continuous minutes from first daypart start
+                      const shiftStartMins = timeToMinutes(shift.start_time);
+                      let shiftEndMins = timeToMinutes(shift.end_time);
+                      if (shiftEndMins <= shiftStartMins) shiftEndMins += 24 * 60;
+                      
+                      const firstDaypartStart = daypartRanges[0].start;
+                      
+                      // Calculate position relative to the continuous timeline
+                      let leftOffset = 0;
+                      let shiftLeft = 0;
+                      
+                      for (const range of daypartRanges) {
+                        if (shiftStartMins >= range.start && shiftStartMins < range.end) {
+                          shiftLeft = leftOffset + (shiftStartMins - range.start);
+                          break;
+                        } else if (shiftStartMins < range.start) {
+                          // Shift starts before this daypart
+                          break;
+                        }
+                        leftOffset += range.duration;
+                      }
+                      
+                      const shiftDuration = shiftEndMins - shiftStartMins;
+                      const leftPercent = (shiftLeft / totalMinutes) * 100;
+                      const widthPercent = (shiftDuration / totalMinutes) * 100;
+                      const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
+
+                      return (
+                        <div
+                          key={shift.id}
+                          className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow group pointer-events-auto"
+                          style={{
+                            left: `${leftPercent}%`,
+                            width: `${widthPercent}%`,
+                            backgroundColor: func?.color || '#94a3b8',
+                            top: shiftIdx * 28 + 4
+                          }}
+                        >
+                          {/* Resize handles */}
+                          <div
+                            className="absolute left-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-l"
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleResizeStart(e, shift, 'left');
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            onDoubleClick={(e) => e.stopPropagation()}
+                          />
+                          <div
+                            className="absolute right-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-r"
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              handleResizeStart(e, shift, 'right');
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            onDoubleClick={(e) => e.stopPropagation()}
+                          />
+
+                          {/* Content */}
+                          <div 
+                            className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move"
+                            draggable
+                            onDragStart={(e) => handleShiftDragStart(e, shift)}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              onShiftClick?.(shift);
+                            }}
+                            style={{ marginLeft: '4px', marginRight: '4px' }}
+                          >
+                            <span className="truncate">
+                              {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
+                            </span>
+                            <span className="text-white/90 text-[9px] flex-shrink-0">
+                              {shift.start_time}-{shift.end_time}
+                            </span>
+                            <span className="text-white/90 text-[9px] flex-shrink-0 flex items-center gap-0.5">
+                              <Clock className="w-2.5 h-2.5" />
+                              {duration}u
+                            </span>
+                          </div>
                         </div>
-
-                        {/* Empty cell click area */}
-                        <div className="absolute inset-0 empty-cell-click" />
-
-                        {/* Shifts */}
-                        <div className="absolute inset-0 p-1 flex flex-col gap-0.5 overflow-hidden pointer-events-none">
-                          {cellShifts.map((shift, shiftIdx) => {
-                            const employee = getEmployee(shift.employeeId);
-                            const func = getFunction(shift.functionId);
-                            const left = getShiftPosition(shift.start_time, daypart.start, daypart.hours);
-                            const width = getShiftWidth(shift.start_time, shift.end_time, daypart.start, daypart.hours);
-                            const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
-
-                            return (
-                              <div
-                                key={shift.id}
-                                className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow group pointer-events-auto shift-bar"
-                                style={{
-                                  left: `${left}%`,
-                                  width: `${width}%`,
-                                  backgroundColor: func?.color || '#94a3b8',
-                                  top: shiftIdx * 26 + 2
-                                }}
-                              >
-                                {/* Resize handles */}
-                                <div
-                                  className="absolute left-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                                  onMouseDown={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    handleResizeStart(e, shift, 'left');
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                  }}
-                                  onDoubleClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                  }}
-                                />
-                                <div
-                                  className="absolute right-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                                  onMouseDown={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    handleResizeStart(e, shift, 'right');
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                  }}
-                                  onDoubleClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                  }}
-                                />
-
-                                {/* Content - draggable and double-clickable */}
-                                <div 
-                                  className="absolute inset-0 px-1.5 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1 cursor-move"
-                                  draggable
-                                  onDragStart={(e) => handleShiftDragStart(e, shift)}
-                                  onDoubleClick={(e) => {
-                                    e.stopPropagation();
-                                    onShiftClick?.(shift);
-                                  }}
-                                  style={{ marginLeft: '4px', marginRight: '4px' }}
-                                >
-                                  <span className="truncate">
-                                    {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
-                                  </span>
-                                  <span className="text-white/90 text-[9px] flex-shrink-0">
-                                    {shift.start_time}-{shift.end_time}
-                                  </span>
-                                  <span className="text-white/90 text-[9px] flex-shrink-0 flex items-center gap-0.5">
-                                    <Clock className="w-2.5 h-2.5" />
-                                    {duration}u
-                                  </span>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ))}
       </div>
