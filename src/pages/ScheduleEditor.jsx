@@ -69,9 +69,18 @@ export default function ScheduleEditor() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
-  const [viewMode, setViewMode] = useState('dayparts'); // 'dayparts', 'simple', or 'timeline'
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState(['morning', 'afternoon', 'evening', 'night']);
+  
+  // Use schedule's default view mode or fallback to 'dayparts'
+  const [viewMode, setViewMode] = useState(schedule?.default_view_mode || 'dayparts');
+  
+  // Update view mode when schedule loads
+  useEffect(() => {
+    if (schedule?.default_view_mode) {
+      setViewMode(schedule.default_view_mode);
+    }
+  }, [schedule?.default_view_mode]);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],

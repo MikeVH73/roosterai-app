@@ -349,7 +349,7 @@ export default function TimelineView({
 
             {/* Days */}
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="flex-1 border-r border-slate-300" style={{ minWidth: `${Math.max(400, filteredDayparts.length * 120)}px` }}>
+              <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${filteredDayparts.length * 160}px`, minWidth: `${filteredDayparts.length * 160}px` }}>
                 <div className="flex" style={{ minHeight: '120px' }}>
                   {filteredDayparts.map((daypart) => {
                     const cellShifts = getShiftsForCell(location.id, day, daypart);
@@ -390,9 +390,7 @@ export default function TimelineView({
                             return (
                               <div
                                 key={shift.id}
-                                draggable
-                                onDragStart={(e) => handleShiftDragStart(e, shift)}
-                                className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow cursor-move group pointer-events-auto shift-bar"
+                                className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow group pointer-events-auto shift-bar"
                                 style={{
                                   left: `${left}%`,
                                   width: `${width}%`,
@@ -402,31 +400,48 @@ export default function TimelineView({
                               >
                                 {/* Resize handles */}
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                  className="absolute left-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                                   onMouseDown={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
                                     handleResizeStart(e, shift, 'left');
                                   }}
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                  }}
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                  }}
                                 />
                                 <div
-                                  className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                  className="absolute right-0 top-0 bottom-0 w-4 cursor-ew-resize hover:bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                                   onMouseDown={(e) => {
                                     e.stopPropagation();
                                     e.preventDefault();
                                     handleResizeStart(e, shift, 'right');
                                   }}
-                                  onClick={(e) => e.stopPropagation()}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                  }}
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                  }}
                                 />
 
-                                {/* Content */}
+                                {/* Content - draggable and double-clickable */}
                                 <div 
-                                  className="px-1.5 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1 h-full"
+                                  className="absolute inset-0 px-1.5 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1 cursor-move"
+                                  draggable
+                                  onDragStart={(e) => handleShiftDragStart(e, shift)}
                                   onDoubleClick={(e) => {
                                     e.stopPropagation();
                                     onShiftClick?.(shift);
                                   }}
+                                  style={{ marginLeft: '4px', marginRight: '4px' }}
                                 >
                                   <span className="truncate">
                                     {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
