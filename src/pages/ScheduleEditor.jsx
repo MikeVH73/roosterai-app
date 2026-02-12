@@ -60,7 +60,7 @@ export default function ScheduleEditor() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
-  const [viewMode, setViewMode] = useState('dayparts'); // 'dayparts' or 'simple'
+  const [viewMode, setViewMode] = useState('dayparts'); // 'dayparts', 'simple', or 'timeline'
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
