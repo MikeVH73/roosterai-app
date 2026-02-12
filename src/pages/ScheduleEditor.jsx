@@ -72,13 +72,6 @@ export default function ScheduleEditor() {
   const [viewMode, setViewMode] = useState('dayparts');
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState(['morning', 'afternoon', 'evening', 'night']);
-  
-  // Update view mode when schedule loads
-  useEffect(() => {
-    if (schedule?.default_view_mode) {
-      setViewMode(schedule.default_view_mode);
-    }
-  }, [schedule?.default_view_mode]);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -130,6 +123,13 @@ export default function ScheduleEditor() {
     queryFn: () => base44.entities.Location.filter({ companyId, status: 'active' }),
     enabled: !!companyId
   });
+
+  // Update view mode when schedule loads
+  useEffect(() => {
+    if (schedule?.default_view_mode) {
+      setViewMode(schedule.default_view_mode);
+    }
+  }, [schedule?.default_view_mode]);
 
   const publishMutation = useMutation({
     mutationFn: () => base44.entities.Schedule.update(scheduleId, {
