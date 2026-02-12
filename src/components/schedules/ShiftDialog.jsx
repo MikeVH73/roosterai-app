@@ -150,6 +150,12 @@ export default function ShiftDialog({
     
     // Remove has_break from the data sent to the backend
     delete submitData.has_break;
+    
+    // Remove empty fields
+    if (!submitData.functionId) delete submitData.functionId;
+    if (!submitData.daypartId) delete submitData.daypartId;
+    if (!submitData.departmentId) delete submitData.departmentId;
+    if (!submitData.locationId) delete submitData.locationId;
 
     if (shift) {
       await updateMutation.mutateAsync({ id: shift.id, data: submitData });
@@ -310,14 +316,14 @@ export default function ShiftDialog({
           <div>
             <Label htmlFor="functionId">Functie</Label>
             <Select 
-              value={formData.functionId} 
-              onValueChange={(v) => setFormData({ ...formData, functionId: v })}
+              value={formData.functionId || 'none'} 
+              onValueChange={(v) => setFormData({ ...formData, functionId: v === 'none' ? '' : v })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer functie" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>Geen</SelectItem>
+                <SelectItem value="none">Geen</SelectItem>
                 {functions.map((func) => (
                   <SelectItem key={func.id} value={func.id}>
                     {func.name}

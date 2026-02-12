@@ -402,12 +402,22 @@ export default function TimelineView({
                               >
                                 {/* Resize handles */}
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                  onMouseDown={(e) => handleResizeStart(e, shift, 'left')}
+                                  className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                  onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    handleResizeStart(e, shift, 'left');
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
                                 <div
-                                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                  onMouseDown={(e) => handleResizeStart(e, shift, 'right')}
+                                  className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                  onMouseDown={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    handleResizeStart(e, shift, 'right');
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
 
                                 {/* Content */}
