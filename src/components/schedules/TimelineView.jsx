@@ -34,20 +34,26 @@ const getShiftPosition = (shiftStart, daypartStart, daypartHours) => {
   let offsetMins = shiftMins - daypartMins;
   if (offsetMins < 0) offsetMins += 24 * 60; // Handle overnight
   
-  return (offsetMins / daypartTotalMins) * 100;
+  // Clamp to 0 if shift starts before daypart
+  return Math.max(0, (offsetMins / daypartTotalMins) * 100);
 };
 
-// Helper: Calculate width percentage
-const getShiftWidth = (start, end, daypartHours) => {
+// Helper: Calculate width percentage within specific daypart
+const getShiftWidth = (start, end, daypartStart, daypartHours) => {
   const startMins = timeToMinutes(start);
   let endMins = timeToMinutes(end);
-  
   if (endMins <= startMins) endMins += 24 * 60;
   
-  const durationMins = endMins - startMins;
-  const daypartTotalMins = daypartHours * 60;
+  const daypartMins = timeToMinutes(daypartStart);
+  let daypartEndMins = daypartMins + (daypartHours * 60);
   
-  return Math.min((durationMins / daypartTotalMins) * 100, 100);
+  // Calculate visible portion of shift within this daypart
+  const visibleStart = Math.max(startMins, daypartMins);
+  const visibleEnd = Math.min(endMins, daypartEndMins);
+  const visibleDuration = Math.max(0, visibleEnd - visibleStart);
+  
+  const daypartTotalMins = daypartHours * 60;
+  return Math.min((visibleDuration / daypartTotalMins) * 100, 100);
 };
 
 // Helper: Get shift duration in hours
@@ -107,14 +113,15 @@ export default function TimelineView({
       if (!isSameDay(parseISO(shift.date), date)) return false;
       
       const shiftStart = timeToMinutes(shift.start_time);
-      const daypartStart = timeToMinutes(daypart.start);
-      const daypartEnd = timeToMinutes(daypart.end);
+      let shiftEnd = timeToMinutes(shift.end_time);
+      if (shiftEnd <= shiftStart) shiftEnd += 24 * 60; // Handle overnight
       
-      // Handle overnight shifts
-      if (daypartEnd < daypartStart) {
-        return shiftStart >= daypartStart || shiftStart < daypartEnd;
-      }
-      return shiftStart >= daypartStart && shiftStart < daypartEnd;
+      const daypartStart = timeToMinutes(daypart.start);
+      let daypartEnd = timeToMinutes(daypart.end);
+      if (daypartEnd <= daypartStart) daypartEnd += 24 * 60; // Handle overnight
+      
+      // Check if shift overlaps with daypart
+      return shiftStart < daypartEnd && shiftEnd > daypartStart;
     });
   };
 
@@ -382,7 +389,7 @@ export default function TimelineView({
                             const employee = getEmployee(shift.employeeId);
                             const func = getFunction(shift.functionId);
                             const left = getShiftPosition(shift.start_time, daypart.start, daypart.hours);
-                            const width = getShiftWidth(shift.start_time, shift.end_time, daypart.hours);
+                            const width = getShiftWidth(shift.start_time, shift.end_time, daypart.start, daypart.hours);
                             const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
 
                             return (
