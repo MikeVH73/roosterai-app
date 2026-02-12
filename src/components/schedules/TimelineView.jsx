@@ -65,7 +65,9 @@ export default function TimelineView({
   employees, 
   functions: allFunctions,
   onShiftClick,
-  onCellClick 
+  onCellClick,
+  currentWeekStart,
+  selectedDayparts = ['morning', 'afternoon', 'evening', 'night']
 }) {
   const queryClient = useQueryClient();
   const [draggedLocation, setDraggedLocation] = useState(null);
@@ -76,15 +78,17 @@ export default function TimelineView({
   const [resizingShift, setResizingShift] = useState(null);
   const resizeRef = useRef({ initialX: 0, initialWidth: 0, edge: null });
 
-  // Get week days
-  const weekStart = useMemo(() => {
-    if (!schedule?.start_date) return startOfWeek(new Date(), { weekStartsOn: 1 });
-    return startOfWeek(parseISO(schedule.start_date), { weekStartsOn: 1 });
-  }, [schedule]);
+  // Use provided week start or default
+  const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
+
+  // Filter dayparts based on selection
+  const filteredDayparts = useMemo(() => {
+    return DAYPARTS.filter(dp => selectedDayparts.includes(dp.id));
+  }, [selectedDayparts]);
 
   // Sort locations by custom order
   const sortedLocations = useMemo(() => {
@@ -308,7 +312,7 @@ export default function TimelineView({
                 
                 {/* Dayparts header */}
                 <div className="flex border-b border-slate-200 bg-slate-50">
-                  {DAYPARTS.map((daypart) => (
+                  {filteredDayparts.map((daypart) => (
                     <div 
                       key={daypart.id} 
                       className="flex-1 text-center py-2 border-r border-slate-200 last:border-r-0"
@@ -358,7 +362,7 @@ export default function TimelineView({
             {weekDays.map((day, dayIdx) => (
               <div key={dayIdx} className="flex-1 min-w-[600px] border-r border-slate-300">
                 <div className="flex h-20">
-                  {DAYPARTS.map((daypart) => {
+                  {filteredDayparts.map((daypart) => {
                     const cellShifts = getShiftsForCell(location.id, day, daypart);
                     
                     return (

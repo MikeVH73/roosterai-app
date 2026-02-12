@@ -20,7 +20,8 @@ import {
   Building2,
   LayoutGrid,
   List,
-  Calendar
+  Calendar,
+  Filter
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   format, 
   parseISO, 
@@ -64,6 +71,7 @@ export default function ScheduleEditor() {
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
   const [viewMode, setViewMode] = useState('dayparts'); // 'dayparts', 'simple', or 'timeline'
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
+  const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState(['morning', 'afternoon', 'evening', 'night']);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -334,18 +342,73 @@ export default function ScheduleEditor() {
               </div>
               
               <div className="flex items-center gap-3">
-                <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
-                  <SelectTrigger className="w-48">
-                    <Building2 className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Afdeling" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle afdelingen</SelectItem>
-                    {relevantDepartments.map(dept => (
-                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {viewMode !== 'timeline' && (
+                  <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                    <SelectTrigger className="w-48">
+                      <Building2 className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Afdeling" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle afdelingen</SelectItem>
+                      {relevantDepartments.map(dept => (
+                        <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {viewMode === 'timeline' && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Filter className="w-4 h-4 mr-2" />
+                        Dagdelen ({selectedTimelineDayparts.length})
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuCheckboxItem
+                        checked={selectedTimelineDayparts.includes('morning')}
+                        onCheckedChange={(checked) => {
+                          setSelectedTimelineDayparts(prev => 
+                            checked ? [...prev, 'morning'] : prev.filter(d => d !== 'morning')
+                          );
+                        }}
+                      >
+                        Ochtend (06:00 - 12:00)
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={selectedTimelineDayparts.includes('afternoon')}
+                        onCheckedChange={(checked) => {
+                          setSelectedTimelineDayparts(prev => 
+                            checked ? [...prev, 'afternoon'] : prev.filter(d => d !== 'afternoon')
+                          );
+                        }}
+                      >
+                        Middag (12:00 - 18:00)
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={selectedTimelineDayparts.includes('evening')}
+                        onCheckedChange={(checked) => {
+                          setSelectedTimelineDayparts(prev => 
+                            checked ? [...prev, 'evening'] : prev.filter(d => d !== 'evening')
+                          );
+                        }}
+                      >
+                        Avond (18:00 - 24:00)
+                      </DropdownMenuCheckboxItem>
+                      <DropdownMenuCheckboxItem
+                        checked={selectedTimelineDayparts.includes('night')}
+                        onCheckedChange={(checked) => {
+                          setSelectedTimelineDayparts(prev => 
+                            checked ? [...prev, 'night'] : prev.filter(d => d !== 'night')
+                          );
+                        }}
+                      >
+                        Nacht (00:00 - 06:00)
+                      </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
 
                 <Tabs value={viewMode} onValueChange={setViewMode}>
                   <TabsList>
@@ -374,6 +437,8 @@ export default function ScheduleEditor() {
                 locations={locations}
                 employees={relevantEmployees}
                 functions={functions}
+                currentWeekStart={currentWeekStart}
+                selectedDayparts={selectedTimelineDayparts}
                 onShiftClick={handleShiftClick}
                 onCellClick={(locationId, date, daypart) => {
                   setSelectedShift(null);
