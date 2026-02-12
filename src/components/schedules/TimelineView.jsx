@@ -204,48 +204,37 @@ export default function TimelineView({
     e.preventDefault();
     
     setResizingShift(shift.id);
+    const shiftElement = e.target.closest('.shift-bar');
+    const cellElement = e.target.closest('[data-daypart]');
+    
     resizeRef.current = {
       initialX: e.clientX,
       initialStart: shift.start_time,
       initialEnd: shift.end_time,
-      edge
+      edge,
+      cellElement,
+      shiftElement
     };
 
     const handleMouseMove = (moveEvent) => {
-      if (resizingShift !== shift.id) return;
-      
-      const deltaX = moveEvent.clientX - resizeRef.current.initialX;
-      const daypartCell = moveEvent.target.closest('[data-daypart]');
-      if (!daypartCell) return;
-      
-      const cellWidth = daypartCell.offsetWidth;
-      const daypartHours = parseFloat(daypartCell.dataset.daypartHours);
-      const minutesPerPixel = (daypartHours * 60) / cellWidth;
-      const deltaMinutes = Math.round(deltaX * minutesPerPixel / 15) * 15; // Snap to 15min
-
-      if (edge === 'left') {
-        const startMins = timeToMinutes(resizeRef.current.initialStart) + deltaMinutes;
-        const newStart = minutesToTime(Math.max(0, startMins));
-        // Update UI optimistically if needed
-      } else {
-        const endMins = timeToMinutes(resizeRef.current.initialEnd) + deltaMinutes;
-        const newEnd = minutesToTime(endMins);
-        // Update UI optimistically if needed
-      }
+      moveEvent.preventDefault();
+      moveEvent.stopPropagation();
     };
 
     const handleMouseUp = async (upEvent) => {
-      if (resizingShift !== shift.id) return;
+      upEvent.preventDefault();
+      upEvent.stopPropagation();
       
       const deltaX = upEvent.clientX - resizeRef.current.initialX;
-      const daypartCell = upEvent.target.closest('[data-daypart]');
-      if (!daypartCell) {
+      if (Math.abs(deltaX) < 5) {
         setResizingShift(null);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
         return;
       }
       
-      const cellWidth = daypartCell.offsetWidth;
-      const daypartHours = parseFloat(daypartCell.dataset.daypartHours);
+      const cellWidth = resizeRef.current.cellElement.offsetWidth;
+      const daypartHours = parseFloat(resizeRef.current.cellElement.dataset.daypartHours);
       const minutesPerPixel = (daypartHours * 60) / cellWidth;
       const deltaMinutes = Math.round(deltaX * minutesPerPixel / 15) * 15;
 
@@ -254,10 +243,10 @@ export default function TimelineView({
 
       if (edge === 'left') {
         const startMins = timeToMinutes(resizeRef.current.initialStart) + deltaMinutes;
-        newStart = minutesToTime(Math.max(0, startMins));
+        newStart = minutesToTime(Math.max(0, Math.min(startMins, timeToMinutes(newEnd) - 15)));
       } else {
         const endMins = timeToMinutes(resizeRef.current.initialEnd) + deltaMinutes;
-        newEnd = minutesToTime(endMins);
+        newEnd = minutesToTime(Math.max(timeToMinutes(newStart) + 15, endMins));
       }
 
       try {
@@ -315,12 +304,12 @@ export default function TimelineView({
                   {filteredDayparts.map((daypart) => (
                     <div 
                       key={daypart.id} 
-                      className="flex-1 text-center py-2 border-r border-slate-200 last:border-r-0"
+                      className="flex-1 text-center py-1.5 border-r border-slate-200 last:border-r-0"
                     >
-                      <div className="text-xs font-semibold text-slate-700 uppercase">
+                      <div className="text-[10px] font-semibold text-slate-700 uppercase">
                         {daypart.name}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
+                      <div className="text-[9px] text-slate-500 mt-0.5">
                         {daypart.start} - {daypart.end}
                       </div>
                     </div>
@@ -360,8 +349,8 @@ export default function TimelineView({
 
             {/* Days */}
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="flex-1 min-w-[600px] border-r border-slate-300">
-                <div className="flex h-20">
+              <div key={dayIdx} className="flex-1 border-r border-slate-300" style={{ minWidth: `${Math.max(400, filteredDayparts.length * 120)}px` }}>
+                <div className="flex" style={{ minHeight: '120px' }}>
                   {filteredDayparts.map((daypart) => {
                     const cellShifts = getShiftsForCell(location.id, day, daypart);
                     
@@ -372,7 +361,7 @@ export default function TimelineView({
                         data-daypart={daypart.id}
                         data-daypart-hours={daypart.hours}
                         onClick={(e) => {
-                          if (e.target === e.currentTarget) {
+                          if (e.target === e.currentTarget || e.target.closest('.empty-cell-click')) {
                             onCellClick?.(location.id, day, daypart);
                           }
                         }}
@@ -386,9 +375,12 @@ export default function TimelineView({
                           ))}
                         </div>
 
+                        {/* Empty cell click area */}
+                        <div className="absolute inset-0 empty-cell-click" />
+
                         {/* Shifts */}
-                        <div className="absolute inset-0 p-1 flex flex-col gap-1 overflow-hidden">
-                          {cellShifts.map((shift) => {
+                        <div className="absolute inset-0 p-1 flex flex-col gap-0.5 overflow-hidden pointer-events-none">
+                          {cellShifts.map((shift, shiftIdx) => {
                             const employee = getEmployee(shift.employeeId);
                             const func = getFunction(shift.functionId);
                             const left = getShiftPosition(shift.start_time, daypart.start, daypart.hours);
@@ -400,38 +392,40 @@ export default function TimelineView({
                                 key={shift.id}
                                 draggable
                                 onDragStart={(e) => handleShiftDragStart(e, shift)}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onShiftClick?.(shift);
-                                }}
-                                className="absolute h-8 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow cursor-move group"
+                                className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow cursor-move group pointer-events-auto shift-bar"
                                 style={{
                                   left: `${left}%`,
                                   width: `${width}%`,
                                   backgroundColor: func?.color || '#94a3b8',
-                                  top: cellShifts.indexOf(shift) * 36 + 4
+                                  top: shiftIdx * 26 + 2
                                 }}
                               >
                                 {/* Resize handles */}
                                 <div
-                                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                   onMouseDown={(e) => handleResizeStart(e, shift, 'left')}
                                 />
                                 <div
-                                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                                   onMouseDown={(e) => handleResizeStart(e, shift, 'right')}
                                 />
 
                                 {/* Content */}
-                                <div className="px-2 py-1 text-xs text-white font-medium truncate flex items-center gap-1">
+                                <div 
+                                  className="px-1.5 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1 h-full"
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    onShiftClick?.(shift);
+                                  }}
+                                >
                                   <span className="truncate">
                                     {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
                                   </span>
-                                  <span className="text-white/80 text-[10px] flex-shrink-0">
+                                  <span className="text-white/90 text-[9px] flex-shrink-0">
                                     {shift.start_time}-{shift.end_time}
                                   </span>
-                                  <span className="text-white/80 text-[10px] flex-shrink-0 flex items-center gap-0.5">
-                                    <Clock className="w-3 h-3" />
+                                  <span className="text-white/90 text-[9px] flex-shrink-0 flex items-center gap-0.5">
+                                    <Clock className="w-2.5 h-2.5" />
                                     {duration}u
                                   </span>
                                 </div>
