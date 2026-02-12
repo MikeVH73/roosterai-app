@@ -355,13 +355,33 @@ export default function ScheduleEditor() {
                       <List className="w-4 h-4" />
                       Simpel
                     </TabsTrigger>
+                    <TabsTrigger value="timeline" className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      Tijdlijn
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
             </div>
 
             {/* Schedule Grid */}
-            {viewMode === 'dayparts' && relevantDayparts.length > 0 ? (
+            {viewMode === 'timeline' ? (
+              <TimelineView
+                schedule={schedule}
+                shifts={shifts}
+                locations={locations}
+                employees={relevantEmployees}
+                functions={functions}
+                onShiftClick={handleShiftClick}
+                onCellClick={(locationId, date, daypart) => {
+                  setSelectedShift(null);
+                  setSelectedEmployeeId(null);
+                  setSelectedDate(format(date, 'yyyy-MM-dd'));
+                  setSelectedDaypartId(null);
+                  setShiftDialogOpen(true);
+                }}
+              />
+            ) : viewMode === 'dayparts' && relevantDayparts.length > 0 ? (
               <DaypartScheduleGrid
                 dayparts={relevantDayparts}
                 employees={relevantEmployees}
