@@ -184,13 +184,11 @@ export default function TimelineView({
     const shift = shifts.find(s => s.id === shiftId);
     if (!shift) return;
 
-    // Update shift with new location and date
+    // Update shift with new location and date, but keep original times
     try {
       await base44.entities.Shift.update(shift.id, {
         locationId,
-        date: format(date, 'yyyy-MM-dd'),
-        start_time: daypart.start,
-        end_time: daypart.end
+        date: format(date, 'yyyy-MM-dd')
       });
       queryClient.invalidateQueries(['shifts']);
     } catch (error) {
