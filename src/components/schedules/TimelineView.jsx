@@ -209,16 +209,14 @@ export default function TimelineView({
     e.preventDefault();
     
     setResizingShift(shift.id);
-    const shiftElement = e.target.closest('.shift-bar');
-    const cellElement = e.target.closest('[data-daypart]');
+    const daypartCells = document.querySelectorAll(`[data-daypart]`);
     
     resizeRef.current = {
       initialX: e.clientX,
       initialStart: shift.start_time,
       initialEnd: shift.end_time,
       edge,
-      cellElement,
-      shiftElement
+      daypartCells: Array.from(daypartCells)
     };
 
     const handleMouseMove = (moveEvent) => {
@@ -238,9 +236,12 @@ export default function TimelineView({
         return;
       }
       
-      const cellWidth = resizeRef.current.cellElement.offsetWidth;
-      const daypartHours = parseFloat(resizeRef.current.cellElement.dataset.daypartHours);
-      const minutesPerPixel = (daypartHours * 60) / cellWidth;
+      // Calculate average cell width and minutes per pixel across all dayparts
+      const totalWidth = resizeRef.current.daypartCells.reduce((sum, cell) => sum + cell.offsetWidth, 0);
+      const totalMinutes = resizeRef.current.daypartCells.reduce((sum, cell) => {
+        return sum + (parseFloat(cell.dataset.daypartHours) * 60);
+      }, 0);
+      const minutesPerPixel = totalMinutes / totalWidth;
       const deltaMinutes = Math.round(deltaX * minutesPerPixel / 15) * 15;
 
       let newStart = resizeRef.current.initialStart;
@@ -373,10 +374,14 @@ export default function TimelineView({
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => handleCellDrop(e, location.id, day, daypart)}
                       >
-                        {/* Time grid lines (subtle) */}
+                        {/* 15-minute grid lines (subtle) */}
                         <div className="absolute inset-0 flex pointer-events-none">
-                          {[...Array(daypart.hours)].map((_, i) => (
-                            <div key={i} className="flex-1 border-r border-slate-100 first:border-l-0" />
+                          {[...Array(daypart.hours * 4)].map((_, i) => (
+                            <div 
+                              key={i} 
+                              className={`flex-1 ${i % 4 === 0 ? 'border-r border-slate-200' : 'border-r border-slate-100'}`}
+                              style={{ minWidth: '1px' }}
+                            />
                           ))}
                         </div>
 
