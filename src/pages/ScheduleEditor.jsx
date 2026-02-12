@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
+import TimelineView from '@/components/schedules/TimelineView';
 import {
   ChevronLeft,
   ChevronRight,
