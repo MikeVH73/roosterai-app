@@ -46,7 +46,7 @@ export default function TimelineView({
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
-  const DAY_WIDTH = 480; // 5px per 15 minutes = 480px for 24 hours (96 quarters)
+  const DAY_WIDTH = 240; // Smaller width to fit Mon-Fri on one screen
   const PIXELS_PER_MINUTE = DAY_WIDTH / (24 * 60);
   const startTimeStr = schedule?.timeline_start_time || '06:00';
   const startTimeOffset = timeToMinutes(startTimeStr);
@@ -74,10 +74,10 @@ export default function TimelineView({
     );
   };
 
-  // Generate hour markers for the timeline
+  // Generate hour markers for the timeline (every 2 hours for cleaner look)
   const hourMarkers = useMemo(() => {
     const markers = [];
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 24; i += 2) {
       const hourMins = (startTimeOffset + i * 60) % (24 * 60);
       const displayHour = Math.floor(hourMins / 60);
       markers.push({
@@ -256,22 +256,22 @@ export default function TimelineView({
             {weekDays.map((day, dayIdx) => (
               <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px` }}>
                 <div className="text-center border-b border-slate-200 bg-slate-50 py-2">
-                  <div className="font-semibold text-slate-800 text-sm">
+                  <div className="font-semibold text-slate-800 text-xs">
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className="text-xs text-slate-600">
+                  <div className="text-[10px] text-slate-600">
                     {format(day, 'd MMM', { locale: nl })}
                   </div>
                 </div>
-                
-                <div className="relative h-8 border-b border-slate-200 bg-slate-50">
+
+                <div className="relative h-6 border-b border-slate-200 bg-slate-50">
                   {hourMarkers.map((marker, idx) => (
                     <div 
                       key={idx} 
-                      className="absolute top-0 bottom-0 border-l border-slate-300"
+                      className="absolute inset-y-0 border-l-2 border-slate-400"
                       style={{ left: `${marker.position}px` }}
                     >
-                      <span className="absolute -top-0.5 -left-4 text-[9px] text-slate-600 font-medium">
+                      <span className="absolute top-0 left-1 text-[10px] text-slate-700 font-semibold">
                         {marker.label}
                       </span>
                     </div>
@@ -336,11 +336,12 @@ export default function TimelineView({
                 >
                   <div className="absolute inset-0 flex pointer-events-none">
                     {[...Array(96)].map((_, i) => {
+                      const isTwoHourLine = i % 8 === 0;
                       const isHourLine = i % 4 === 0;
                       return (
                         <div 
                           key={i} 
-                          className={`flex-1 ${isHourLine ? 'border-r border-slate-300' : 'border-r border-slate-100'}`}
+                          className={`flex-1 ${isTwoHourLine ? 'border-r-2 border-slate-400' : isHourLine ? 'border-r border-slate-300' : 'border-r border-slate-100'}`}
                         />
                       );
                     })}
