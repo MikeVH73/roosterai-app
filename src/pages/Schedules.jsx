@@ -491,7 +491,8 @@ export default function Schedules() {
                 <SelectContent>
                   <SelectItem value="dayparts">Dagdelen</SelectItem>
                   <SelectItem value="simple">Simpel</SelectItem>
-                  <SelectItem value="timeline">Tijdlijn</SelectItem>
+                  <SelectItem value="timeline">Tijdlijn (Horizontaal)</SelectItem>
+                  <SelectItem value="vertical-timeline">Tijdlijn (Verticaal)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
