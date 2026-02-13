@@ -126,7 +126,8 @@ export default function Schedules() {
         status: schedule.status || 'draft',
         default_view_mode: schedule.default_view_mode || 'dayparts',
         timeline_start_time: schedule.timeline_start_time || '06:00',
-        timeline_end_time: schedule.timeline_end_time || '06:00'
+        timeline_end_time: schedule.timeline_end_time || '06:00',
+        active_days: schedule.active_days || [0, 1, 2, 3, 4, 5, 6]
       });
     } else {
       setSelectedSchedule(null);
@@ -147,7 +148,8 @@ export default function Schedules() {
         status: 'draft',
         default_view_mode: 'dayparts',
         timeline_start_time: '06:00',
-        timeline_end_time: '06:00'
+        timeline_end_time: '06:00',
+        active_days: [1, 2, 3, 4, 5]
       });
     }
     setDialogOpen(true);
@@ -499,6 +501,31 @@ export default function Schedules() {
                   <SelectItem value="vertical-timeline">Tijdlijn (Verticaal)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label>Actieve dagen</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'].map((dayName, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`active-day-${index}`}
+                      checked={formData.active_days?.includes(index)}
+                      onCheckedChange={(checked) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          active_days: checked
+                            ? [...(prev.active_days || []), index].sort((a, b) => a - b)
+                            : (prev.active_days || []).filter(day => day !== index)
+                        }));
+                      }}
+                    />
+                    <Label htmlFor={`active-day-${index}`} className="text-sm font-normal cursor-pointer">
+                      {dayName}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

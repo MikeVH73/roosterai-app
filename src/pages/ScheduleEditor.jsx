@@ -420,6 +420,7 @@ export default function ScheduleEditor() {
                 dayparts={dayparts}
                 currentWeekStart={currentWeekStart}
                 selectedDayparts={selectedTimelineDayparts}
+                activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
                 onShiftClick={handleShiftClick}
                 onShiftUpdate={handleShiftUpdate}
                 onCellClick={(locationId, date, daypartId, startTime) => {

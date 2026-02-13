@@ -34,7 +34,8 @@ export default function TimelineView({
   onCellClick,
   onShiftUpdate,
   currentWeekStart,
-  selectedDayparts = []
+  selectedDayparts = [],
+  activeDays = [0, 1, 2, 3, 4, 5, 6]
 }) {
   const queryClient = useQueryClient();
   const [draggedLocation, setDraggedLocation] = useState(null);
@@ -56,15 +57,37 @@ export default function TimelineView({
   if (totalMinutes <= 0) totalMinutes += 24 * 60;
   const totalHours = totalMinutes / 60;
   
-  // Dynamic day width based on time range (280px baseline for 24h, scale proportionally)
-  const DAY_WIDTH = Math.round((280 * totalHours) / 24);
+  // Calculate day width dynamically based on available width and number of active days
+  const numActiveDays = weekDays.length;
+  const minDayWidth = 200;
+  let calculatedDayWidth = minDayWidth;
+  if (numActiveDays > 0 && timelineWidth > 0) {
+    calculatedDayWidth = Math.max(minDayWidth, timelineWidth / numActiveDays);
+  }
+  
+  const DAY_WIDTH = calculatedDayWidth;
   const PIXELS_PER_MINUTE = DAY_WIDTH / totalMinutes;
 
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
 
+  const [timelineWidth, setTimelineWidth] = React.useState(0);
+  const timelineRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const updateWidth = () => {
+      if (timelineRef.current) {
+        setTimelineWidth(timelineRef.current.offsetWidth);
+      }
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
   const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  }, [weekStart]);
+    const allDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    return allDays.filter(day => activeDays.includes(day.getDay()));
+  }, [weekStart, activeDays]);
 
 
 
@@ -259,8 +282,9 @@ export default function TimelineView({
   }
 
   return (
-    <div className="w-full overflow-auto bg-white rounded-lg border border-slate-200">
-      <div className="min-w-max">
+    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col">
+      <div ref={timelineRef} className="overflow-x-auto flex-1">
+        <div className="min-w-max relative">
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
           <div className="flex">
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50 p-3">
@@ -268,7 +292,7 @@ export default function TimelineView({
             </div>
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-200" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px` }}>
+              <div key={dayIdx} className="border-r border-slate-200" style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px` }}>
                 <div className="text-center bg-white py-2.5">
                   <div className="font-semibold text-slate-800 text-sm">
                     {format(day, 'EEEE', { locale: nl })}
@@ -286,7 +310,7 @@ export default function TimelineView({
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50" />
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, height: '32px' }}>
+              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50" style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, height: '32px' }}>
                 {hourMarkers.map((marker, idx) => (
                   <div 
                     key={idx} 
@@ -335,7 +359,7 @@ export default function TimelineView({
                 <div 
                   key={dayIdx} 
                   className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors" 
-                  style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, minHeight: '100px' }}
+                  style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, minHeight: '100px' }}
                   data-day-container
                   onClick={(e) => {
                     if (isDraggingOrResizing.current) {
