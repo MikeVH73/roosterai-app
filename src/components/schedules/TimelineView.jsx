@@ -311,7 +311,7 @@ export default function TimelineView({
   }
 
   return (
-    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col relative">
+    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col relative h-full">
       {resizeTooltip && (
         <div 
           className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-sm font-semibold pointer-events-none"
@@ -326,7 +326,7 @@ export default function TimelineView({
           </div>
         </div>
       )}
-      <div ref={timelineRef} className="overflow-x-auto flex-1">
+      <div ref={timelineRef} className="overflow-x-auto overflow-y-auto flex-1">
         <div className="min-w-max relative">
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
           <div className="flex">
@@ -397,12 +397,13 @@ export default function TimelineView({
 
             {weekDays.map((day, dayIdx) => {
               const dayShifts = getShiftsForDay(location.id, day);
+              const cellHeight = Math.max(100, dayShifts.length * 38 + 20);
 
               return (
                 <div 
                   key={dayIdx} 
                   className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors" 
-                  style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, minHeight: '100px' }}
+                  style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, minHeight: `${cellHeight}px` }}
                   data-day-container
                   onClick={(e) => {
                     if (isDraggingOrResizing.current) {
