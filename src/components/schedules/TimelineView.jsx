@@ -383,39 +383,6 @@ export default function TimelineView({
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div
-                            className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30 rounded-l"
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              handleResizeStart(e, shift, 'left');
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onDoubleClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                          />
-                          <div
-                            className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30 rounded-r"
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              handleResizeStart(e, shift, 'right');
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onDoubleClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                          />
-
                           <div 
                             className="absolute inset-0 px-2 py-1 text-[11px] text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10"
                             draggable
@@ -427,6 +394,25 @@ export default function TimelineView({
                               onShiftClick?.(shift);
                             }}
                           >
+                            {/* Resize handles - thin edges only */}
+                            <div
+                              className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                handleResizeStart(e, shift, 'left');
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div
+                              className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                handleResizeStart(e, shift, 'right');
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            />
                             <span className="truncate">
                               {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
                             </span>
