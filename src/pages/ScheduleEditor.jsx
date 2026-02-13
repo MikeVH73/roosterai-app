@@ -8,6 +8,7 @@ import TopBar from '@/components/layout/TopBar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
 import TimelineView from '@/components/schedules/TimelineView';
+import VerticalTimelineView from '@/components/schedules/VerticalTimelineView';
 import {
   ChevronLeft,
   ChevronRight,
@@ -367,22 +368,7 @@ export default function ScheduleEditor() {
                   </Button>
                 )}
                 
-                {viewMode !== 'timeline' && (
-                  <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
-                    <SelectTrigger className="w-48">
-                      <Building2 className="w-4 h-4 mr-2" />
-                      <SelectValue placeholder="Afdeling" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Alle afdelingen</SelectItem>
-                      {relevantDepartments.map(dept => (
-                        <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {viewMode === 'timeline' && relevantDayparts.length > 0 && (
+                {(viewMode === 'timeline' || viewMode === 'vertical-timeline') && relevantDayparts.length > 0 && (
                   <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
                     <span className="text-sm text-slate-600 font-medium">Dagdelen:</span>
                     <div className="flex items-center gap-4">
@@ -404,11 +390,46 @@ export default function ScheduleEditor() {
                     </div>
                   </div>
                 )}
+
+                {viewMode !== 'timeline' && viewMode !== 'vertical-timeline' && (
+                  <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                    <SelectTrigger className="w-48">
+                      <Building2 className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Afdeling" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Alle afdelingen</SelectItem>
+                      {relevantDepartments.map(dept => (
+                        <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
 
             {/* Schedule Grid */}
-            {viewMode === 'timeline' ? (
+            {viewMode === 'vertical-timeline' ? (
+              <VerticalTimelineView
+                schedule={schedule}
+                shifts={shifts}
+                locations={locations}
+                employees={relevantEmployees}
+                functions={functions}
+                dayparts={dayparts}
+                currentWeekStart={currentWeekStart}
+                selectedDayparts={selectedTimelineDayparts}
+                onShiftClick={handleShiftClick}
+                onShiftUpdate={handleShiftUpdate}
+                onCellClick={(locationId, date, daypartId) => {
+                  setSelectedShift(null);
+                  setSelectedEmployeeId(null);
+                  setSelectedDate(format(date, 'yyyy-MM-dd'));
+                  setSelectedDaypartId(daypartId);
+                  setShiftDialogOpen(true);
+                }}
+              />
+            ) : viewMode === 'timeline' ? (
               <TimelineView
                 schedule={schedule}
                 shifts={shifts}
