@@ -47,27 +47,6 @@ export default function TimelineView({
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
-  const startTimeStr = schedule?.timeline_start_time || '06:00';
-  const endTimeStr = schedule?.timeline_end_time || '06:00';
-  const startTimeOffset = timeToMinutes(startTimeStr);
-  const endTimeOffset = timeToMinutes(endTimeStr);
-  
-  // Calculate total hours between start and end (handling wrap-around midnight)
-  let totalMinutes = endTimeOffset - startTimeOffset;
-  if (totalMinutes <= 0) totalMinutes += 24 * 60;
-  const totalHours = totalMinutes / 60;
-  
-  // Calculate day width dynamically based on available width and number of active days
-  const numActiveDays = weekDays.length;
-  const minDayWidth = 200;
-  let calculatedDayWidth = minDayWidth;
-  if (numActiveDays > 0 && timelineWidth > 0) {
-    calculatedDayWidth = Math.max(minDayWidth, timelineWidth / numActiveDays);
-  }
-  
-  const DAY_WIDTH = calculatedDayWidth;
-  const PIXELS_PER_MINUTE = DAY_WIDTH / totalMinutes;
-
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
 
   const [timelineWidth, setTimelineWidth] = React.useState(0);
@@ -88,6 +67,27 @@ export default function TimelineView({
     const allDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
     return allDays.filter(day => activeDays.includes(day.getDay()));
   }, [weekStart, activeDays]);
+
+  const startTimeStr = schedule?.timeline_start_time || '06:00';
+  const endTimeStr = schedule?.timeline_end_time || '06:00';
+  const startTimeOffset = timeToMinutes(startTimeStr);
+  const endTimeOffset = timeToMinutes(endTimeStr);
+  
+  // Calculate total hours between start and end (handling wrap-around midnight)
+  let totalMinutes = endTimeOffset - startTimeOffset;
+  if (totalMinutes <= 0) totalMinutes += 24 * 60;
+  const totalHours = totalMinutes / 60;
+  
+  // Calculate day width dynamically based on available width and number of active days
+  const numActiveDays = weekDays.length;
+  const minDayWidth = 200;
+  let calculatedDayWidth = minDayWidth;
+  if (numActiveDays > 0 && timelineWidth > 0) {
+    calculatedDayWidth = Math.max(minDayWidth, timelineWidth / numActiveDays);
+  }
+  
+  const DAY_WIDTH = calculatedDayWidth;
+  const PIXELS_PER_MINUTE = DAY_WIDTH / totalMinutes;
 
 
 
