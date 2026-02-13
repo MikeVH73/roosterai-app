@@ -177,10 +177,10 @@ export default function TimelineView({
     isDraggingOrResizing.current = false;
   };
 
-  const handleDayDrop = async (e, locationId, date) => {
+  const handleDayDrop = async (e, locationId, dateToUse) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     const shiftId = e.dataTransfer.getData('shiftId');
     if (!shiftId) return;
 
@@ -188,11 +188,12 @@ export default function TimelineView({
     if (!shift) return;
 
     const oldData = { ...shift };
+    const targetDate = format(dateToUse, 'yyyy-MM-dd');
 
     try {
       await base44.entities.Shift.update(shift.id, {
         locationId,
-        date: format(date, 'yyyy-MM-dd')
+        date: targetDate
       });
       onShiftUpdate?.(shift, oldData);
       queryClient.invalidateQueries(['shifts']);
@@ -398,6 +399,7 @@ export default function TimelineView({
             {weekDays.map((day, dayIdx) => {
               const dayShifts = getShiftsForDay(location.id, day);
               const cellHeight = Math.max(100, dayShifts.length * 38 + 20);
+              const currentDay = day;
 
               return (
                 <div 
@@ -405,6 +407,7 @@ export default function TimelineView({
                   className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors" 
                   style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, minHeight: `${cellHeight}px` }}
                   data-day-container
+                  data-date={format(currentDay, 'yyyy-MM-dd')}
                   onClick={(e) => {
                     if (isDraggingOrResizing.current) {
                       isDraggingOrResizing.current = false;
@@ -416,12 +419,18 @@ export default function TimelineView({
                       const offsetX = e.clientX - rect.left;
                       const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
                       const clickedTime = minutesToTime(clickedMinutes);
-                      
-                      onCellClick?.(location.id, day, null, clickedTime);
+
+                      onCellClick?.(location.id, currentDay, null, clickedTime);
                     }
                   }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => handleDayDrop(e, location.id, day)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.stopPropagation();
+                    handleDayDrop(e, location.id, currentDay);
+                  }}
                 >
                   {/* Vertical grid lines every 2 hours */}
                   {hourMarkers.map((marker, idx) => (
