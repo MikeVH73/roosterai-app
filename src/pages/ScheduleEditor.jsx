@@ -17,7 +17,8 @@ import {
   AlertTriangle,
   Users,
   Loader2,
-  Building2
+  Building2,
+  Undo2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +62,7 @@ export default function ScheduleEditor() {
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState([]);
+  const [undoStack, setUndoStack] = useState([]);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -230,6 +232,23 @@ export default function ScheduleEditor() {
     setSelectedDaypartId(null);
   };
 
+  const handleShiftUpdate = (shift, oldData) => {
+    setUndoStack(prev => [...prev, { shift, oldData, timestamp: Date.now() }].slice(-10));
+  };
+
+  const handleUndo = async () => {
+    if (undoStack.length === 0) return;
+    
+    const lastAction = undoStack[undoStack.length - 1];
+    try {
+      await base44.entities.Shift.update(lastAction.shift.id, lastAction.oldData);
+      queryClient.invalidateQueries(['shifts']);
+      setUndoStack(prev => prev.slice(0, -1));
+    } catch (error) {
+      console.error('Failed to undo:', error);
+    }
+  };
+
   const handleDaypartOrderChange = useCallback((newOrder) => {
     updateDaypartOrderMutation.mutate(newOrder);
   }, [updateDaypartOrderMutation]);
@@ -341,6 +360,13 @@ export default function ScheduleEditor() {
               </div>
               
               <div className="flex items-center gap-3">
+                {undoStack.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={handleUndo}>
+                    <Undo2 className="w-4 h-4 mr-2" />
+                    Herstel laatste stap
+                  </Button>
+                )}
+                
                 {viewMode !== 'timeline' && (
                   <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
                     <SelectTrigger className="w-48">
@@ -389,15 +415,16 @@ export default function ScheduleEditor() {
                 locations={locations}
                 employees={relevantEmployees}
                 functions={functions}
-                dayparts={relevantDayparts}
+                dayparts={dayparts}
                 currentWeekStart={currentWeekStart}
                 selectedDayparts={selectedTimelineDayparts}
                 onShiftClick={handleShiftClick}
-                onCellClick={(locationId, date) => {
+                onShiftUpdate={handleShiftUpdate}
+                onCellClick={(locationId, date, daypartId) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));
-                  setSelectedDaypartId(null);
+                  setSelectedDaypartId(daypartId);
                   setShiftDialogOpen(true);
                 }}
               />
