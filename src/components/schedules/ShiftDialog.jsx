@@ -210,34 +210,6 @@ export default function ShiftDialog({
             </Select>
           </div>
 
-          {sortedDayparts.length > 0 && (
-            <div>
-              <Label htmlFor="daypartId">Dagdeel</Label>
-              <Select 
-                value={formData.daypartId} 
-                onValueChange={handleDaypartChange}
-              >
-                <SelectTrigger>
-                  <Clock className="w-4 h-4 mr-2 text-slate-400" />
-                  <SelectValue placeholder="Selecteer dagdeel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortedDayparts.map((dp) => (
-                    <SelectItem key={dp.id} value={dp.id}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: dp.color || '#E5E7EB' }}
-                        />
-                        {dp.name} ({dp.startTime}-{dp.endTime})
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="start_time">Starttijd *</Label>
