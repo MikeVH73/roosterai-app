@@ -316,23 +316,25 @@ export default function TimelineView({
                   style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, minHeight: '120px' }}
                   data-day-container
                   onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const offsetX = e.clientX - rect.left;
-                    const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
-                    
-                    let clickedDaypartId = null;
-                    for (const dp of allDayparts) {
-                      const startMins = timeToMinutes(dp.startTime);
-                      let endMins = timeToMinutes(dp.endTime);
-                      if (endMins <= startMins) endMins += 24 * 60;
-                      if (clickedMinutes >= startMins && clickedMinutes < endMins) {
-                        clickedDaypartId = dp.id;
-                        break;
-                      }
-                    }
-
+                    // Only trigger on direct clicks on empty space
                     if (e.target === e.currentTarget || e.target.closest('[data-empty-area]')) {
-                      onCellClick?.(location.id, day, clickedDaypartId);
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const offsetX = e.clientX - rect.left;
+                      const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
+                      const clickedTime = minutesToTime(clickedMinutes);
+                      
+                      let clickedDaypartId = null;
+                      for (const dp of allDayparts) {
+                        const startMins = timeToMinutes(dp.startTime);
+                        let endMins = timeToMinutes(dp.endTime);
+                        if (endMins <= startMins) endMins += 24 * 60;
+                        if (clickedMinutes >= startMins && clickedMinutes < endMins) {
+                          clickedDaypartId = dp.id;
+                          break;
+                        }
+                      }
+
+                      onCellClick?.(location.id, day, clickedDaypartId, clickedTime);
                     }
                   }}
                   onDragOver={(e) => e.preventDefault()}
@@ -404,7 +406,14 @@ export default function TimelineView({
                               e.preventDefault();
                               handleResizeStart(e, shift, 'left');
                             }}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
                           />
                           <div
                             className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-r"
@@ -413,13 +422,21 @@ export default function TimelineView({
                               e.preventDefault();
                               handleResizeStart(e, shift, 'right');
                             }}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
                           />
 
                           <div 
                             className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move"
                             draggable
                             onDragStart={(e) => handleShiftDragStart(e, shift)}
+                            onClick={(e) => e.stopPropagation()}
                             onDoubleClick={(e) => {
                               e.stopPropagation();
                               onShiftClick?.(shift);

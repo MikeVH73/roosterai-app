@@ -445,14 +445,18 @@ export default function ScheduleEditor() {
                 selectedDayparts={selectedTimelineDayparts}
                 onShiftClick={handleShiftClick}
                 onShiftUpdate={handleShiftUpdate}
-                onCellClick={(locationId, date, daypartId) => {
+                onCellClick={(locationId, date, daypartId, startTime) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));
                   setSelectedDaypartId(daypartId);
+                  // Pre-fill start time if clicked on specific time
+                  if (startTime) {
+                    setSelectedShift({ start_time: startTime });
+                  }
                   setShiftDialogOpen(true);
                 }}
-              />
+                />
             ) : viewMode === 'dayparts' && relevantDayparts.length > 0 ? (
               <DaypartScheduleGrid
                 dayparts={relevantDayparts}
