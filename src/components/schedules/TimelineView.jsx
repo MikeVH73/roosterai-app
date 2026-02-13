@@ -46,7 +46,7 @@ export default function TimelineView({
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
-  const DAY_WIDTH = 240; // Smaller width to fit Mon-Fri on one screen
+  const DAY_WIDTH = 280; // Optimized width to fit Mon-Fri comfortably on one screen
   const PIXELS_PER_MINUTE = DAY_WIDTH / (24 * 60);
   const startTimeStr = schedule?.timeline_start_time || '06:00';
   const startTimeOffset = timeToMinutes(startTimeStr);
@@ -250,33 +250,40 @@ export default function TimelineView({
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
           <div className="flex">
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50 p-3">
-              <div className="font-semibold text-slate-700">Locaties</div>
+              <div className="font-semibold text-slate-700 text-sm">Locaties</div>
             </div>
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px` }}>
-                <div className="text-center border-b border-slate-200 bg-slate-50 py-2">
-                  <div className="font-semibold text-slate-800 text-xs">
+              <div key={dayIdx} className="border-r border-slate-200" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px` }}>
+                <div className="text-center bg-white py-2.5">
+                  <div className="font-semibold text-slate-800 text-sm">
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className="text-[10px] text-slate-600">
+                  <div className="text-xs text-slate-600">
                     {format(day, 'd MMM', { locale: nl })}
                   </div>
                 </div>
+              </div>
+            ))}
+          </div>
 
-                <div className="relative h-6 border-b border-slate-200 bg-slate-50">
-                  {hourMarkers.map((marker, idx) => (
-                    <div 
-                      key={idx} 
-                      className="absolute inset-y-0 border-l-2 border-slate-400"
-                      style={{ left: `${marker.position}px` }}
-                    >
-                      <span className="absolute top-0 left-1 text-[10px] text-slate-700 font-semibold">
-                        {marker.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Timeline with hours spanning all days */}
+          <div className="flex border-t border-slate-200">
+            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50" />
+
+            {weekDays.map((day, dayIdx) => (
+              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, height: '32px' }}>
+                {hourMarkers.map((marker, idx) => (
+                  <div 
+                    key={idx} 
+                    className="absolute inset-y-0 border-l border-slate-300"
+                    style={{ left: `${marker.position}px` }}
+                  >
+                    <span className="absolute -top-1 left-0.5 text-[11px] text-slate-600 font-medium">
+                      {marker.label.replace(':00', '')}
+                    </span>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
@@ -297,10 +304,10 @@ export default function TimelineView({
               setDragOverLocation(null);
             }}
           >
-            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 cursor-move">
+            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 cursor-move hover:bg-slate-50 transition-colors">
               <GripVertical className="w-4 h-4 text-slate-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-slate-800 truncate">{location.name}</div>
+                <div className="font-medium text-slate-800 text-sm truncate">{location.name}</div>
                 {location.code && (
                   <div className="text-xs text-slate-500">{location.code}</div>
                 )}
@@ -313,8 +320,8 @@ export default function TimelineView({
               return (
                 <div 
                   key={dayIdx} 
-                  className="border-r border-slate-300 relative bg-white hover:bg-slate-50/30" 
-                  style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, minHeight: '120px' }}
+                  className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors" 
+                  style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, minHeight: '100px' }}
                   data-day-container
                   onClick={(e) => {
                     if (isDraggingOrResizing.current) {
@@ -337,11 +344,10 @@ export default function TimelineView({
                   <div className="absolute inset-0 flex pointer-events-none">
                     {[...Array(96)].map((_, i) => {
                       const isTwoHourLine = i % 8 === 0;
-                      const isHourLine = i % 4 === 0;
                       return (
                         <div 
                           key={i} 
-                          className={`flex-1 ${isTwoHourLine ? 'border-r-2 border-slate-400' : isHourLine ? 'border-r border-slate-300' : 'border-r border-slate-100'}`}
+                          className={`flex-1 ${isTwoHourLine ? 'border-r border-slate-300' : ''}`}
                         />
                       );
                     })}
@@ -371,12 +377,12 @@ export default function TimelineView({
                       return (
                         <div
                           key={shift.id}
-                          className="absolute h-6 rounded shadow-sm border border-slate-300 hover:shadow-md transition-shadow group pointer-events-auto"
+                          className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto"
                           style={{
                             left: `${leftPx}px`,
                             width: `${widthPx}px`,
                             backgroundColor: func?.color || '#94a3b8',
-                            top: shiftIdx * 28 + 4
+                            top: shiftIdx * 32 + 6
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -414,7 +420,7 @@ export default function TimelineView({
                           />
 
                           <div 
-                            className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move z-10"
+                            className="absolute inset-0 px-2 py-1 text-[11px] text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10"
                             draggable
                             onDragStart={(e) => handleShiftDragStart(e, shift)}
                             onDragEnd={handleShiftDragEnd}
@@ -427,13 +433,11 @@ export default function TimelineView({
                             <span className="truncate">
                               {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
                             </span>
-                            <span className="text-white/90 text-[9px] flex-shrink-0">
-                              {shift.start_time}-{shift.end_time}
-                            </span>
-                            <span className="text-white/90 text-[9px] flex-shrink-0 flex items-center gap-0.5">
-                              <Clock className="w-2.5 h-2.5" />
-                              {duration}u
-                            </span>
+                            {widthPx > 60 && (
+                              <span className="text-white/95 text-[10px] flex-shrink-0 font-semibold ml-auto">
+                                {duration}
+                              </span>
+                            )}
                           </div>
                         </div>
                       );
