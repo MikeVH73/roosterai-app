@@ -67,7 +67,7 @@ export default function ShiftDialog({
   const [formData, setFormData] = useState(defaultFormData);
 
   useEffect(() => {
-    if (shift) {
+    if (shift?.id) {
       const hasBreak = shift.break_duration && shift.break_duration > 0;
       setFormData({
         employeeId: shift.employeeId || '',
@@ -91,7 +91,7 @@ export default function ShiftDialog({
         employeeId: employeeId || '',
         date: date || '',
         daypartId: daypartId || '',
-        start_time: selectedDaypart?.startTime || '09:00',
+        start_time: shift?.start_time || selectedDaypart?.startTime || '09:00',
         end_time: selectedDaypart?.endTime || '17:00'
       });
     }
@@ -157,7 +157,7 @@ export default function ShiftDialog({
     if (!submitData.departmentId) delete submitData.departmentId;
     if (!submitData.locationId) delete submitData.locationId;
 
-    if (shift) {
+    if (shift?.id) {
       await updateMutation.mutateAsync({ id: shift.id, data: submitData });
     } else {
       await createMutation.mutateAsync(submitData);
@@ -317,7 +317,7 @@ export default function ShiftDialog({
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            {shift && (
+            {shift?.id && (
               <Button 
                 type="button" 
                 variant="ghost" 
@@ -329,13 +329,13 @@ export default function ShiftDialog({
                 Verwijderen
               </Button>
             )}
-            <div className={`flex gap-3 ${!shift ? 'ml-auto' : ''}`}>
+            <div className={`flex gap-3 ${!shift?.id ? 'ml-auto' : ''}`}>
               <Button type="button" variant="outline" onClick={onClose}>
                 Annuleren
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
                 {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                {shift ? 'Opslaan' : 'Toevoegen'}
+                {shift?.id ? 'Opslaan' : 'Toevoegen'}
               </Button>
             </div>
           </div>
