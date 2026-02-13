@@ -368,7 +368,7 @@ export default function ScheduleEditor() {
                   </Button>
                 )}
                 
-                {(viewMode === 'timeline' || viewMode === 'vertical-timeline') && relevantDayparts.length > 0 && (
+                {viewMode === 'timeline' && relevantDayparts.length > 0 && (
                   <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
                     <span className="text-sm text-slate-600 font-medium">Dagdelen:</span>
                     <div className="flex items-center gap-4">
@@ -416,16 +416,16 @@ export default function ScheduleEditor() {
                 locations={locations}
                 employees={relevantEmployees}
                 functions={functions}
-                dayparts={dayparts}
+                departments={relevantDepartments}
                 currentWeekStart={currentWeekStart}
-                selectedDayparts={selectedTimelineDayparts}
                 onShiftClick={handleShiftClick}
                 onShiftUpdate={handleShiftUpdate}
-                onCellClick={(locationId, date, daypartId) => {
+                onCellClick={(locationId, date, daypartId, departmentId) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));
                   setSelectedDaypartId(daypartId);
+                  setSelectedDepartmentId(departmentId);
                   setShiftDialogOpen(true);
                 }}
               />
