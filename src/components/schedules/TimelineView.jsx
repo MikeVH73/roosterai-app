@@ -44,6 +44,7 @@ export default function TimelineView({
     schedule?.location_order || locations.map(l => l.id)
   );
   const [resizingShift, setResizingShift] = useState(null);
+  const [resizeTooltip, setResizeTooltip] = useState(null);
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
@@ -219,6 +220,31 @@ export default function TimelineView({
 
     const handleMouseMove = (moveEvent) => {
       moveEvent.preventDefault();
+      
+      const deltaX = moveEvent.clientX - resizeRef.current.initialX;
+      const deltaMinutes = Math.round((deltaX / PIXELS_PER_MINUTE) / 15) * 15;
+
+      let currentStartMins = timeToMinutes(resizeRef.current.initialStart);
+      let currentEndMins = timeToMinutes(resizeRef.current.initialEnd);
+      if (currentEndMins <= currentStartMins) currentEndMins += 24 * 60;
+
+      let newStart = resizeRef.current.initialStart;
+      let newEnd = resizeRef.current.initialEnd;
+
+      if (resizeRef.current.edge === 'left') {
+        const newStartMins = Math.max(0, Math.min(currentStartMins + deltaMinutes, currentEndMins - 15));
+        newStart = minutesToTime(newStartMins);
+      } else {
+        const newEndMins = Math.max(currentStartMins + 15, currentEndMins + deltaMinutes);
+        newEnd = minutesToTime(newEndMins);
+      }
+
+      setResizeTooltip({
+        x: moveEvent.clientX,
+        y: moveEvent.clientY,
+        time: resizeRef.current.edge === 'left' ? newStart : newEnd,
+        edge: resizeRef.current.edge
+      });
     };
 
     const handleMouseUp = async (upEvent) => {
@@ -227,6 +253,8 @@ export default function TimelineView({
       const deltaX = upEvent.clientX - resizeRef.current.initialX;
       const deltaMinutes = Math.round((deltaX / PIXELS_PER_MINUTE) / 15) * 15;
 
+      setResizeTooltip(null);
+      
       if (Math.abs(deltaMinutes) < 15) {
         setResizingShift(null);
         isDraggingOrResizing.current = false;
@@ -264,6 +292,7 @@ export default function TimelineView({
       }
 
       setResizingShift(null);
+      setResizeTooltip(null);
       isDraggingOrResizing.current = false;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -282,7 +311,21 @@ export default function TimelineView({
   }
 
   return (
-    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col">
+    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col relative">
+      {resizeTooltip && (
+        <div 
+          className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-sm font-semibold pointer-events-none"
+          style={{
+            left: `${resizeTooltip.x + 15}px`,
+            top: `${resizeTooltip.y - 40}px`,
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span>{resizeTooltip.time}</span>
+          </div>
+        </div>
+      )}
       <div ref={timelineRef} className="overflow-x-auto flex-1">
         <div className="min-w-max relative">
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
