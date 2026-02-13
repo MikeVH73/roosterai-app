@@ -459,22 +459,25 @@ export default function TimelineView({
                       const employee = getEmployee(shift.employeeId);
                       const func = getFunction(shift.functionId);
                       const shiftColor = employee?.color || func?.color || '#94a3b8';
-                      
-                      let startMins = timeToMinutes(shift.start_time);
-                      let endMins = timeToMinutes(shift.end_time);
-                      if (endMins <= startMins) endMins += 24 * 60;
-                      
-                      // Adjust for timeline start offset
-                      const rawStartMins = timeToMinutes(shift.start_time);
-                      const rawEndMins = timeToMinutes(shift.end_time) + (timeToMinutes(shift.end_time) < rawStartMins ? 24 * 60 : 0);
-                      
-                      // Position relative to timeline start
-                      startMins = (rawStartMins - startTimeOffset + 24 * 60) % (24 * 60);
-                      const shiftDurationMins = rawEndMins - rawStartMins;
-                      endMins = startMins + shiftDurationMins;
-                      
-                      const leftPx = startMins * PIXELS_PER_MINUTE;
-                      const widthPx = (endMins - startMins) * PIXELS_PER_MINUTE;
+
+                      // Calculate shift position relative to timeline start
+                      const shiftStartMins = timeToMinutes(shift.start_time);
+                      const shiftEndMins = timeToMinutes(shift.end_time);
+
+                      // Calculate offset from timeline start
+                      let offsetFromStart = shiftStartMins - startTimeOffset;
+                      if (offsetFromStart < 0) {
+                        offsetFromStart += 24 * 60; // Wrap around midnight
+                      }
+
+                      // Calculate duration
+                      let durationMins = shiftEndMins - shiftStartMins;
+                      if (durationMins <= 0) {
+                        durationMins += 24 * 60; // Shift crosses midnight
+                      }
+
+                      const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
+                      const widthPx = durationMins * PIXELS_PER_MINUTE;
                       const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
 
                       return (
