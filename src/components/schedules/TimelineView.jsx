@@ -360,7 +360,7 @@ export default function TimelineView({
                     className="absolute inset-y-0 border-l border-slate-300"
                     style={{ left: `${marker.position}px` }}
                   >
-                    <span className="absolute -top-1 left-0.5 text-[11px] text-slate-600 font-medium">
+                    <span className="absolute top-1 left-0.5 text-[11px] text-slate-600 font-medium">
                       {marker.label.replace(':00', '')}
                     </span>
                   </div>
@@ -434,10 +434,11 @@ export default function TimelineView({
 
                   <div className="absolute inset-0" data-empty-area />
 
-                  <div className="absolute inset-0 p-1 pointer-events-none">
+                  <div className="absolute inset-0 p-1">
                     {dayShifts.map((shift, shiftIdx) => {
                       const employee = getEmployee(shift.employeeId);
                       const func = getFunction(shift.functionId);
+                      const shiftColor = employee?.color || func?.color || '#94a3b8';
                       
                       let startMins = timeToMinutes(shift.start_time);
                       let endMins = timeToMinutes(shift.end_time);
@@ -459,12 +460,13 @@ export default function TimelineView({
                       return (
                         <div
                           key={shift.id}
-                          className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto"
+                          className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10"
                           style={{
                             left: `${leftPx}px`,
                             width: `${widthPx}px`,
-                            backgroundColor: func?.color || '#94a3b8',
-                            top: shiftIdx * 32 + 6
+                            backgroundColor: shiftColor,
+                            top: shiftIdx * 32 + 6,
+                            zIndex: 10 + shiftIdx
                           }}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -516,6 +518,9 @@ export default function TimelineView({
             })}
           </div>
         ))}
+        
+        {/* Extra ruimte onder de laatste locatie */}
+        <div className="h-32 bg-slate-50/30 border-b border-slate-200" />
         </div>
       </div>
     </div>
