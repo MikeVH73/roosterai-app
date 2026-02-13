@@ -341,17 +341,14 @@ export default function TimelineView({
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => handleDayDrop(e, location.id, day)}
                 >
-                  <div className="absolute inset-0 flex pointer-events-none">
-                    {[...Array(96)].map((_, i) => {
-                      const isTwoHourLine = i % 8 === 0;
-                      return (
-                        <div 
-                          key={i} 
-                          className={`flex-1 ${isTwoHourLine ? 'border-r border-slate-300' : ''}`}
-                        />
-                      );
-                    })}
-                  </div>
+                  {/* Vertical grid lines every 2 hours */}
+                  {hourMarkers.map((marker, idx) => (
+                    <div
+                      key={`grid-${idx}`}
+                      className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
+                      style={{ left: `${marker.position}px` }}
+                    />
+                  ))}
 
                   <div className="absolute inset-0" data-empty-area />
 
