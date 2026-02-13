@@ -46,8 +46,10 @@ export default function TimelineView({
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
-  const DAY_WIDTH = 960; // 10px per 15 minutes = 960px for 24 hours (96 quarters)
+  const DAY_WIDTH = 480; // 5px per 15 minutes = 480px for 24 hours (96 quarters)
   const PIXELS_PER_MINUTE = DAY_WIDTH / (24 * 60);
+  const startTimeStr = schedule?.timeline_start_time || '06:00';
+  const startTimeOffset = timeToMinutes(startTimeStr);
 
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
 
@@ -55,13 +57,7 @@ export default function TimelineView({
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
 
-  const allDayparts = useMemo(() => {
-    return [...dayparts].sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
-  }, [dayparts]);
 
-  const visibleDayparts = useMemo(() => {
-    return allDayparts.filter(dp => selectedDayparts.includes(dp.id));
-  }, [allDayparts, selectedDayparts]);
 
   const sortedLocations = useMemo(() => {
     const orderMap = new Map(locationOrder.map((id, idx) => [id, idx]));
@@ -77,6 +73,20 @@ export default function TimelineView({
       shift.locationId === locationId && isSameDay(parseISO(shift.date), date)
     );
   };
+
+  // Generate hour markers for the timeline
+  const hourMarkers = useMemo(() => {
+    const markers = [];
+    for (let i = 0; i < 24; i++) {
+      const hourMins = (startTimeOffset + i * 60) % (24 * 60);
+      const displayHour = Math.floor(hourMins / 60);
+      markers.push({
+        label: `${String(displayHour).padStart(2, '0')}:00`,
+        position: i * 60 * PIXELS_PER_MINUTE
+      });
+    }
+    return markers;
+  }, [startTimeOffset, PIXELS_PER_MINUTE]);
 
   const getEmployee = (employeeId) => employees.find(e => e.id === employeeId);
   const getFunction = (functionId) => allFunctions.find(f => f.id === functionId);
@@ -234,14 +244,6 @@ export default function TimelineView({
     );
   }
 
-  if (!allDayparts.length) {
-    return (
-      <div className="flex items-center justify-center h-64 text-slate-500">
-        Geen dagdelen beschikbaar
-      </div>
-    );
-  }
-
   return (
     <div className="w-full overflow-auto bg-white rounded-lg border border-slate-200">
       <div className="min-w-max">
@@ -254,38 +256,26 @@ export default function TimelineView({
             {weekDays.map((day, dayIdx) => (
               <div key={dayIdx} className="border-r border-slate-300" style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px` }}>
                 <div className="text-center border-b border-slate-200 bg-slate-50 py-2">
-                  <div className="font-semibold text-slate-800">
+                  <div className="font-semibold text-slate-800 text-sm">
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className="text-sm text-slate-600">
+                  <div className="text-xs text-slate-600">
                     {format(day, 'd MMM', { locale: nl })}
                   </div>
                 </div>
                 
-                <div className="relative h-12 border-b border-slate-200 bg-slate-50">
-                  {visibleDayparts.map((daypart) => {
-                    const startMins = timeToMinutes(daypart.startTime);
-                    let endMins = timeToMinutes(daypart.endTime);
-                    if (endMins <= startMins) endMins += 24 * 60;
-                    
-                    const leftPx = startMins * PIXELS_PER_MINUTE;
-                    const widthPx = (endMins - startMins) * PIXELS_PER_MINUTE;
-
-                    return (
-                      <div 
-                        key={daypart.id} 
-                        className="absolute inset-y-0 text-center flex flex-col justify-center border-r border-slate-300"
-                        style={{ left: `${leftPx}px`, width: `${widthPx}px` }}
-                      >
-                        <div className="text-[10px] font-semibold text-slate-700 uppercase">
-                          {daypart.name}
-                        </div>
-                        <div className="text-[9px] text-slate-500 mt-0.5">
-                          {daypart.startTime} - {daypart.endTime}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="relative h-8 border-b border-slate-200 bg-slate-50">
+                  {hourMarkers.map((marker, idx) => (
+                    <div 
+                      key={idx} 
+                      className="absolute top-0 bottom-0 border-l border-slate-300"
+                      style={{ left: `${marker.position}px` }}
+                    >
+                      <span className="absolute -top-0.5 -left-4 text-[9px] text-slate-600 font-medium">
+                        {marker.label}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
@@ -338,18 +328,7 @@ export default function TimelineView({
                       const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
                       const clickedTime = minutesToTime(clickedMinutes);
                       
-                      let clickedDaypartId = null;
-                      for (const dp of allDayparts) {
-                        const startMins = timeToMinutes(dp.startTime);
-                        let endMins = timeToMinutes(dp.endTime);
-                        if (endMins <= startMins) endMins += 24 * 60;
-                        if (clickedMinutes >= startMins && clickedMinutes < endMins) {
-                          clickedDaypartId = dp.id;
-                          break;
-                        }
-                      }
-
-                      onCellClick?.(location.id, day, clickedDaypartId, clickedTime);
+                      onCellClick?.(location.id, day, null, clickedTime);
                     }
                   }}
                   onDragOver={(e) => e.preventDefault()}
@@ -369,35 +348,20 @@ export default function TimelineView({
 
                   <div className="absolute inset-0" data-empty-area />
 
-                  {visibleDayparts.map(daypart => {
-                    const startMins = timeToMinutes(daypart.startTime);
-                    let endMins = timeToMinutes(daypart.endTime);
-                    if (endMins <= startMins) endMins += 24 * 60;
-                    
-                    const leftPx = startMins * PIXELS_PER_MINUTE;
-                    const widthPx = (endMins - startMins) * PIXELS_PER_MINUTE;
-
-                    return (
-                      <div 
-                        key={daypart.id} 
-                        className="absolute inset-y-0 opacity-5 pointer-events-none"
-                        style={{ 
-                          left: `${leftPx}px`, 
-                          width: `${widthPx}px`, 
-                          backgroundColor: daypart.color || '#3b82f6' 
-                        }}
-                      />
-                    );
-                  })}
-
                   <div className="absolute inset-0 p-1 pointer-events-none">
                     {dayShifts.map((shift, shiftIdx) => {
                       const employee = getEmployee(shift.employeeId);
                       const func = getFunction(shift.functionId);
                       
-                      const startMins = timeToMinutes(shift.start_time);
+                      let startMins = timeToMinutes(shift.start_time);
                       let endMins = timeToMinutes(shift.end_time);
                       if (endMins <= startMins) endMins += 24 * 60;
+                      
+                      // Adjust for timeline start offset
+                      startMins = (startMins - startTimeOffset + 24 * 60) % (24 * 60);
+                      endMins = startMins + (timeToMinutes(shift.end_time) >= timeToMinutes(shift.start_time) 
+                        ? timeToMinutes(shift.end_time) - timeToMinutes(shift.start_time)
+                        : 24 * 60 - timeToMinutes(shift.start_time) + timeToMinutes(shift.end_time));
                       
                       const leftPx = startMins * PIXELS_PER_MINUTE;
                       const widthPx = (endMins - startMins) * PIXELS_PER_MINUTE;

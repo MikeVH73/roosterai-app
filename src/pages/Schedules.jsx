@@ -124,7 +124,8 @@ export default function Schedules() {
         departmentIds: schedule.departmentIds || [],
         locationIds: schedule.locationIds || [],
         status: schedule.status || 'draft',
-        default_view_mode: schedule.default_view_mode || 'dayparts'
+        default_view_mode: schedule.default_view_mode || 'dayparts',
+        timeline_start_time: schedule.timeline_start_time || '06:00'
       });
     } else {
       setSelectedSchedule(null);
@@ -143,7 +144,8 @@ export default function Schedules() {
         departmentIds: [],
         locationIds: [],
         status: 'draft',
-        default_view_mode: 'dayparts'
+        default_view_mode: 'dayparts',
+        timeline_start_time: '06:00'
       });
     }
     setDialogOpen(true);
@@ -495,6 +497,19 @@ export default function Schedules() {
                   <SelectItem value="vertical-timeline">Tijdlijn (Verticaal)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="timeline_start_time">Tijdlijn starttijd</Label>
+              <Input
+                id="timeline_start_time"
+                type="time"
+                value={formData.timeline_start_time}
+                onChange={(e) => setFormData({ ...formData, timeline_start_time: e.target.value })}
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Vanaf welk uur start de tijdlijn weergave (24 uur vanaf dit moment)
+              </p>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

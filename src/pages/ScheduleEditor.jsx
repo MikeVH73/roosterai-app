@@ -367,29 +367,6 @@ export default function ScheduleEditor() {
                     Herstel laatste stap
                   </Button>
                 )}
-                
-                {viewMode === 'timeline' && relevantDayparts.length > 0 && (
-                  <div className="flex items-center gap-3 px-3 py-1.5 bg-white border border-slate-200 rounded-lg">
-                    <span className="text-sm text-slate-600 font-medium">Dagdelen:</span>
-                    <div className="flex items-center gap-4">
-                      {relevantDayparts.map(dp => (
-                        <label key={dp.id} className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedTimelineDayparts.includes(dp.id)}
-                            onChange={(e) => {
-                              setSelectedTimelineDayparts(prev => 
-                                e.target.checked ? [...prev, dp.id] : prev.filter(id => id !== dp.id)
-                              );
-                            }}
-                            className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-slate-700">{dp.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {viewMode !== 'timeline' && viewMode !== 'vertical-timeline' && (
                   <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
