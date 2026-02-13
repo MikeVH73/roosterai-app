@@ -398,9 +398,10 @@ export default function TimelineView({
                             backgroundColor: func?.color || '#94a3b8',
                             top: shiftIdx * 28 + 4
                           }}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <div
-                            className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-l"
+                            className="absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30 rounded-l"
                             onMouseDown={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
@@ -416,7 +417,7 @@ export default function TimelineView({
                             }}
                           />
                           <div
-                            className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20 rounded-r"
+                            className="absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30 rounded-r"
                             onMouseDown={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
@@ -433,7 +434,7 @@ export default function TimelineView({
                           />
 
                           <div 
-                            className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move"
+                            className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move z-10"
                             draggable
                             onDragStart={(e) => handleShiftDragStart(e, shift)}
                             onClick={(e) => e.stopPropagation()}
