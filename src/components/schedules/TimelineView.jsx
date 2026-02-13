@@ -44,6 +44,7 @@ export default function TimelineView({
   );
   const [resizingShift, setResizingShift] = useState(null);
   const resizeRef = useRef({});
+  const isDraggingOrResizing = useRef(false);
 
   const DAY_WIDTH = 960; // 10px per 15 minutes = 960px for 24 hours (96 quarters)
   const PIXELS_PER_MINUTE = DAY_WIDTH / (24 * 60);
@@ -121,6 +122,11 @@ export default function TimelineView({
     e.stopPropagation();
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('shiftId', shift.id);
+    isDraggingOrResizing.current = true;
+  };
+
+  const handleShiftDragEnd = () => {
+    isDraggingOrResizing.current = false;
   };
 
   const handleDayDrop = async (e, locationId, date) => {
@@ -144,6 +150,8 @@ export default function TimelineView({
       queryClient.invalidateQueries(['shifts']);
     } catch (error) {
       console.error('Failed to move shift:', error);
+    } finally {
+      isDraggingOrResizing.current = false;
     }
   };
 
@@ -152,6 +160,7 @@ export default function TimelineView({
     e.preventDefault();
     
     setResizingShift(shift.id);
+    isDraggingOrResizing.current = true;
     
     resizeRef.current = {
       initialX: e.clientX,
@@ -173,6 +182,7 @@ export default function TimelineView({
 
       if (Math.abs(deltaMinutes) < 15) {
         setResizingShift(null);
+        isDraggingOrResizing.current = false;
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
         return;
@@ -207,6 +217,7 @@ export default function TimelineView({
       }
 
       setResizingShift(null);
+      isDraggingOrResizing.current = false;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -316,6 +327,10 @@ export default function TimelineView({
                   style={{ width: `${DAY_WIDTH}px`, minWidth: `${DAY_WIDTH}px`, minHeight: '120px' }}
                   data-day-container
                   onClick={(e) => {
+                    if (isDraggingOrResizing.current) {
+                      isDraggingOrResizing.current = false;
+                      return;
+                    }
                     // Only trigger on direct clicks on empty space
                     if (e.target === e.currentTarget || e.target.closest('[data-empty-area]')) {
                       const rect = e.currentTarget.getBoundingClientRect();
@@ -437,6 +452,7 @@ export default function TimelineView({
                             className="absolute inset-0 px-2 py-0.5 text-[10px] text-white font-medium truncate flex items-center gap-1.5 cursor-move z-10"
                             draggable
                             onDragStart={(e) => handleShiftDragStart(e, shift)}
+                            onDragEnd={handleShiftDragEnd}
                             onClick={(e) => e.stopPropagation()}
                             onDoubleClick={(e) => {
                               e.stopPropagation();
