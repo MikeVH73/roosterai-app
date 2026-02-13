@@ -125,7 +125,8 @@ export default function Schedules() {
         locationIds: schedule.locationIds || [],
         status: schedule.status || 'draft',
         default_view_mode: schedule.default_view_mode || 'dayparts',
-        timeline_start_time: schedule.timeline_start_time || '06:00'
+        timeline_start_time: schedule.timeline_start_time || '06:00',
+        timeline_end_time: schedule.timeline_end_time || '06:00'
       });
     } else {
       setSelectedSchedule(null);
@@ -145,7 +146,8 @@ export default function Schedules() {
         locationIds: [],
         status: 'draft',
         default_view_mode: 'dayparts',
-        timeline_start_time: '06:00'
+        timeline_start_time: '06:00',
+        timeline_end_time: '06:00'
       });
     }
     setDialogOpen(true);
@@ -499,18 +501,29 @@ export default function Schedules() {
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="timeline_start_time">Tijdlijn starttijd</Label>
-              <Input
-                id="timeline_start_time"
-                type="time"
-                value={formData.timeline_start_time}
-                onChange={(e) => setFormData({ ...formData, timeline_start_time: e.target.value })}
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Vanaf welk uur start de tijdlijn weergave (24 uur vanaf dit moment)
-              </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="timeline_start_time">Tijdlijn starttijd</Label>
+                <Input
+                  id="timeline_start_time"
+                  type="time"
+                  value={formData.timeline_start_time}
+                  onChange={(e) => setFormData({ ...formData, timeline_start_time: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="timeline_end_time">Tijdlijn eindtijd</Label>
+                <Input
+                  id="timeline_end_time"
+                  type="time"
+                  value={formData.timeline_end_time}
+                  onChange={(e) => setFormData({ ...formData, timeline_end_time: e.target.value })}
+                />
+              </div>
             </div>
+            <p className="text-xs text-slate-500 -mt-2">
+              De tijdlijn toont alleen diensten tussen deze tijden
+            </p>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={handleCloseDialog}>

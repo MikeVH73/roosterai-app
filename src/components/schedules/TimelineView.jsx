@@ -46,10 +46,19 @@ export default function TimelineView({
   const resizeRef = useRef({});
   const isDraggingOrResizing = useRef(false);
 
-  const DAY_WIDTH = 280; // Optimized width to fit Mon-Fri comfortably on one screen
-  const PIXELS_PER_MINUTE = DAY_WIDTH / (24 * 60);
   const startTimeStr = schedule?.timeline_start_time || '06:00';
+  const endTimeStr = schedule?.timeline_end_time || '06:00';
   const startTimeOffset = timeToMinutes(startTimeStr);
+  const endTimeOffset = timeToMinutes(endTimeStr);
+  
+  // Calculate total hours between start and end (handling wrap-around midnight)
+  let totalMinutes = endTimeOffset - startTimeOffset;
+  if (totalMinutes <= 0) totalMinutes += 24 * 60;
+  const totalHours = totalMinutes / 60;
+  
+  // Dynamic day width based on time range (280px baseline for 24h, scale proportionally)
+  const DAY_WIDTH = Math.round((280 * totalHours) / 24);
+  const PIXELS_PER_MINUTE = DAY_WIDTH / totalMinutes;
 
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
 
@@ -77,16 +86,21 @@ export default function TimelineView({
   // Generate hour markers for the timeline (every 2 hours for cleaner look)
   const hourMarkers = useMemo(() => {
     const markers = [];
-    for (let i = 0; i < 24; i += 2) {
-      const hourMins = (startTimeOffset + i * 60) % (24 * 60);
-      const displayHour = Math.floor(hourMins / 60);
-      markers.push({
-        label: `${String(displayHour).padStart(2, '0')}:00`,
-        position: i * 60 * PIXELS_PER_MINUTE
-      });
+    const numHours = Math.ceil(totalHours);
+    const interval = totalHours <= 12 ? 2 : 2; // Show every 2 hours
+    
+    for (let i = 0; i <= numHours; i += interval) {
+      if (i * 60 <= totalMinutes) {
+        const hourMins = (startTimeOffset + i * 60) % (24 * 60);
+        const displayHour = Math.floor(hourMins / 60);
+        markers.push({
+          label: `${String(displayHour).padStart(2, '0')}:00`,
+          position: i * 60 * PIXELS_PER_MINUTE
+        });
+      }
     }
     return markers;
-  }, [startTimeOffset, PIXELS_PER_MINUTE]);
+  }, [startTimeOffset, totalMinutes, totalHours, PIXELS_PER_MINUTE]);
 
   const getEmployee = (employeeId) => employees.find(e => e.id === employeeId);
   const getFunction = (functionId) => allFunctions.find(f => f.id === functionId);
@@ -362,10 +376,13 @@ export default function TimelineView({
                       if (endMins <= startMins) endMins += 24 * 60;
                       
                       // Adjust for timeline start offset
-                      startMins = (startMins - startTimeOffset + 24 * 60) % (24 * 60);
-                      endMins = startMins + (timeToMinutes(shift.end_time) >= timeToMinutes(shift.start_time) 
-                        ? timeToMinutes(shift.end_time) - timeToMinutes(shift.start_time)
-                        : 24 * 60 - timeToMinutes(shift.start_time) + timeToMinutes(shift.end_time));
+                      const rawStartMins = timeToMinutes(shift.start_time);
+                      const rawEndMins = timeToMinutes(shift.end_time) + (timeToMinutes(shift.end_time) < rawStartMins ? 24 * 60 : 0);
+                      
+                      // Position relative to timeline start
+                      startMins = (rawStartMins - startTimeOffset + 24 * 60) % (24 * 60);
+                      const shiftDurationMins = rawEndMins - rawStartMins;
+                      endMins = startMins + shiftDurationMins;
                       
                       const leftPx = startMins * PIXELS_PER_MINUTE;
                       const widthPx = (endMins - startMins) * PIXELS_PER_MINUTE;
