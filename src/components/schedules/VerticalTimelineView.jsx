@@ -82,7 +82,7 @@ export default function VerticalTimelineView({
   const [compactMode, setCompactMode] = useState(false);
   const resizeRef = useRef({});
 
-  const HOUR_HEIGHT = 80; // 80px per uur voor betere leesbaarheid
+  const HOUR_HEIGHT = 40; // 40px per uur voor compactere weergave
   const PIXELS_PER_MINUTE = HOUR_HEIGHT / 60;
 
   const weekStart = currentWeekStart || startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -248,15 +248,15 @@ export default function VerticalTimelineView({
         <div className="flex min-w-max">
           {/* Time axis - left column */}
           <div className="w-20 flex-shrink-0 border-r border-slate-300 bg-slate-50 sticky left-0 z-20">
-            {/* Header spacer */}
-            <div className="h-24 border-b border-slate-300 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-slate-400" />
+            {/* Header spacer - sticky */}
+            <div className="h-16 border-b border-slate-300 flex items-center justify-center sticky top-0 z-30 bg-slate-50">
+              <Clock className="w-4 h-4 text-slate-400" />
             </div>
             {/* Time labels */}
             {[...Array(24)].map((_, hour) => (
               <div 
                 key={hour} 
-                className="border-b border-slate-200 text-xs font-medium text-slate-600 px-2 flex items-start pt-1"
+                className="border-b border-slate-200 text-[10px] font-medium text-slate-600 px-1 flex items-start pt-0.5"
                 style={{ height: `${HOUR_HEIGHT}px` }}
               >
                 {String(hour).padStart(2, '0')}:00
@@ -265,34 +265,36 @@ export default function VerticalTimelineView({
           </div>
 
           {/* Department/Location columns - left side */}
-          <div className="w-64 flex-shrink-0 border-r border-slate-300 bg-white sticky left-20 z-20">
+          <div className="w-64 flex-shrink-0 border-r border-slate-300 bg-white sticky left-20 z-20 shadow-lg">
             {/* Header */}
-            <div className="h-24 border-b border-slate-300 bg-slate-50 p-3 flex items-center">
-              <span className="font-semibold text-slate-700">Afdeling / Locatie</span>
+            <div className="h-16 border-b border-slate-300 bg-slate-50 p-2 flex items-center sticky top-0 z-30">
+              <span className="font-semibold text-slate-700 text-sm">Afdeling / Locatie</span>
             </div>
             {/* Department & Location rows */}
-            {relevantDepartments.map(dept => {
-              const locs = departmentLocations[dept.id] || [];
-              if (!locs.length) return null;
+            <div className="overflow-y-auto" style={{ maxHeight: `${24 * HOUR_HEIGHT}px` }}>
+              {relevantDepartments.map(dept => {
+                const locs = departmentLocations[dept.id] || [];
+                if (!locs.length) return null;
 
-              return (
-                <div key={dept.id}>
-                  {locs.map(loc => (
-                    <div 
-                      key={loc.id}
-                      className="border-b border-slate-200 p-3 flex flex-col justify-center"
-                      style={{ height: `${24 * HOUR_HEIGHT}px` }}
-                    >
-                      <div className="font-semibold text-slate-900 text-sm mb-1">{dept.name}</div>
-                      <div className="text-slate-600 text-xs flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {loc.name}
+                return (
+                  <div key={dept.id}>
+                    {locs.map(loc => (
+                      <div 
+                        key={loc.id}
+                        className="border-b border-slate-200 p-2 flex flex-col justify-center bg-white hover:bg-slate-50"
+                        style={{ minHeight: '80px' }}
+                      >
+                        <div className="font-semibold text-slate-900 text-sm mb-1">{dept.name}</div>
+                        <div className="text-slate-600 text-xs flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {loc.name}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Days columns with shifts */}
@@ -301,12 +303,12 @@ export default function VerticalTimelineView({
             
             return (
               <div key={dayIdx} className="flex-1 min-w-[280px] border-r border-slate-300 last:border-r-0">
-                {/* Day header */}
-                <div className="h-24 border-b border-slate-300 bg-slate-50 p-3 sticky top-0 z-10">
-                  <div className="font-semibold text-slate-800">
+                {/* Day header - sticky */}
+                <div className="h-16 border-b border-slate-300 bg-slate-50 p-2 sticky top-0 z-30 shadow-sm">
+                  <div className="font-semibold text-slate-800 text-sm">
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className="text-sm text-slate-600">
+                  <div className="text-xs text-slate-600">
                     {format(day, 'd MMMM yyyy', { locale: nl })}
                   </div>
                 </div>
@@ -331,19 +333,23 @@ export default function VerticalTimelineView({
                         return (
                           <div 
                             key={loc.id}
-                            className={`relative border-b border-slate-200 ${isWeekend ? 'bg-slate-50/30' : 'bg-white'}`}
-                            style={{ height: `${24 * HOUR_HEIGHT}px` }}
+                            className={`relative border-b border-slate-200 ${isWeekend ? 'bg-slate-50/30' : 'bg-white'} cursor-pointer`}
+                            style={{ minHeight: '80px' }}
                             onClick={(e) => {
-                              if (e.target === e.currentTarget) {
+                              // Only trigger on direct clicks on empty space
+                              if (e.target.classList.contains('timeline-cell')) {
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 const offsetY = e.clientY - rect.top;
                                 const clickedMinutes = Math.round((offsetY / PIXELS_PER_MINUTE) / 15) * 15;
-                                onCellClick?.(loc.id, day, null, dept.id);
+                                const clickedTime = minutesToTime(clickedMinutes);
+                                onCellClick?.(loc.id, day, null, dept.id, clickedTime);
                               }
                             }}
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => handleDayDrop(e, loc.id, dept.id, day)}
                           >
+                            {/* Clickable overlay for empty space */}
+                            <div className="timeline-cell absolute inset-0" style={{ height: `${24 * HOUR_HEIGHT}px` }} />
                             {/* Hour grid lines */}
                             {[...Array(24)].map((_, hour) => (
                               <div 
@@ -379,16 +385,16 @@ export default function VerticalTimelineView({
                                     left: `${leftPosition}%`,
                                     width: `${laneWidth - 1}%`,
                                     backgroundColor: func?.color || '#64748b',
-                                    minHeight: '40px'
+                                    minHeight: '24px'
                                   }}
                                   draggable
                                   onDragStart={(e) => handleShiftDragStart(e, shift)}
-                                  onClick={(e) => {
+                                  onDoubleClick={(e) => {
                                     e.stopPropagation();
                                     onShiftClick?.(shift);
                                   }}
                                 >
-                                  {/* Resize handles */}
+                                  {/* Resize handles - block all clicks */}
                                   <div
                                     className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30"
                                     onMouseDown={(e) => {
@@ -396,7 +402,14 @@ export default function VerticalTimelineView({
                                       e.preventDefault();
                                       handleResizeStart(e, shift, 'top');
                                     }}
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                    }}
+                                    onDoubleClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                    }}
                                   />
                                   <div
                                     className="absolute bottom-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-30"
@@ -405,44 +418,53 @@ export default function VerticalTimelineView({
                                       e.preventDefault();
                                       handleResizeStart(e, shift, 'bottom');
                                     }}
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                    }}
+                                    onDoubleClick={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                    }}
                                   />
 
-                                  {/* Shift content */}
-                                  {compactMode ? (
-                                    // Compact mode - vertical text
-                                    <div className="h-full flex items-center justify-center p-1">
-                                      <div className="transform -rotate-90 origin-center whitespace-nowrap text-white font-semibold text-xs">
-                                        {employee ? `${employee.first_name} ${employee.last_name.charAt(0)}.` : '?'} • {shift.start_time}-{shift.end_time}
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    // Normal mode - horizontal text
-                                    <div className="px-3 py-2 text-white h-full flex flex-col justify-between">
-                                      <div>
-                                        <div className="font-semibold text-sm flex items-center gap-1.5 mb-1">
-                                          <User className="w-3.5 h-3.5 flex-shrink-0" />
-                                          <span className="truncate">
-                                            {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
-                                          </span>
+                                  {/* Shift content - prevent click bubbling */}
+                                  <div onClick={(e) => e.stopPropagation()} className="h-full">
+                                    {compactMode ? (
+                                      // Compact mode - vertical text
+                                      <div className="h-full flex items-center justify-center p-1">
+                                        <div className="transform -rotate-90 origin-center whitespace-nowrap text-white font-semibold text-[10px]">
+                                          {employee ? `${employee.first_name} ${employee.last_name.charAt(0)}.` : '?'} • {shift.start_time}-{shift.end_time}
                                         </div>
-                                        {func && (
-                                          <div className="text-xs text-white/80 truncate">
-                                            {func.name}
+                                      </div>
+                                    ) : (
+                                      // Normal mode - horizontal text
+                                      <div className="px-2 py-1.5 text-white h-full flex flex-col justify-between">
+                                        <div>
+                                          <div className="font-semibold text-xs flex items-center gap-1 mb-0.5">
+                                            <User className="w-3 h-3 flex-shrink-0" />
+                                            <span className="truncate">
+                                              {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
+                                            </span>
                                           </div>
-                                        )}
-                                      </div>
-                                      <div className="text-xs text-white/95 space-y-1">
-                                        <div className="flex items-center gap-1.5 font-medium">
-                                          <Clock className="w-3 h-3" />
-                                          {shift.start_time} - {shift.end_time}
+                                          {func && (
+                                            <div className="text-[10px] text-white/80 truncate">
+                                              {func.name}
+                                            </div>
+                                          )}
                                         </div>
-                                        <div className="font-semibold">
-                                          {duration}u {shift.break_duration > 0 && `(${shift.break_duration}m pauze)`}
+                                        <div className="text-[10px] text-white/95 space-y-0.5">
+                                          <div className="flex items-center gap-1 font-medium">
+                                            <Clock className="w-2.5 h-2.5" />
+                                            {shift.start_time} - {shift.end_time}
+                                          </div>
+                                          <div className="font-semibold">
+                                            {duration}u {shift.break_duration > 0 && `(${shift.break_duration}m)`}
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
                               );
                             })}

@@ -420,12 +420,16 @@ export default function ScheduleEditor() {
                 currentWeekStart={currentWeekStart}
                 onShiftClick={handleShiftClick}
                 onShiftUpdate={handleShiftUpdate}
-                onCellClick={(locationId, date, daypartId, departmentId) => {
+                onCellClick={(locationId, date, daypartId, departmentId, startTime) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));
                   setSelectedDaypartId(daypartId);
                   setSelectedDepartmentId(departmentId);
+                  // Pre-fill start time if clicked on specific time
+                  if (startTime) {
+                    setSelectedShift({ start_time: startTime });
+                  }
                   setShiftDialogOpen(true);
                 }}
               />
