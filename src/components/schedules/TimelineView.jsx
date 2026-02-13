@@ -432,9 +432,9 @@ export default function TimelineView({
                     />
                   ))}
 
-                  <div className="absolute inset-0" data-empty-area />
+                  <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
-                  <div className="absolute inset-0 p-1">
+                  <div className="absolute inset-0 p-1 pointer-events-none">
                     {dayShifts.map((shift, shiftIdx) => {
                       const employee = getEmployee(shift.employeeId);
                       const func = getFunction(shift.functionId);
