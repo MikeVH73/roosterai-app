@@ -29,6 +29,7 @@ const defaultFormData = {
   email: '',
   phone: '',
   employee_number: '',
+  color: '#3B82F6',
   contract_hours: '',
   contract_type: 'fulltime',
   hourly_rate: '',
@@ -184,8 +185,8 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
               <TabsTrigger value="preferences">Voorkeuren</TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 overflow-y-auto py-4">
-              <TabsContent value="general" className="space-y-4 mt-0">
+            <div className="flex-1 overflow-y-auto py-4 min-h-[400px]">
+              <TabsContent value="general" className="space-y-4 mt-0 h-full">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="first_name">Voornaam *</Label>
@@ -282,9 +283,29 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <Label htmlFor="color">Kleur (voor rooster)</Label>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      id="color"
+                      type="color"
+                      value={formData.color}
+                      onChange={(e) => updateField('color', e.target.value)}
+                      className="w-20 h-10 cursor-pointer"
+                    />
+                    <Input
+                      type="text"
+                      value={formData.color}
+                      onChange={(e) => updateField('color', e.target.value)}
+                      placeholder="#3B82F6"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
               </TabsContent>
 
-              <TabsContent value="contract" className="space-y-4 mt-0">
+              <TabsContent value="contract" className="space-y-4 mt-0 h-full">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="contract_type">Contracttype</Label>
@@ -336,7 +357,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                 </div>
               </TabsContent>
 
-              <TabsContent value="preferences" className="space-y-4 mt-0">
+              <TabsContent value="preferences" className="space-y-4 mt-0 h-full">
                 <div>
                   <Label>Voorkeursdagen</Label>
                   <div className="grid grid-cols-4 gap-2 mt-2">
