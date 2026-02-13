@@ -168,8 +168,12 @@ export default function TimelineView({
 
   const handleShiftDragStart = (e, shift) => {
     e.stopPropagation();
+    if (!shift?.id) {
+      console.error('Cannot drag shift without ID');
+      return;
+    }
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('shiftId', shift.id);
+    e.dataTransfer.setData('text/plain', shift.id);
     isDraggingOrResizing.current = true;
   };
 
@@ -181,11 +185,18 @@ export default function TimelineView({
     e.preventDefault();
     e.stopPropagation();
 
-    const shiftId = e.dataTransfer.getData('shiftId');
-    if (!shiftId) return;
+    const shiftId = e.dataTransfer.getData('text/plain');
+    if (!shiftId) {
+      isDraggingOrResizing.current = false;
+      return;
+    }
 
     const shift = shifts.find(s => s.id === shiftId);
-    if (!shift) return;
+    if (!shift) {
+      console.error('Shift not found:', shiftId);
+      isDraggingOrResizing.current = false;
+      return;
+    }
 
     const oldData = { ...shift };
     const targetDate = format(dateToUse, 'yyyy-MM-dd');
