@@ -265,6 +265,35 @@ export default function ShiftDialog({
           </div>
 
           <div>
+            <Label htmlFor="locationId">Locatie *</Label>
+            <Select 
+              value={formData.locationId || 'auto'} 
+              onValueChange={(v) => setFormData({ ...formData, locationId: v === 'auto' ? '' : v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecteer locatie" />
+              </SelectTrigger>
+              <SelectContent>
+                {schedule?.locationIds && schedule.locationIds.length > 0 ? (
+                  locations
+                    .filter(loc => schedule.locationIds.includes(loc.id))
+                    .map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name}
+                      </SelectItem>
+                    ))
+                ) : (
+                  locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label htmlFor="shift_type">Type dienst</Label>
             <Select 
               value={formData.shift_type} 
@@ -282,8 +311,6 @@ export default function ShiftDialog({
               </SelectContent>
             </Select>
           </div>
-
-
 
           <div>
             <Label htmlFor="functionId">Functie</Label>
