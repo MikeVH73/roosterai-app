@@ -609,9 +609,8 @@ export default function ScheduleOverview() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {currentScheduleId && (
+        {currentScheduleId && (
         <ShiftDialog
           open={shiftDialogOpen}
           onClose={handleCloseShiftDialog}
@@ -631,7 +630,7 @@ export default function ScheduleOverview() {
           functions={functions}
           schedule={schedules.find(s => s.id === currentScheduleId)}
         />
-      )}
+        )}
       </div>
     </div>
   );
