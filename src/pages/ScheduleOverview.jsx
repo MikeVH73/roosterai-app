@@ -5,7 +5,7 @@ import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
-import VerticalTimelineView from '@/components/schedules/VerticalTimelineView';
+import TimelineView from '@/components/schedules/TimelineView';
 import MiniCalendar from '@/components/schedules/MiniCalendar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import { 
@@ -87,6 +87,8 @@ export default function ScheduleOverview() {
     queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId, status: 'active' }),
     enabled: !!companyId
   });
+
+  const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState([]);
 
   const { data: employees = [] } = useQuery({
     queryKey: ['employees', companyId],
@@ -569,7 +571,7 @@ export default function ScheduleOverview() {
                           </div>
                         )}
 
-                        {/* Schedule Grid - Always Vertical Timeline View */}
+                        {/* Schedule Grid - Horizontal Timeline View */}
                         <div className="w-full overflow-auto">
                           {weekDays.length === 0 ? (
                             <div className="p-12 text-center" style={{ color: 'var(--color-text-muted)' }}>
@@ -577,23 +579,26 @@ export default function ScheduleOverview() {
                               <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
                             </div>
                           ) : (
-                            <VerticalTimelineView
+                            <TimelineView
                               schedule={schedule}
                               shifts={scheduleShifts}
                               locations={locations}
+                              departments={departments}
                               employees={employees}
                               functions={functions}
-                              departments={departments}
+                              dayparts={dayparts}
                               currentWeekStart={currentWeekStart}
+                              selectedDayparts={selectedTimelineDayparts}
+                              activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
                               onShiftUpdate={(shift, oldData) => {
-                                // No undo stack in overview, just refetch
+                                queryClient.invalidateQueries(['all-shifts', companyId]);
                               }}
-                              onCellClick={(locationId, date, daypartId, departmentId, startTime) => {
+                              onCellClick={(locationId, date, departmentId, startTime) => {
                                 setSelectedShift(startTime ? { start_time: startTime } : null);
                                 setSelectedEmployeeId(null);
                                 setSelectedDate(format(date, 'yyyy-MM-dd'));
-                                setSelectedDaypartId(daypartId);
+                                setSelectedDaypartId(null);
                                 setCurrentScheduleId(schedule.id);
                                 setShiftDialogOpen(true);
                               }}
