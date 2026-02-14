@@ -813,42 +813,6 @@ export default function TimelineView({
           );
         })}
         
-        {/* Grand total row - Daily totals */}
-        <div className="flex w-full border-t-2" style={{ 
-          borderColor: 'var(--color-border)',
-          backgroundColor: 'var(--color-primary)'
-        }}>
-          <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>Totaal per Dag</div>
-          </div>
-          {weekDays.map((day, dayIdx) => {
-            const dateStr = format(day, 'yyyy-MM-dd');
-            const visibleLocationIds = sortedLocations.map(loc => loc.id);
-            const allDayShifts = shifts.filter(s => s.date === dateStr && visibleLocationIds.includes(s.locationId));
-            const grandTotal = allDayShifts.reduce((sum, shift) => {
-              const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
-              return sum + duration;
-            }, 0);
-
-            return (
-              <div 
-                key={dayIdx}
-                className="border-r-2 flex-1 flex items-center justify-center"
-                style={{ 
-                  minWidth: '100px', 
-                  minHeight: '44px',
-                  borderColor: 'var(--color-border)',
-                  backgroundColor: 'var(--color-primary)'
-                }}
-              >
-                <div className="font-bold text-base" style={{ color: 'var(--color-text-primary)' }}>
-                  {grandTotal.toFixed(1)}u
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
         {/* Week total row */}
         <div className="flex w-full border-t" style={{ 
           borderColor: 'var(--color-border)',
