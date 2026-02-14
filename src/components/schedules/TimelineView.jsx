@@ -522,28 +522,22 @@ export default function TimelineView({
           const isLocationSubtotal = row.type === 'location_subtotal';
           const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
-          // Calculate row height once for all days (for department rows)
-           let rowHeightForAllDays = isDepartmentRow ? (() => {
-             let maxLanesNeeded = 0;
-             weekDays.forEach(day => {
-               const dayShifts = shifts.filter(s => 
-                 s.locationId === row.parentLocationId && 
-                 s.departmentId === row.data.id &&
-                 format(day, 'yyyy-MM-dd') === s.date
-               );
-               if (dayShifts.length > 0) {
-                 const lanesForDay = assignShiftLanes(dayShifts);
-                 const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
-                 maxLanesNeeded = Math.max(maxLanesNeeded, lanesNeeded);
-               }
-             });
-             const SHIFT_HEIGHT = 28;
-             const SHIFT_INTERVAL = 30; // 28px height + 2px spacing
-             const PADDING_TOP = 4;
-             const PADDING_BOTTOM = 4;
-             const totalHeight = PADDING_TOP + ((maxLanesNeeded - 1) * SHIFT_INTERVAL) + SHIFT_HEIGHT + PADDING_BOTTOM;
-             return Math.max(56, totalHeight);
-           })() : undefined;
+          // Calculate cell height based on per-day lanes
+          const calculateCellHeight = (dateStr, isDept) => {
+            if (!isDept) return 72;
+            const dayShifts = shifts.filter(s => 
+              s.locationId === row.parentLocationId && 
+              s.departmentId === row.data.id &&
+              s.date === dateStr
+            );
+            if (dayShifts.length === 0) return 56;
+            const lanesForDay = assignShiftLanes(dayShifts);
+            const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
+            const SHIFT_HEIGHT = 28;
+            const SHIFT_INTERVAL = 30;
+            const totalHeight = 4 + ((lanesNeeded - 1) * SHIFT_INTERVAL) + SHIFT_HEIGHT + 4;
+            return Math.max(56, totalHeight);
+          };
 
           return (
             <div
