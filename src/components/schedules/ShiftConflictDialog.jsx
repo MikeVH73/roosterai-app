@@ -84,8 +84,8 @@ export default function ShiftConflictDialog({
                 Planning conflict gedetecteerd
               </DialogTitle>
               <p className="text-sm text-slate-600 mt-1">
-                {employee?.first_name} {employee?.last_name} heeft overlappende diensten op{' '}
-                {format(parseISO(newShift.date), 'EEEE d MMMM yyyy', { locale: nl })}
+                {employee?.first_name} {employee?.last_name} heeft overlappende diensten
+                {newShift.date && ` op ${format(parseISO(newShift.date), 'EEEE d MMMM yyyy', { locale: nl })}`}
               </p>
             </div>
           </div>
