@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { format, addDays, startOfWeek, isSameDay, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { GripVertical, Clock } from 'lucide-react';
+import { GripVertical, Clock, ChevronRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -27,6 +27,7 @@ export default function TimelineView({
   schedule, 
   shifts, 
   locations, 
+  departments = [],
   employees, 
   functions: allFunctions,
   dayparts = [],
@@ -101,7 +102,6 @@ export default function TimelineView({
 
 
   const sortedLocations = useMemo(() => {
-    // Filter locations based on schedule's locationIds if specified
     const filteredLocations = schedule?.locationIds?.length > 0
       ? locations.filter(loc => schedule.locationIds.includes(loc.id))
       : locations;
@@ -113,6 +113,32 @@ export default function TimelineView({
       return orderA - orderB;
     });
   }, [locations, locationOrder, schedule?.locationIds]);
+
+  const displayRows = useMemo(() => {
+    const rows = [];
+    const scheduleDepartmentIds = schedule?.departmentIds || [];
+    const departmentsInSchedule = departments.filter(dept => 
+      scheduleDepartmentIds.length > 0 ? scheduleDepartmentIds.includes(dept.id) : true
+    );
+
+    sortedLocations.forEach(location => {
+      rows.push({ type: 'location_header', id: location.id, data: location });
+
+      const departmentsForLocation = departmentsInSchedule.filter(dept =>
+        dept.locationIds?.includes(location.id)
+      ).sort((a, b) => a.name.localeCompare(b.name));
+
+      departmentsForLocation.forEach(department => {
+        rows.push({ 
+          type: 'department_row', 
+          id: `${location.id}-${department.id}`, 
+          data: department, 
+          parentLocationId: location.id 
+        });
+      });
+    });
+    return rows;
+  }, [sortedLocations, departments, schedule?.departmentIds]);
 
   const getShiftsForDay = (locationId, date) => {
     return shifts.filter(shift => 
@@ -395,165 +421,199 @@ export default function TimelineView({
           </div>
           </div>
 
-        {sortedLocations.map((location) => (
-          <div
-            key={location.id}
-            className={`flex w-full border-b border-slate-200 hover:bg-slate-50/50 transition-colors ${
-              dragOverLocation === location.id ? 'bg-blue-50' : ''
-            }`}
-            draggable
-            onDragStart={(e) => handleLocationDragStart(e, location.id)}
-            onDragOver={(e) => handleLocationDragOver(e, location.id)}
-            onDrop={(e) => handleLocationDrop(e, location.id)}
-            onDragEnd={() => {
-              setDraggedLocation(null);
-              setDragOverLocation(null);
-            }}
-          >
-            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 cursor-move hover:bg-slate-50 transition-colors">
-              <GripVertical className="w-4 h-4 text-slate-400 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-slate-800 text-sm break-words leading-tight">{location.name}</div>
-                {location.code && (
-                  <div className="text-xs text-slate-500">{location.code}</div>
+        {displayRows.map((row) => {
+          const isLocationHeader = row.type === 'location_header';
+          const isDepartmentRow = row.type === 'department_row';
+          const location = isLocationHeader ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
+
+          return (
+            <div
+              key={row.id}
+              className={`flex w-full border-b border-slate-200 hover:bg-slate-50/50 transition-colors ${
+                isLocationHeader && dragOverLocation === location.id ? 'bg-blue-50' : ''
+              }`}
+              draggable={isLocationHeader}
+              onDragStart={isLocationHeader ? (e) => handleLocationDragStart(e, location.id) : undefined}
+              onDragOver={isLocationHeader ? (e) => handleLocationDragOver(e, location.id) : undefined}
+              onDrop={isLocationHeader ? (e) => handleLocationDrop(e, location.id) : undefined}
+              onDragEnd={isLocationHeader ? () => {
+                setDraggedLocation(null);
+                setDragOverLocation(null);
+              } : undefined}
+            >
+              <div className={`w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 ${
+                isLocationHeader ? 'cursor-move hover:bg-slate-50' : 'pl-8'
+              } transition-colors`}>
+                {isLocationHeader ? (
+                  <>
+                    <GripVertical className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-slate-900 text-sm break-words leading-tight">{row.data.name}</div>
+                      {row.data.code && (
+                        <div className="text-xs text-slate-500">{row.data.code}</div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-slate-700 text-sm break-words leading-tight">{row.data.name}</div>
+                      {row.data.code && (
+                        <div className="text-xs text-slate-500">{row.data.code}</div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
-            </div>
 
-            {weekDays.map((day, dayIdx) => {
-              const dayShifts = getShiftsForDay(location.id, day);
-              const cellHeight = Math.max(100, dayShifts.length * 38 + 20);
-              const currentDay = day;
+              {weekDays.map((day, dayIdx) => {
+                const dateStr = format(day, 'yyyy-MM-dd');
+                let dayShifts = [];
+                let cellLocationId = location.id;
+                let cellDepartmentId = null;
 
-              return (
-                <div 
-                  key={dayIdx} 
-                  className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
-                  style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
-                  data-day-container
-                  data-date={format(currentDay, 'yyyy-MM-dd')}
-                  onClick={(e) => {
-                    if (isDraggingOrResizing.current) {
-                      isDraggingOrResizing.current = false;
-                      return;
-                    }
-                    // Only trigger on direct clicks on empty space
-                    if (e.target === e.currentTarget || e.target.closest('[data-empty-area]')) {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const offsetX = e.clientX - rect.left;
-                      const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
-                      const clickedTime = minutesToTime(clickedMinutes);
+                if (isLocationHeader) {
+                  dayShifts = shifts.filter(s => 
+                    s.locationId === location.id && 
+                    s.date === dateStr && 
+                    !s.departmentId
+                  );
+                } else {
+                  cellDepartmentId = row.data.id;
+                  dayShifts = shifts.filter(s => 
+                    s.locationId === row.parentLocationId && 
+                    s.departmentId === row.data.id && 
+                    s.date === dateStr
+                  );
+                }
 
-                      onCellClick?.(location.id, currentDay, null, clickedTime);
-                    }
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  onDrop={(e) => {
-                    e.stopPropagation();
-                    handleDayDrop(e, location.id, currentDay);
-                  }}
-                >
-                  {/* Vertical grid lines every 2 hours */}
-                  {hourMarkers.map((marker, idx) => (
-                    <div
-                      key={`grid-${idx}`}
-                      className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
-                      style={{ left: `${marker.position}px` }}
-                    />
-                  ))}
+                const cellHeight = Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
 
-                  <div className="absolute inset-0 pointer-events-none" data-empty-area />
-
-                  <div className="absolute inset-0 p-1 pointer-events-none">
-                    {dayShifts.map((shift, shiftIdx) => {
-                      const employee = getEmployee(shift.employeeId);
-                      const func = getFunction(shift.functionId);
-                      const shiftColor = employee?.color || func?.color || '#94a3b8';
-
-                      // Calculate shift position relative to timeline start
-                      const shiftStartMins = timeToMinutes(shift.start_time);
-                      const shiftEndMins = timeToMinutes(shift.end_time);
-
-                      // Calculate offset from timeline start
-                      let offsetFromStart = shiftStartMins - startTimeOffset;
-                      if (offsetFromStart < 0) {
-                        offsetFromStart += 24 * 60; // Wrap around midnight
+                return (
+                  <div 
+                    key={dayIdx} 
+                    className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
+                    style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
+                    data-day-container
+                    data-date={dateStr}
+                    onClick={(e) => {
+                      if (isDraggingOrResizing.current) {
+                        isDraggingOrResizing.current = false;
+                        return;
                       }
+                      if (e.target === e.currentTarget || e.target.closest('[data-empty-area]')) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const offsetX = e.clientX - rect.left;
+                        const clickedMinutes = Math.round((offsetX / PIXELS_PER_MINUTE) / 15) * 15;
+                        const clickedTime = minutesToTime(startTimeOffset + clickedMinutes);
 
-                      // Calculate duration
-                      let durationMins = shiftEndMins - shiftStartMins;
-                      if (durationMins <= 0) {
-                        durationMins += 24 * 60; // Shift crosses midnight
+                        onCellClick?.(cellLocationId, day, cellDepartmentId, clickedTime);
                       }
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onDrop={(e) => {
+                      e.stopPropagation();
+                      handleDayDrop(e, cellLocationId, day);
+                    }}
+                  >
+                    {hourMarkers.map((marker, idx) => (
+                      <div
+                        key={`grid-${idx}`}
+                        className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
+                        style={{ left: `${marker.position}px` }}
+                      />
+                    ))}
 
-                      const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
-                      const widthPx = durationMins * PIXELS_PER_MINUTE;
-                      const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
+                    <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
-                      return (
-                        <div
-                          key={shift.id}
-                          className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10"
-                          style={{
-                            left: `${leftPx}px`,
-                            width: `${widthPx}px`,
-                            backgroundColor: shiftColor,
-                            top: shiftIdx * 32 + 6,
-                            zIndex: 10 + shiftIdx
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div 
-                            className={`absolute inset-0 px-2 py-1 ${fontSizeClass} text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10`}
-                            draggable
-                            onDragStart={(e) => handleShiftDragStart(e, shift)}
-                            onDragEnd={handleShiftDragEnd}
-                            onClick={(e) => e.stopPropagation()}
-                            onDoubleClick={(e) => {
-                              e.stopPropagation();
-                              onShiftClick?.(shift);
+                    <div className="absolute inset-0 p-1 pointer-events-none">
+                      {dayShifts.map((shift, shiftIdx) => {
+                        const employee = getEmployee(shift.employeeId);
+                        const func = getFunction(shift.functionId);
+                        const shiftColor = employee?.color || func?.color || '#94a3b8';
+
+                        const shiftStartMins = timeToMinutes(shift.start_time);
+                        const shiftEndMins = timeToMinutes(shift.end_time);
+
+                        let offsetFromStart = shiftStartMins - startTimeOffset;
+                        if (offsetFromStart < 0) {
+                          offsetFromStart += 24 * 60;
+                        }
+
+                        let durationMins = shiftEndMins - shiftStartMins;
+                        if (durationMins <= 0) {
+                          durationMins += 24 * 60;
+                        }
+
+                        const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
+                        const widthPx = durationMins * PIXELS_PER_MINUTE;
+                        const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
+
+                        return (
+                          <div
+                            key={shift.id}
+                            className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10"
+                            style={{
+                              left: `${leftPx}px`,
+                              width: `${widthPx}px`,
+                              backgroundColor: shiftColor,
+                              top: shiftIdx * 32 + 6,
+                              zIndex: 10 + shiftIdx
                             }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            {/* Resize handles - thin edges only */}
-                            <div
-                              className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                handleResizeStart(e, shift, 'left');
-                              }}
+                            <div 
+                              className={`absolute inset-0 px-2 py-1 ${fontSizeClass} text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10`}
+                              draggable
+                              onDragStart={(e) => handleShiftDragStart(e, shift)}
+                              onDragEnd={handleShiftDragEnd}
                               onClick={(e) => e.stopPropagation()}
-                            />
-                            <div
-                              className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
-                              onMouseDown={(e) => {
+                              onDoubleClick={(e) => {
                                 e.stopPropagation();
-                                e.preventDefault();
-                                handleResizeStart(e, shift, 'right');
+                                onShiftClick?.(shift);
                               }}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <span className="truncate">
-                              {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
-                            </span>
-                            {widthPx > 60 && (
-                              <span className={`text-white/95 flex-shrink-0 font-semibold ml-auto ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[10px]'}`}>
-                                {duration}
+                            >
+                              <div
+                                className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  handleResizeStart(e, shift, 'left');
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <div
+                                className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  handleResizeStart(e, shift, 'right');
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <span className="truncate">
+                                {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
                               </span>
-                            )}
+                              {widthPx > 60 && (
+                                <span className={`text-white/95 flex-shrink-0 font-semibold ml-auto ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[10px]'}`}>
+                                  {duration}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          );
+        })}
         
         {/* Extra ruimte onder de laatste locatie */}
         <div className="h-32 bg-slate-50/30 border-b border-slate-200" />
