@@ -435,7 +435,7 @@ export default function TimelineView({
             </div>
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-200 flex-1" style={{ minWidth: '100px' }}>
+              <div key={dayIdx} className="border-r-2 border-slate-800 flex-1" style={{ minWidth: '100px' }}>
                 <div className="text-center bg-white py-2.5">
                   <div className={`font-semibold text-slate-800 ${DAY_WIDTH < 120 ? 'text-xs' : 'text-sm'} truncate px-2`}>
                     {format(day, 'EEEE', { locale: nl })}
@@ -453,7 +453,7 @@ export default function TimelineView({
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50" />
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50 flex-1" style={{ minWidth: '100px', height: '32px' }}>
+              <div key={dayIdx} className="relative border-r-2 border-slate-800 bg-slate-50 flex-1" style={{ minWidth: '100px', height: '32px' }}>
                 {hourMarkers.map((marker, idx) => (
                   <div 
                     key={idx} 
@@ -542,7 +542,7 @@ export default function TimelineView({
                 return (
                   <div 
                     key={dayIdx} 
-                    className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
+                    className="border-r-2 border-slate-800 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
                     style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
                     data-day-container
                     data-date={dateStr}
