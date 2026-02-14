@@ -56,7 +56,7 @@ export default function ScheduleOverview() {
   const queryClient = useQueryClient();
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 })); // Week starts on Monday
-  const [viewMode, setViewMode] = useState('week'); // 'day', 'week', 'month', 'year'
+  const [viewMode, setViewMode] = useState('week'); // Always week view for timeline
   const [visibleDays, setVisibleDays] = useState([1, 2, 3, 4, 5, 6, 0]); // 1=maandag, 0=zondag
   const [miniCalendarOpen, setMiniCalendarOpen] = useState(true);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
@@ -309,10 +309,17 @@ export default function ScheduleOverview() {
                               <span className="truncate flex-1 text-left">{schedule.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge className={`${statusConfig[schedule.status].color} text-[10px] px-1.5 py-0`}>
+                              <Badge 
+                                className="text-[10px] px-1.5 py-0" 
+                                style={{ 
+                                  backgroundColor: schedule.status === 'published' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(148, 163, 184, 0.2)',
+                                  color: schedule.status === 'published' ? '#22c55e' : 'var(--color-text-secondary)',
+                                  border: `1px solid ${schedule.status === 'published' ? '#22c55e' : 'var(--color-border)'}`
+                                }}
+                              >
                                 {statusConfig[schedule.status].label}
                               </Badge>
-                              <span className="text-xs text-slate-400">
+                              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                                 {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })}
                               </span>
                             </div>
@@ -488,45 +495,18 @@ export default function ScheduleOverview() {
                         {/* Compact Header with Controls */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            {/* View Mode Selector */}
-                            <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-                              <Button
-                                variant={viewMode === 'day' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setViewMode('day')}
-                                className={`h-7 px-3 text-xs ${viewMode === 'day' ? 'bg-white shadow-sm' : ''}`}
-                              >
-                                Dag
-                              </Button>
-                              <Button
-                                variant={viewMode === 'week' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setViewMode('week')}
-                                className={`h-7 px-3 text-xs ${viewMode === 'week' ? 'bg-white shadow-sm' : ''}`}
-                              >
-                                Week
-                              </Button>
-                              <Button
-                                variant={viewMode === 'month' ? 'default' : 'ghost'}
-                                size="sm"
-                                onClick={() => setViewMode('month')}
-                                className={`h-7 px-3 text-xs ${viewMode === 'month' ? 'bg-white shadow-sm' : ''}`}
-                              >
-                                Maand
-                              </Button>
-                            </div>
-                            
                             {/* Navigation */}
-                            <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
+                            <div className="flex items-center gap-2 rounded-lg p-1" style={{ backgroundColor: 'var(--color-surface-light)' }}>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={handlePrev}
                                 className="h-7"
+                                style={{ color: 'var(--color-text-secondary)' }}
                               >
                                 <ChevronLeft className="w-3 h-3" />
                               </Button>
-                              <span className="text-xs font-medium px-3 min-w-[140px] text-center">
+                              <span className="text-xs font-medium px-3 min-w-[140px] text-center" style={{ color: 'var(--color-text-primary)' }}>
                                 {getViewLabel()}
                               </span>
                               <Button
@@ -534,6 +514,7 @@ export default function ScheduleOverview() {
                                 size="sm"
                                 onClick={handleNext}
                                 className="h-7"
+                                style={{ color: 'var(--color-text-secondary)' }}
                               >
                                 <ChevronRight className="w-3 h-3" />
                               </Button>
@@ -542,7 +523,7 @@ export default function ScheduleOverview() {
                             {/* Day Selector */}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs">
+                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
                                   <Settings2 className="w-3 h-3 mr-1" />
                                   Dagen ({visibleDays.length})
                                 </Button>
@@ -584,33 +565,26 @@ export default function ScheduleOverview() {
                           </div>
                         )}
 
-                        {/* Schedule Grid */}
+                        {/* Schedule Grid - Always Timeline View */}
                         <div className="w-full overflow-auto">
-                          {viewMode === 'month' ? (
-                            <MonthCalendarGrid
-                              currentDate={currentWeekStart}
-                              shifts={scheduleShifts}
-                              dayparts={relevantDayparts}
-                              staffingRequirements={staffingRequirements}
-                              onDayClick={handleDateSelect}
-                            />
-                          ) : weekDays.length === 0 ? (
-                            <div className="p-12 text-center text-slate-500">
-                              <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                          {weekDays.length === 0 ? (
+                            <div className="p-12 text-center" style={{ color: 'var(--color-text-muted)' }}>
+                              <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)', opacity: 0.3 }} />
                               <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
                             </div>
                           ) : (
-                            <DaypartScheduleGrid
-                              dayparts={relevantDayparts}
+                            <ScheduleWeekView
+                              schedule={schedule}
+                              weekDays={weekDays}
                               employees={scheduleEmployees}
                               shifts={scheduleShifts}
-                              weekDays={weekDays}
-                              staffingRequirements={staffingRequirements}
+                              departments={departments}
+                              dayparts={relevantDayparts}
+                              locations={locations}
                               functions={functions}
+                              staffingRequirements={staffingRequirements}
                               onCellClick={(employeeId, date, daypartId) => handleCellClick(employeeId, date, daypartId, schedule.id)}
                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
-                              onDaypartOrderChange={handleDaypartOrderChange}
-                              schedule={schedule}
                             />
                           )}
                         </div>
