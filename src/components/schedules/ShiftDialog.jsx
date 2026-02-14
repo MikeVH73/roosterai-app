@@ -525,7 +525,10 @@ export default function ShiftDialog({
               </Button>
             )}
             <div className={`flex gap-3 ${!shift?.id ? 'ml-auto' : ''}`}>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} style={{ 
+                color: 'var(--color-text-primary)',
+                borderColor: 'var(--color-border)'
+              }}>
                 Annuleren
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">

@@ -448,13 +448,19 @@ export default function TimelineView({
   }
 
   return (
-    <div className="w-full bg-white rounded-lg border border-slate-200 flex flex-col relative h-full">
+    <div className="w-full rounded-lg border flex flex-col relative h-full" style={{ 
+      backgroundColor: 'var(--color-surface)',
+      borderColor: 'var(--color-border)'
+    }}>
       {resizeTooltip && (
         <div 
-          className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-sm font-semibold pointer-events-none"
+          className="fixed z-50 px-3 py-2 rounded-lg shadow-xl text-sm font-semibold pointer-events-none"
           style={{
             left: `${resizeTooltip.x + 15}px`,
             top: `${resizeTooltip.y - 40}px`,
+            backgroundColor: 'var(--color-surface)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-border)'
           }}
         >
           <div className="flex items-center gap-2">
@@ -465,19 +471,28 @@ export default function TimelineView({
       )}
       <div ref={timelineRef} className="overflow-y-auto flex-1 w-full">
         <div className="w-full relative">
-        <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
+        <div className="sticky top-0 z-20 border-b" style={{ 
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)'
+        }}>
           <div className="flex w-full">
-            <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 bg-slate-50 p-3">
-              <div className="font-semibold text-slate-700 text-sm">Locaties</div>
+            <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{ 
+              borderColor: 'var(--color-border)',
+              backgroundColor: 'var(--color-surface-light)'
+            }}>
+              <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>Locaties</div>
             </div>
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r-2 border-slate-800 flex-1" style={{ minWidth: '100px' }}>
-                <div className="text-center bg-white py-2.5">
-                  <div className={`font-semibold text-slate-800 ${DAY_WIDTH < 120 ? 'text-xs' : 'text-sm'} truncate px-2`}>
+              <div key={dayIdx} className="border-r-2 flex-1" style={{ 
+                minWidth: '100px',
+                borderColor: 'var(--color-border)'
+              }}>
+                <div className="text-center py-2.5" style={{ backgroundColor: 'var(--color-surface)' }}>
+                  <div className={`font-semibold ${DAY_WIDTH < 120 ? 'text-xs' : 'text-sm'} truncate px-2`} style={{ color: 'var(--color-text-primary)' }}>
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className={`text-slate-600 ${DAY_WIDTH < 120 ? 'text-[10px]' : 'text-xs'}`}>
+                  <div className={DAY_WIDTH < 120 ? 'text-[10px]' : 'text-xs'} style={{ color: 'var(--color-text-secondary)' }}>
                     {format(day, 'd MMM', { locale: nl })}
                   </div>
                 </div>
@@ -486,18 +501,29 @@ export default function TimelineView({
           </div>
 
           {/* Timeline with hours spanning all days */}
-          <div className="flex border-t border-slate-200 w-full">
-            <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 bg-slate-50" />
+          <div className="flex border-t w-full" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="w-48 flex-shrink-0 border-r-2" style={{ 
+              borderColor: 'var(--color-border)',
+              backgroundColor: 'var(--color-surface-light)'
+            }} />
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="relative border-r-2 border-slate-800 bg-slate-50 flex-1" style={{ minWidth: '100px', height: '32px' }}>
+              <div key={dayIdx} className="relative border-r-2 flex-1" style={{ 
+                minWidth: '100px', 
+                height: '32px',
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-surface-light)'
+              }}>
                 {hourMarkers.map((marker, idx) => (
                   <div 
                     key={idx} 
-                    className="absolute inset-y-0 border-l border-slate-300"
-                    style={{ left: `${marker.position}px` }}
+                    className="absolute inset-y-0 border-l"
+                    style={{ 
+                      left: `${marker.position}px`,
+                      borderColor: 'var(--color-border)'
+                    }}
                   >
-                    <span className={`absolute top-1 left-0.5 text-slate-600 font-medium ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[11px]'}`}>
+                    <span className={`absolute top-1 left-0.5 font-medium ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[11px]'}`} style={{ color: 'var(--color-text-secondary)' }}>
                       {marker.label.replace(':00', '')}
                     </span>
                   </div>
@@ -517,9 +543,11 @@ export default function TimelineView({
           return (
             <div
               key={row.id}
-              className={`flex w-full border-b border-slate-200 hover:bg-slate-50/50 transition-colors ${
-                isLocationHeader && dragOverLocation === location.id ? 'bg-blue-50' : ''
-              }`}
+              className="flex w-full border-b transition-colors"
+              style={{ 
+                borderColor: 'var(--color-border)',
+                backgroundColor: isLocationHeader && dragOverLocation === location.id ? 'var(--color-accent-light)' : 'transparent'
+              }}
               draggable={isLocationHeader}
               onDragStart={isLocationHeader ? (e) => handleLocationDragStart(e, location.id) : undefined}
               onDragOver={isLocationHeader ? (e) => handleLocationDragOver(e, location.id) : undefined}
@@ -529,34 +557,41 @@ export default function TimelineView({
                 setDragOverLocation(null);
               } : undefined}
             >
-              <div className={`w-48 flex-shrink-0 border-r-2 border-slate-800 bg-white p-3 flex items-center gap-2 ${
-                isLocationHeader ? 'cursor-move hover:bg-slate-50' : isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? 'bg-slate-100 pl-8' : 'pl-8'
-              } transition-colors`}>
+              <div className={`w-48 flex-shrink-0 border-r-2 p-3 flex items-center gap-2 ${
+                isLocationHeader ? 'cursor-move' : isDepartmentSubtotal ? 'pl-8' : 'pl-8'
+              } transition-colors`}
+              style={{
+                borderColor: 'var(--color-border)',
+                backgroundColor: isLocationHeader ? 'var(--color-surface)' : 
+                               isLocationSubtotal ? 'var(--color-surface-light)' : 
+                               isDepartmentSubtotal ? 'var(--color-surface-light)' : 
+                               'var(--color-surface)'
+              }}>
                 {isLocationHeader ? (
                   <>
-                    <GripVertical className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <GripVertical className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-slate-900 text-sm break-words leading-tight">{row.data.name}</div>
+                      <div className="font-semibold text-sm break-words leading-tight" style={{ color: 'var(--color-text-primary)' }}>{row.data.name}</div>
                       {row.data.code && (
-                        <div className="text-xs text-slate-500">{row.data.code}</div>
+                        <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{row.data.code}</div>
                       )}
                     </div>
                   </>
                 ) : isLocationSubtotal ? (
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-blue-900 text-sm">Totaal {row.data.name}</div>
+                    <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>Totaal {row.data.name}</div>
                   </div>
                 ) : isDepartmentSubtotal ? (
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-700 text-xs italic">Subtotaal {row.data.name}</div>
+                    <div className="font-medium text-xs italic" style={{ color: 'var(--color-text-secondary)' }}>Subtotaal {row.data.name}</div>
                   </div>
                 ) : (
                   <>
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                    <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-slate-700 text-sm break-words leading-tight">{row.data.name}</div>
+                      <div className="font-medium text-sm break-words leading-tight" style={{ color: 'var(--color-text-primary)' }}>{row.data.name}</div>
                       {row.data.code && (
-                        <div className="text-xs text-slate-500">{row.data.code}</div>
+                        <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{row.data.code}</div>
                       )}
                     </div>
                   </>
@@ -611,10 +646,16 @@ export default function TimelineView({
                 return (
                   <div 
                     key={dayIdx} 
-                    className={`border-r-2 border-slate-800 relative transition-colors flex-1 ${
-                      isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? row.colorClass : isDepartmentRow ? row.colorClass : 'bg-white hover:bg-slate-50/50'
-                    }`}
-                    style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
+                    className="border-r-2 relative transition-colors flex-1"
+                    style={{ 
+                      minWidth: '100px', 
+                      minHeight: `${cellHeight}px`,
+                      borderColor: 'var(--color-border)',
+                      backgroundColor: isLocationSubtotal ? 'var(--color-surface-light)' : 
+                                      isDepartmentSubtotal ? 'var(--color-surface-light)' : 
+                                      isDepartmentRow ? 'var(--color-surface)' : 
+                                      'var(--color-surface)'
+                    }}
                     data-day-container
                     data-date={dateStr}
                     onClick={(e) => {
@@ -645,7 +686,7 @@ export default function TimelineView({
                   >
                     {(isLocationSubtotal || isDepartmentSubtotal) ? (
                       <div className="h-full flex items-center justify-center">
-                        <div className={`${isLocationSubtotal ? 'font-bold text-blue-900 text-sm' : 'font-semibold text-slate-700 text-xs'}`}>
+                        <div className={isLocationSubtotal ? 'font-bold text-sm' : 'font-semibold text-xs'} style={{ color: 'var(--color-text-primary)' }}>
                           {totalHours.toFixed(1)}u
                         </div>
                       </div>
@@ -654,8 +695,11 @@ export default function TimelineView({
                         {hourMarkers.map((marker, idx) => (
                           <div
                             key={`grid-${idx}`}
-                            className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
-                            style={{ left: `${marker.position}px` }}
+                            className="absolute inset-y-0 border-r pointer-events-none"
+                            style={{ 
+                              left: `${marker.position}px`,
+                              borderColor: 'var(--color-border)'
+                            }}
                           />
                         ))}
 
@@ -767,9 +811,12 @@ export default function TimelineView({
         })}
         
         {/* Grand total row - Daily totals */}
-        <div className="flex w-full border-t-2 border-slate-900 bg-slate-800">
-          <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 p-3">
-            <div className="font-bold text-white text-sm">Totaal per Dag</div>
+        <div className="flex w-full border-t-2" style={{ 
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-primary)'
+        }}>
+          <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>Totaal per Dag</div>
           </div>
           {weekDays.map((day, dayIdx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
@@ -782,10 +829,15 @@ export default function TimelineView({
             return (
               <div 
                 key={dayIdx}
-                className="border-r-2 border-slate-800 flex-1 bg-slate-800 flex items-center justify-center"
-                style={{ minWidth: '100px', minHeight: '44px' }}
+                className="border-r-2 flex-1 flex items-center justify-center"
+                style={{ 
+                  minWidth: '100px', 
+                  minHeight: '44px',
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'var(--color-primary)'
+                }}
               >
-                <div className="font-bold text-white text-base">
+                <div className="font-bold text-base" style={{ color: 'var(--color-text-primary)' }}>
                   {grandTotal.toFixed(1)}u
                 </div>
               </div>
@@ -794,12 +846,18 @@ export default function TimelineView({
         </div>
 
         {/* Week total row */}
-        <div className="flex w-full border-t border-slate-700 bg-slate-900">
-          <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 p-3">
-            <div className="font-bold text-white text-sm">Totaal Week</div>
+        <div className="flex w-full border-t" style={{ 
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-primary-light)'
+        }}>
+          <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>Totaal Week</div>
           </div>
-          <div className="flex-1 bg-slate-900 flex items-center justify-center border-r-2 border-slate-800">
-            <div className="font-bold text-white text-lg">
+          <div className="flex-1 flex items-center justify-center border-r-2" style={{ 
+            borderColor: 'var(--color-border)',
+            backgroundColor: 'var(--color-primary-light)'
+          }}>
+            <div className="font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>
               {(() => {
                 const weekTotal = shifts.filter(s => 
                   weekDays.some(day => format(day, 'yyyy-MM-dd') === s.date)
@@ -814,7 +872,10 @@ export default function TimelineView({
         </div>
 
         {/* Extra ruimte onder de laatste locatie */}
-        <div className="h-8 bg-slate-50/30 border-b border-slate-200" />
+        <div className="h-8 border-b" style={{ 
+          backgroundColor: 'var(--color-surface-light)',
+          borderColor: 'var(--color-border)'
+        }} />
         </div>
       </div>
     </div>
