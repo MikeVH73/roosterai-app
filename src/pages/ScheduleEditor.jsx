@@ -345,16 +345,19 @@ export default function ScheduleEditor() {
         <Card className="border-0 shadow-sm">
           <CardContent className="p-0">
             {/* Controls Bar */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <div className="flex items-center justify-between p-4 border-b" style={{ 
+              backgroundColor: 'var(--color-surface)',
+              borderColor: 'var(--color-border)'
+            }}>
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" onClick={() => navigateWeek('prev')}>
+                <Button variant="ghost" size="sm" onClick={() => navigateWeek('prev')} style={{ color: 'var(--color-text-primary)' }}>
                   <ChevronLeft className="w-4 h-4 mr-1" />
                   Vorige week
                 </Button>
-                <h3 className="font-medium text-slate-900">
+                <h3 className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                   Week {format(currentWeekStart, 'w', { locale: nl })} - {format(currentWeekStart, 'MMMM yyyy', { locale: nl })}
                 </h3>
-                <Button variant="ghost" size="sm" onClick={() => navigateWeek('next')}>
+                <Button variant="ghost" size="sm" onClick={() => navigateWeek('next')} style={{ color: 'var(--color-text-primary)' }}>
                   Volgende week
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
