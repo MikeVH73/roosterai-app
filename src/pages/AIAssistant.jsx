@@ -5,6 +5,7 @@ import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
+import AgentChat from '@/components/agents/AgentChat';
 import {
   Sparkles,
   UserX,
@@ -88,7 +89,7 @@ export default function AIAssistant() {
   const urlParams = new URLSearchParams(window.location.search);
   const preSelectedScheduleId = urlParams.get('scheduleId');
 
-  const [activeTab, setActiveTab] = useState('actions');
+  const [activeTab, setActiveTab] = useState('chat');
   const [selectedAction, setSelectedAction] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -350,6 +351,10 @@ export default function AIAssistant() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
+            <TabsTrigger value="chat">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Agent Chat
+            </TabsTrigger>
             <TabsTrigger value="actions">Acties</TabsTrigger>
             <TabsTrigger value="suggestions">
               Suggesties
@@ -359,6 +364,10 @@ export default function AIAssistant() {
             </TabsTrigger>
             <TabsTrigger value="history">Geschiedenis</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="chat">
+            <AgentChat agentName="planning_assistent" />
+          </TabsContent>
 
           <TabsContent value="actions">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
