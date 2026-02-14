@@ -8,8 +8,6 @@ import { Building2, Plus, ChevronRight, Users, Calendar, Sparkles } from 'lucide
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AuroraBackground } from "@/components/ui/aurora-background";
-import { motion } from "framer-motion";
 
 export default function CompanySelect() {
   const navigate = useNavigate();
@@ -57,24 +55,15 @@ export default function CompanySelect() {
 
   if (loading || isLoading) {
     return (
-      <AuroraBackground>
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-slate-400">Laden...</div>
-      </AuroraBackground>
+      </div>
     );
   }
 
   return (
-    <AuroraBackground>
-      <motion.div 
-        initial={{ opacity: 0.0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: 0.2,
-          duration: 0.8,
-          ease: "easeInOut",
-        }}
-        className="w-full max-w-2xl px-6"
-      >
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
@@ -163,7 +152,7 @@ export default function CompanySelect() {
             <p className="text-xs text-slate-500">Team management</p>
           </div>
         </div>
-      </motion.div>
-    </AuroraBackground>
+      </div>
+    </div>
   );
 }

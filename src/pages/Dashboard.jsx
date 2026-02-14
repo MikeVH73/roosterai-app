@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlowCard } from "@/components/ui/glow-card";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -128,13 +129,14 @@ export default function Dashboard() {
   const pendingRequests = vacationRequests.length + swapRequests.length;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <TopBar 
-        title="Dashboard" 
-        subtitle={format(new Date(), "EEEE d MMMM yyyy", { locale: nl })}
-      />
+    <AuroraBackground className="min-h-screen">
+      <div className="w-full">
+        <TopBar 
+          title="Dashboard" 
+          subtitle={format(new Date(), "EEEE d MMMM yyyy", { locale: nl })}
+        />
 
-      <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-6 max-w-7xl mx-auto">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
@@ -360,6 +362,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </AuroraBackground>
   );
 }
