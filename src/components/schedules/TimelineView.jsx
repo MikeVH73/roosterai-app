@@ -656,12 +656,9 @@ export default function TimelineView({
                   );
                 }
 
-                // Calculate lanes and height once
+                // Calculate lanes and height for this day
                 const shiftLanesWithIndices = assignShiftLanes(dayShifts);
-                const lanesForCell = shiftLanesWithIndices.length > 0 
-                  ? Math.max(...shiftLanesWithIndices.map(s => (s.laneIndex || 0))) + 1
-                  : 0;
-                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 56 : 72, lanesForCell * 32 + 8);
+                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : (isDepartmentRow ? rowHeightForAllDays : 72);
 
                 return (
                   <div 
