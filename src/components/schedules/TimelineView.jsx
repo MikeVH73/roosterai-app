@@ -643,9 +643,8 @@ export default function TimelineView({
                   );
                 }
 
-                // Calculate lanes and height for this day
+                // Calculate lanes for this day
                 const shiftLanesWithIndices = assignShiftLanes(dayShifts);
-                const cellHeight = calculateCellHeight(dateStr, isDepartmentRow);
 
                 return (
                   <div 
@@ -653,8 +652,8 @@ export default function TimelineView({
                     className="border-r-2 relative transition-colors flex-1"
                     style={{ 
                       minWidth: '100px', 
-                      height: isDepartmentRow ? `${cellHeight}px` : undefined,
-                      minHeight: `${cellHeight}px`,
+                      height: isDepartmentRow ? `${maxRowHeight}px` : undefined,
+                      minHeight: `${maxRowHeight}px`,
                       borderColor: 'var(--color-border)',
                       backgroundColor: isLocationSubtotal ? 'var(--color-surface-light)' : 
                                       isDepartmentSubtotal ? 'var(--color-surface-light)' : 
