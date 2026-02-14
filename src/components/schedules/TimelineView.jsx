@@ -522,8 +522,8 @@ export default function TimelineView({
           const isLocationSubtotal = row.type === 'location_subtotal';
           const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
-          // Calculate max cell height needed for this row across ALL days
-          let maxRowHeight = isDepartmentRow ? 56 : 72;
+          // Calculate max lanes needed for this row across ALL days in the week
+          let maxLanesInWeek = 1;
           if (isDepartmentRow) {
             weekDays.forEach(day => {
               const dayShifts = shifts.filter(s => 
@@ -533,14 +533,18 @@ export default function TimelineView({
               );
               if (dayShifts.length > 0) {
                 const lanesForDay = assignShiftLanes(dayShifts);
-                const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
-                const SHIFT_HEIGHT = 28;
-                const SHIFT_INTERVAL = 30;
-                const totalHeight = 4 + ((lanesNeeded - 1) * SHIFT_INTERVAL) + SHIFT_HEIGHT + 4;
-                maxRowHeight = Math.max(maxRowHeight, totalHeight);
+                if (lanesForDay.length > 0) {
+                  const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
+                  maxLanesInWeek = Math.max(maxLanesInWeek, lanesNeeded);
+                }
               }
             });
           }
+          
+          // Calculate height: 4px top + (lanes * 30px with spacing) + 4px bottom
+          const SHIFT_HEIGHT = 28;
+          const LANE_HEIGHT = 30; // shift + spacing
+          const maxRowHeight = 4 + (maxLanesInWeek * LANE_HEIGHT) + 4;
 
           return (
             <div
