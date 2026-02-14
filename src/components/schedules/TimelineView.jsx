@@ -644,7 +644,7 @@ export default function TimelineView({
                   );
                 }
 
-                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
+                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 56 : 72, dayShifts.length * 30 + 16);
 
                 return (
                   <div 
@@ -742,7 +742,7 @@ export default function TimelineView({
                               left: `${leftPx}px`,
                               width: `${widthPx}px`,
                               backgroundColor: shiftColor,
-                              top: (shift.laneIndex || 0) * 32 + 6,
+                              top: (shift.laneIndex || 0) * 30 + 4,
                               zIndex: 10 + (shift.laneIndex || 0)
                             }}
                             onClick={(e) => e.stopPropagation()}
