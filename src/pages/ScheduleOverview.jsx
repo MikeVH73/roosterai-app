@@ -466,7 +466,11 @@ export default function ScheduleOverview() {
                             size="sm"
                             onClick={() => setMiniCalendarOpen(true)}
                             className="mb-4"
-                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                            style={{ 
+                              borderColor: 'var(--color-border)', 
+                              color: 'var(--color-text-primary)',
+                              backgroundColor: 'var(--color-surface)'
+                            }}
                           >
                             <Menu className="w-4 h-4 mr-2" />
                             Toon kalender
@@ -529,7 +533,11 @@ export default function ScheduleOverview() {
                             {/* Day Selector */}
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs" style={{ 
+                                  borderColor: 'var(--color-border)', 
+                                  color: 'var(--color-text-primary)',
+                                  backgroundColor: 'var(--color-surface)'
+                                }}>
                                   <Settings2 className="w-3 h-3 mr-1" />
                                   Dagen ({visibleDays.length})
                                 </Button>

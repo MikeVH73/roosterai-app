@@ -136,8 +136,9 @@ export default function Layout({ children, currentPageName }) {
           color: inherit;
         }
 
-        button[class*="outline"] {
+        button[class*="outline"], button[variant="outline"] {
           color: var(--color-text-primary) !important;
+          background-color: var(--color-surface) !important;
         }
 
         /* Badges */
