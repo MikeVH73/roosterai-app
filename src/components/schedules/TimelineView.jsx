@@ -544,22 +544,26 @@ export default function TimelineView({
           const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
           // Calculate row height once for all days (for department rows)
-          let rowHeightForAllDays = isDepartmentRow ? (() => {
-            let maxLanesNeeded = 0;
-            weekDays.forEach(day => {
-              const dayShifts = shifts.filter(s => 
-                s.locationId === row.parentLocationId && 
-                s.departmentId === row.data.id &&
-                format(day, 'yyyy-MM-dd') === s.date
-              );
-              if (dayShifts.length > 0) {
-                const lanesForDay = assignShiftLanes(dayShifts);
-                const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
-                maxLanesNeeded = Math.max(maxLanesNeeded, lanesNeeded);
-              }
-            });
-            return Math.max(56, maxLanesNeeded * 28 + (maxLanesNeeded - 1) * 2 + 8);
-          })() : undefined;
+           let rowHeightForAllDays = isDepartmentRow ? (() => {
+             let maxLanesNeeded = 0;
+             weekDays.forEach(day => {
+               const dayShifts = shifts.filter(s => 
+                 s.locationId === row.parentLocationId && 
+                 s.departmentId === row.data.id &&
+                 format(day, 'yyyy-MM-dd') === s.date
+               );
+               if (dayShifts.length > 0) {
+                 const lanesForDay = assignShiftLanes(dayShifts);
+                 const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
+                 maxLanesNeeded = Math.max(maxLanesNeeded, lanesNeeded);
+               }
+             });
+             const SHIFT_HEIGHT = 28;
+             const SHIFT_SPACING = 2;
+             const PADDING_TOP = 4;
+             const PADDING_BOTTOM = 4;
+             return Math.max(56, PADDING_TOP + (maxLanesNeeded * SHIFT_HEIGHT) + ((maxLanesNeeded - 1) * SHIFT_SPACING) + PADDING_BOTTOM);
+           })() : undefined;
 
           return (
             <div
