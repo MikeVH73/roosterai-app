@@ -654,7 +654,7 @@ export default function TimelineView({
                 return (
                   <div 
                     key={dayIdx} 
-                    className="border-r-2 relative transition-colors flex-1 overflow-hidden"
+                    className="border-r-2 relative transition-colors flex-1"
                     style={{ 
                       minWidth: '100px', 
                       minHeight: `${cellHeight}px`,
