@@ -101,13 +101,18 @@ export default function TimelineView({
 
 
   const sortedLocations = useMemo(() => {
+    // Filter locations based on schedule's locationIds if specified
+    const filteredLocations = schedule?.locationIds?.length > 0
+      ? locations.filter(loc => schedule.locationIds.includes(loc.id))
+      : locations;
+    
     const orderMap = new Map(locationOrder.map((id, idx) => [id, idx]));
-    return [...locations].sort((a, b) => {
+    return [...filteredLocations].sort((a, b) => {
       const orderA = orderMap.get(a.id) ?? 999;
       const orderB = orderMap.get(b.id) ?? 999;
       return orderA - orderB;
     });
-  }, [locations, locationOrder]);
+  }, [locations, locationOrder, schedule?.locationIds]);
 
   const getShiftsForDay = (locationId, date) => {
     return shifts.filter(shift => 
@@ -408,7 +413,7 @@ export default function TimelineView({
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 cursor-move hover:bg-slate-50 transition-colors">
               <GripVertical className="w-4 h-4 text-slate-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-slate-800 text-sm truncate">{location.name}</div>
+                <div className="font-medium text-slate-800 text-sm break-words leading-tight">{location.name}</div>
                 {location.code && (
                   <div className="text-xs text-slate-500">{location.code}</div>
                 )}
