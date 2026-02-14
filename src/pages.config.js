@@ -52,6 +52,7 @@ import Billing from './pages/Billing';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import CompanySelect from './pages/CompanySelect';
 import CompanySettings from './pages/CompanySettings';
+import Dashboard from './pages/Dashboard';
 import DepartmentDetails from './pages/DepartmentDetails';
 import Departments from './pages/Departments';
 import Employees from './pages/Employees';
@@ -63,7 +64,6 @@ import ScheduleOverview from './pages/ScheduleOverview';
 import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
-import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -73,6 +73,7 @@ export const PAGES = {
     "CompanyOnboarding": CompanyOnboarding,
     "CompanySelect": CompanySelect,
     "CompanySettings": CompanySettings,
+    "Dashboard": Dashboard,
     "DepartmentDetails": DepartmentDetails,
     "Departments": Departments,
     "Employees": Employees,
@@ -84,7 +85,6 @@ export const PAGES = {
     "Schedules": Schedules,
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
-    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
