@@ -543,6 +543,18 @@ export default function TimelineView({
           const isLocationSubtotal = row.type === 'location_subtotal';
           const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
+          // Calculate row height once for all days (for department rows)
+          let rowHeightForAllDays = isDepartmentRow ? (() => {
+            const allShiftsInRow = shifts.filter(s => 
+              s.locationId === row.parentLocationId && 
+              s.departmentId === row.data.id
+            );
+            const lanesNeeded = allShiftsInRow.length > 0 
+              ? Math.max(...assignShiftLanes(allShiftsInRow).map(s => (s.laneIndex || 0))) + 1
+              : 1;
+            return Math.max(56, lanesNeeded * 32 + 8);
+          })() : undefined;
+
           return (
             <div
               key={row.id}
