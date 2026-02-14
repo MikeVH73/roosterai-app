@@ -27,10 +27,10 @@ import { nl } from 'date-fns/locale';
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    purple: 'bg-purple-50 text-purple-600',
-    orange: 'bg-orange-50 text-orange-600',
+    blue: 'bg-gradient-to-br from-blue-500 to-blue-600 text-white',
+    green: 'bg-gradient-to-br from-green-500 to-green-600 text-white',
+    purple: 'bg-gradient-to-br from-purple-500 to-purple-600 text-white',
+    orange: 'bg-gradient-to-br from-orange-500 to-orange-600 text-white',
   };
 
   return (
@@ -49,8 +49,13 @@ function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
                 </div>
               )}
             </div>
-            <div className={`p-3 rounded-xl ${colorClasses[color]}`}>
-              <Icon className="w-6 h-6" />
+            <div 
+              className={`relative w-16 h-16 flex items-center justify-center ${colorClasses[color]} shadow-lg`}
+              style={{
+                clipPath: "polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)",
+              }}
+            >
+              <Icon className="w-7 h-7" />
             </div>
           </div>
         </CardContent>
