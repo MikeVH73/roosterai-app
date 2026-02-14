@@ -430,7 +430,7 @@ export default function TimelineView({
         <div className="w-full relative">
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
           <div className="flex w-full">
-            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50 p-3">
+            <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 bg-slate-50 p-3">
               <div className="font-semibold text-slate-700 text-sm">Locaties</div>
             </div>
 
@@ -450,7 +450,7 @@ export default function TimelineView({
 
           {/* Timeline with hours spanning all days */}
           <div className="flex border-t border-slate-200 w-full">
-            <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50" />
+            <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 bg-slate-50" />
 
             {weekDays.map((day, dayIdx) => (
               <div key={dayIdx} className="relative border-r-2 border-slate-800 bg-slate-50 flex-1" style={{ minWidth: '100px', height: '32px' }}>
@@ -490,7 +490,7 @@ export default function TimelineView({
                 setDragOverLocation(null);
               } : undefined}
             >
-              <div className={`w-48 flex-shrink-0 border-r border-slate-300 bg-white p-3 flex items-center gap-2 ${
+              <div className={`w-48 flex-shrink-0 border-r-2 border-slate-800 bg-white p-3 flex items-center gap-2 ${
                 isLocationHeader ? 'cursor-move hover:bg-slate-50' : 'pl-8'
               } transition-colors`}>
                 {isLocationHeader ? (
