@@ -389,6 +389,9 @@ export default function VerticalTimelineView({
                               const laneWidth = 100 / maxLanes;
                               const leftPosition = lane * laneWidth;
 
+                              const hasBreak = shift.break_duration > 0;
+                              const tooltipContent = `${employee?.first_name} ${employee?.last_name} | ${shift.start_time} - ${shift.end_time}${hasBreak ? ` | Pauze: ${shift.break_duration}m${shift.break_start_time ? ` om ${shift.break_start_time}` : ''}` : ''}`;
+
                               return (
                                 <div
                                   key={shift.id}
@@ -407,6 +410,7 @@ export default function VerticalTimelineView({
                                     e.stopPropagation();
                                     onShiftClick?.(shift);
                                   }}
+                                  title={tooltipContent}
                                 >
                                   {/* Resize handles - block all clicks */}
                                   <div
@@ -441,6 +445,20 @@ export default function VerticalTimelineView({
                                       e.preventDefault();
                                     }}
                                   />
+
+                                  {/* Break indicator */}
+                                  {hasBreak && shift.break_start_time && (
+                                    <div
+                                      className="absolute left-0 right-0 h-0.5 bg-white/40 pointer-events-none z-20"
+                                      style={{
+                                        top: `${(timeToMinutes(shift.break_start_time) - startMins) * PIXELS_PER_MINUTE}px`
+                                      }}
+                                    >
+                                      <div className="absolute -left-1 -top-1.5 w-3 h-3 bg-white/60 rounded-full flex items-center justify-center">
+                                        <span className="text-[8px] font-bold" style={{ color: func?.color || '#64748b' }}>P</span>
+                                      </div>
+                                    </div>
+                                  )}
 
                                   {/* Shift content - prevent click bubbling */}
                                   <div onClick={(e) => e.stopPropagation()} className="h-full">

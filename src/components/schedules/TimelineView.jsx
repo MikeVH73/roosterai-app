@@ -146,46 +146,53 @@ export default function TimelineView({
     );
   };
 
-  // Group consecutive shifts from same employee
-  const groupConsecutiveShifts = (dayShifts) => {
+  // Assign shifts to lanes - consecutive shifts from same employee get same lane
+  const assignShiftLanes = (dayShifts) => {
     const sorted = [...dayShifts].sort((a, b) => 
       timeToMinutes(a.start_time) - timeToMinutes(b.start_time)
     );
 
-    const groups = [];
+    const lanes = [];
+    
     sorted.forEach(shift => {
       const startMins = timeToMinutes(shift.start_time);
       let endMins = timeToMinutes(shift.end_time);
       if (endMins <= startMins) endMins += 24 * 60;
 
-      // Find if this shift can be grouped with existing shifts
-      let placed = false;
-      for (const group of groups) {
-        // Check if shift is from same employee and doesn't overlap with any in group
-        const canGroup = group.every(s => {
-          if (s.employeeId !== shift.employeeId) return false;
-          
+      // Find first available lane
+      let assignedLane = -1;
+      for (let laneIdx = 0; laneIdx < lanes.length; laneIdx++) {
+        const lane = lanes[laneIdx];
+        
+        // Check if this shift overlaps with any shift in this lane
+        const hasOverlap = lane.some(s => {
           const sStart = timeToMinutes(s.start_time);
           let sEnd = timeToMinutes(s.end_time);
           if (sEnd <= sStart) sEnd += 24 * 60;
-
-          // No overlap (consecutive or separate is OK)
-          return !(startMins < sEnd && endMins > sStart);
+          return startMins < sEnd && endMins > sStart;
         });
 
-        if (canGroup && group[0].employeeId === shift.employeeId) {
-          group.push(shift);
-          placed = true;
-          break;
+        if (!hasOverlap) {
+          // Check if same employee - prefer to keep same employee in same lane
+          const sameEmployee = lane.some(s => s.employeeId === shift.employeeId);
+          if (sameEmployee || lane.length === 0) {
+            lane.push(shift);
+            assignedLane = laneIdx;
+            break;
+          }
         }
       }
 
-      if (!placed) {
-        groups.push([shift]);
+      // If no suitable lane found, create new one
+      if (assignedLane === -1) {
+        lanes.push([shift]);
       }
     });
 
-    return groups.flat();
+    // Flatten and assign lane index
+    return lanes.flatMap((lane, idx) => 
+      lane.map(shift => ({ ...shift, laneIndex: idx }))
+    );
   };
 
   // Generate hour markers for the timeline (every 2 hours for cleaner look)
@@ -573,7 +580,7 @@ export default function TimelineView({
                     <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
                     <div className="absolute inset-0 p-1 pointer-events-none">
-                      {groupConsecutiveShifts(dayShifts).map((shift, shiftIdx) => {
+                      {assignShiftLanes(dayShifts).map((shift) => {
                         const employee = getEmployee(shift.employeeId);
                         const func = getFunction(shift.functionId);
                         const shiftColor = employee?.color || func?.color || '#94a3b8';
@@ -595,19 +602,37 @@ export default function TimelineView({
                         const widthPx = durationMins * PIXELS_PER_MINUTE;
                         const duration = getShiftDuration(shift.start_time, shift.end_time, shift.break_duration);
 
+                        const hasBreak = shift.break_duration > 0;
+                        const tooltipContent = `${employee?.first_name} ${employee?.last_name} | ${shift.start_time} - ${shift.end_time}${hasBreak ? ` | Pauze: ${shift.break_duration}m${shift.break_start_time ? ` om ${shift.break_start_time}` : ''}` : ''}`;
+
                         return (
                           <div
                             key={shift.id}
-                            className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10"
+                            className="absolute h-7 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 relative"
                             style={{
                               left: `${leftPx}px`,
                               width: `${widthPx}px`,
                               backgroundColor: shiftColor,
-                              top: shiftIdx * 32 + 6,
-                              zIndex: 10 + shiftIdx
+                              top: (shift.laneIndex || 0) * 32 + 6,
+                              zIndex: 10 + (shift.laneIndex || 0)
                             }}
                             onClick={(e) => e.stopPropagation()}
+                            title={tooltipContent}
                           >
+                            {/* Break indicator */}
+                            {hasBreak && shift.break_start_time && (
+                              <div
+                                className="absolute top-0 bottom-0 w-0.5 bg-white/40 pointer-events-none z-20"
+                                style={{
+                                  left: `${(timeToMinutes(shift.break_start_time) - timeToMinutes(shift.start_time)) * PIXELS_PER_MINUTE}px`
+                                }}
+                              >
+                                <div className="absolute -top-1 -left-1.5 w-3 h-3 bg-white/60 rounded-full flex items-center justify-center">
+                                  <span className="text-[8px] font-bold" style={{ color: shiftColor }}>P</span>
+                                </div>
+                              </div>
+                            )}
+
                             <div 
                               className={`absolute inset-0 px-2 py-1 ${fontSizeClass} text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10`}
                               draggable
