@@ -43,6 +43,7 @@ const defaultFormData = {
   start_time: '09:00',
   end_time: '17:00',
   break_duration: 0,
+  break_start_time: '',
   shift_type: 'regular',
   notes: '',
   has_break: false
@@ -89,23 +90,26 @@ export default function ShiftDialog({
         start_time: shift.start_time || '09:00',
         end_time: shift.end_time || '17:00',
         break_duration: shift.break_duration || 30,
+        break_start_time: shift.break_start_time || '',
         shift_type: shift.shift_type || 'regular',
         notes: shift.notes || '',
         has_break: hasBreak
       });
     } else {
-      // Find the daypart to get default times
+      // Find the daypart to get default times and break duration
       const selectedDaypart = dayparts.find(dp => dp.id === daypartId);
       setFormData({
         ...defaultFormData,
         employeeId: employeeId || '',
         date: date || '',
         daypartId: daypartId || '',
+        departmentId: schedule?.departmentIds?.[0] || '',
         start_time: shift?.start_time || selectedDaypart?.startTime || '09:00',
-        end_time: selectedDaypart?.endTime || '17:00'
+        end_time: selectedDaypart?.endTime || '17:00',
+        break_duration: selectedDaypart?.break_duration || 30
       });
     }
-  }, [shift, employeeId, date, daypartId, dayparts, open]);
+  }, [shift, employeeId, date, daypartId, dayparts, open, schedule]);
 
   // Update times when daypart changes
   const handleDaypartChange = (newDaypartId) => {
@@ -114,7 +118,8 @@ export default function ShiftDialog({
       ...prev,
       daypartId: newDaypartId,
       start_time: selectedDaypart?.startTime || prev.start_time,
-      end_time: selectedDaypart?.endTime || prev.end_time
+      end_time: selectedDaypart?.endTime || prev.end_time,
+      break_duration: selectedDaypart?.break_duration || prev.break_duration
     }));
   };
 
@@ -356,21 +361,39 @@ export default function ShiftDialog({
                 })}
               />
               <Label htmlFor="has_break" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Pauze toevoegen (komt bovenop de dienst)
+                Pauze toevoegen
               </Label>
             </div>
             
             {formData.has_break && (
-              <div className="ml-6 mb-4">
-                <Label htmlFor="break_duration" className="text-sm">Pauze duur (minuten)</Label>
-                <Input
-                  id="break_duration"
-                  type="number"
-                  value={formData.break_duration}
-                  onChange={(e) => setFormData({ ...formData, break_duration: e.target.value })}
-                  min={0}
-                  className="mt-1 w-32"
-                />
+              <div className="ml-6 mb-4 space-y-3">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="break_duration" className="text-sm">Pauze duur (minuten)</Label>
+                    <Input
+                      id="break_duration"
+                      type="number"
+                      value={formData.break_duration}
+                      onChange={(e) => setFormData({ ...formData, break_duration: e.target.value })}
+                      min={0}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="break_start_time" className="text-sm">Pauze start</Label>
+                    <Input
+                      id="break_start_time"
+                      type="time"
+                      value={formData.break_start_time}
+                      onChange={(e) => setFormData({ ...formData, break_start_time: e.target.value })}
+                      className="mt-1"
+                      placeholder="Optioneel"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-slate-500">
+                  De pauze wordt aan het rooster toegevoegd en komt bovenop de werktijd
+                </p>
               </div>
             )}
           </div>

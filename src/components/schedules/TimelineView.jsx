@@ -146,6 +146,48 @@ export default function TimelineView({
     );
   };
 
+  // Group consecutive shifts from same employee
+  const groupConsecutiveShifts = (dayShifts) => {
+    const sorted = [...dayShifts].sort((a, b) => 
+      timeToMinutes(a.start_time) - timeToMinutes(b.start_time)
+    );
+
+    const groups = [];
+    sorted.forEach(shift => {
+      const startMins = timeToMinutes(shift.start_time);
+      let endMins = timeToMinutes(shift.end_time);
+      if (endMins <= startMins) endMins += 24 * 60;
+
+      // Find if this shift can be grouped with existing shifts
+      let placed = false;
+      for (const group of groups) {
+        // Check if shift is from same employee and doesn't overlap with any in group
+        const canGroup = group.every(s => {
+          if (s.employeeId !== shift.employeeId) return false;
+          
+          const sStart = timeToMinutes(s.start_time);
+          let sEnd = timeToMinutes(s.end_time);
+          if (sEnd <= sStart) sEnd += 24 * 60;
+
+          // No overlap (consecutive or separate is OK)
+          return !(startMins < sEnd && endMins > sStart);
+        });
+
+        if (canGroup && group[0].employeeId === shift.employeeId) {
+          group.push(shift);
+          placed = true;
+          break;
+        }
+      }
+
+      if (!placed) {
+        groups.push([shift]);
+      }
+    });
+
+    return groups.flat();
+  };
+
   // Generate hour markers for the timeline (every 2 hours for cleaner look)
   const hourMarkers = useMemo(() => {
     const markers = [];
@@ -531,7 +573,7 @@ export default function TimelineView({
                     <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
                     <div className="absolute inset-0 p-1 pointer-events-none">
-                      {dayShifts.map((shift, shiftIdx) => {
+                      {groupConsecutiveShifts(dayShifts).map((shift, shiftIdx) => {
                         const employee = getEmployee(shift.employeeId);
                         const func = getFunction(shift.functionId);
                         const shiftColor = employee?.color || func?.color || '#94a3b8';

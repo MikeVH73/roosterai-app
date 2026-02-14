@@ -24,6 +24,7 @@ const getShiftDuration = (start, end, breakDuration = 0) => {
 };
 
 // Smart collision detection - places overlapping shifts side by side
+// BUT keeps consecutive shifts from same employee in same lane
 const calculatePositionedShifts = (dayShifts) => {
   const positionedShifts = [];
   const sortedShifts = [...dayShifts].sort((a, b) => 
@@ -42,6 +43,19 @@ const calculatePositionedShifts = (dayShifts) => {
     while (!placed && lane < 10) {
       const hasConflict = positionedShifts.some(ps => {
         if (ps.lane !== lane) return false;
+        
+        // Same employee - check if consecutive (no overlap)
+        if (ps.shift.employeeId === shift.employeeId) {
+          const psStart = timeToMinutes(ps.shift.start_time);
+          let psEnd = timeToMinutes(ps.shift.end_time);
+          if (psEnd <= psStart) psEnd += 24 * 60;
+          
+          // No overlap means consecutive - allow same lane
+          const hasOverlap = startMins < psEnd && endMins > psStart;
+          return hasOverlap;
+        }
+        
+        // Different employee - check normal overlap
         const psStart = timeToMinutes(ps.shift.start_time);
         let psEnd = timeToMinutes(ps.shift.end_time);
         if (psEnd <= psStart) psEnd += 24 * 60;
