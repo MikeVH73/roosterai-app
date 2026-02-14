@@ -714,7 +714,7 @@ export default function TimelineView({
                         <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
                         <div className="absolute inset-0 p-1 pointer-events-none">
-                          {assignShiftLanes(dayShifts).map((shift) => {
+                          {shiftLanesWithIndices.map((shift) => {
                         const employee = getEmployee(shift.employeeId);
                         const func = getFunction(shift.functionId);
                         const shiftColor = employee?.color || func?.color || '#94a3b8';
