@@ -191,6 +191,105 @@ export default function TimelineViewGrid({
     }
   };
 
+  const handleResizeStart = (e, shift, edge) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    setResizingShift(shift.id);
+    isDraggingOrResizing.current = true;
+    
+    resizeRef.current = {
+      initialX: e.clientX,
+      initialStart: shift.start_time,
+      initialEnd: shift.end_time,
+      edge,
+      shift
+    };
+
+    const handleMouseMove = (moveEvent) => {
+      moveEvent.preventDefault();
+      
+      const deltaX = moveEvent.clientX - resizeRef.current.initialX;
+      const deltaMinutes = Math.round((deltaX / PIXELS_PER_MINUTE) / 15) * 15;
+
+      let currentStartMins = timeToMinutes(resizeRef.current.initialStart);
+      let currentEndMins = timeToMinutes(resizeRef.current.initialEnd);
+      if (currentEndMins <= currentStartMins) currentEndMins += 24 * 60;
+
+      let newStart = resizeRef.current.initialStart;
+      let newEnd = resizeRef.current.initialEnd;
+
+      if (resizeRef.current.edge === 'left') {
+        const newStartMins = Math.max(0, Math.min(currentStartMins + deltaMinutes, currentEndMins - 15));
+        newStart = minutesToTime(newStartMins);
+      } else {
+        const newEndMins = Math.max(currentStartMins + 15, currentEndMins + deltaMinutes);
+        newEnd = minutesToTime(newEndMins);
+      }
+
+      setResizeTooltip({
+        x: moveEvent.clientX,
+        y: moveEvent.clientY,
+        time: resizeRef.current.edge === 'left' ? newStart : newEnd,
+        edge: resizeRef.current.edge
+      });
+    };
+
+    const handleMouseUp = async (upEvent) => {
+      upEvent.preventDefault();
+      
+      const deltaX = upEvent.clientX - resizeRef.current.initialX;
+      const deltaMinutes = Math.round((deltaX / PIXELS_PER_MINUTE) / 15) * 15;
+
+      setResizeTooltip(null);
+      
+      if (Math.abs(deltaMinutes) < 15) {
+        setResizingShift(null);
+        isDraggingOrResizing.current = false;
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        return;
+      }
+
+      let currentStartMins = timeToMinutes(resizeRef.current.initialStart);
+      let currentEndMins = timeToMinutes(resizeRef.current.initialEnd);
+      if (currentEndMins <= currentStartMins) currentEndMins += 24 * 60;
+
+      let newStart = resizeRef.current.initialStart;
+      let newEnd = resizeRef.current.initialEnd;
+
+      if (resizeRef.current.edge === 'left') {
+        const newStartMins = Math.max(0, Math.min(currentStartMins + deltaMinutes, currentEndMins - 15));
+        newStart = minutesToTime(newStartMins);
+      } else {
+        const newEndMins = Math.max(currentStartMins + 15, currentEndMins + deltaMinutes);
+        newEnd = minutesToTime(newEndMins);
+      }
+
+      const oldData = { ...resizeRef.current.shift };
+
+      try {
+        await base44.entities.Shift.update(resizeRef.current.shift.id, {
+          start_time: newStart,
+          end_time: newEnd
+        });
+        onShiftUpdate?.(resizeRef.current.shift, oldData);
+        queryClient.invalidateQueries(['shifts']);
+      } catch (error) {
+        console.error('Failed to resize shift:', error);
+      }
+
+      setResizingShift(null);
+      setResizeTooltip(null);
+      isDraggingOrResizing.current = false;
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
   const departmentColors = [
     'bg-blue-50', 'bg-green-50', 'bg-yellow-50', 'bg-purple-50', 'bg-pink-50',
     'bg-indigo-50', 'bg-orange-50', 'bg-teal-50', 'bg-cyan-50', 'bg-lime-50'
@@ -209,6 +308,23 @@ export default function TimelineViewGrid({
       backgroundColor: 'var(--color-surface)',
       borderColor: 'var(--color-border)'
     }}>
+      {resizeTooltip && (
+        <div 
+          className="fixed z-50 px-3 py-2 rounded-lg shadow-xl text-sm font-semibold pointer-events-none"
+          style={{
+            left: `${resizeTooltip.x + 15}px`,
+            top: `${resizeTooltip.y - 40}px`,
+            backgroundColor: 'var(--color-surface)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            <span>{resizeTooltip.time}</span>
+          </div>
+        </div>
+      )}
       <div ref={timelineRef} className="overflow-auto flex-1 w-full h-full">
         <div className="w-full relative">
           {/* Header */}
@@ -369,26 +485,46 @@ export default function TimelineViewGrid({
                                     const duration = getShiftDuration(shiftForThisRow.start_time, shiftForThisRow.end_time, shiftForThisRow.break_duration);
 
                                     return (
-                                      <div
-                                        className="absolute h-8 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
-                                        style={{
-                                          left: `${leftPx}px`,
-                                          width: `${widthPx}px`,
-                                          backgroundColor: shiftColor,
-                                          top: '1px',
-                                          bottom: '1px'
-                                        }}
-                                        draggable
-                                        onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          onShiftClick?.(shiftForThisRow);
-                                        }}
-                                        title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
-                                      >
-                                        {employee?.first_name} {duration}u
-                                      </div>
-                                    );
+                                       <div
+                                         className="absolute h-8 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
+                                         style={{
+                                           left: `${leftPx}px`,
+                                           width: `${widthPx}px`,
+                                           backgroundColor: shiftColor,
+                                           top: '1px',
+                                           bottom: '1px'
+                                         }}
+                                         draggable
+                                         onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           onShiftClick?.(shiftForThisRow);
+                                         }}
+                                         title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
+                                       >
+                                         <div
+                                           className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                           onMouseDown={(e) => {
+                                             e.stopPropagation();
+                                             e.preventDefault();
+                                             handleResizeStart(e, shiftForThisRow, 'left');
+                                           }}
+                                           onClick={(e) => e.stopPropagation()}
+                                         />
+                                         <div
+                                           className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                           onMouseDown={(e) => {
+                                             e.stopPropagation();
+                                             e.preventDefault();
+                                             handleResizeStart(e, shiftForThisRow, 'right');
+                                           }}
+                                           onClick={(e) => e.stopPropagation()}
+                                         />
+                                         <span className="truncate">
+                                           {employee?.first_name} {duration}u
+                                         </span>
+                                       </div>
+                                     );
                                   })()}
                                 </div>
                               );
