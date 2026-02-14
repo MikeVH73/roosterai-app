@@ -559,10 +559,11 @@ export default function TimelineView({
                }
              });
              const SHIFT_HEIGHT = 28;
-             const SHIFT_SPACING = 2;
+             const SHIFT_INTERVAL = 30; // 28px height + 2px spacing
              const PADDING_TOP = 4;
              const PADDING_BOTTOM = 4;
-             return Math.max(56, PADDING_TOP + (maxLanesNeeded * SHIFT_HEIGHT) + ((maxLanesNeeded - 1) * SHIFT_SPACING) + PADDING_BOTTOM);
+             const totalHeight = PADDING_TOP + ((maxLanesNeeded - 1) * SHIFT_INTERVAL) + SHIFT_HEIGHT + PADDING_BOTTOM;
+             return Math.max(56, totalHeight);
            })() : undefined;
 
           return (
