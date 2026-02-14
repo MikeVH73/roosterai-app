@@ -819,39 +819,7 @@ export default function TimelineView({
           );
         })}
         
-        {/* Week total row */}
-        <div className="flex w-full border-t" style={{ 
-          borderColor: 'var(--color-border)',
-          backgroundColor: 'var(--color-primary-light)'
-        }}>
-          <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="font-bold text-sm" style={{ color: 'var(--color-text-primary)' }}>Totaal Week</div>
-          </div>
-          <div className="flex-1 flex items-center justify-center border-r-2" style={{ 
-            borderColor: 'var(--color-border)',
-            backgroundColor: 'var(--color-primary-light)'
-          }}>
-            <div className="font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>
-              {(() => {
-                const visibleLocationIds = sortedLocations.map(loc => loc.id);
-                const weekTotal = shifts.filter(s => 
-                  weekDays.some(day => format(day, 'yyyy-MM-dd') === s.date) && 
-                  visibleLocationIds.includes(s.locationId)
-                ).reduce((sum, shift) => {
-                  const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
-                  return sum + duration;
-                }, 0);
-                return `${weekTotal.toFixed(1)}u`;
-              })()}
-            </div>
-          </div>
-        </div>
 
-        {/* Extra ruimte onder de laatste locatie */}
-        <div className="h-8 border-b" style={{ 
-          backgroundColor: 'var(--color-surface-light)',
-          borderColor: 'var(--color-border)'
-        }} />
         </div>
       </div>
     </div>
