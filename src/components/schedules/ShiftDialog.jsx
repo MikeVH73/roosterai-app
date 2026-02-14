@@ -294,6 +294,36 @@ export default function ShiftDialog({
           </div>
 
           <div>
+            <Label htmlFor="departmentId">Afdeling</Label>
+            <Select 
+              value={formData.departmentId || 'none'} 
+              onValueChange={(v) => setFormData({ ...formData, departmentId: v === 'none' ? '' : v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecteer afdeling" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Geen</SelectItem>
+                {schedule?.departmentIds && schedule.departmentIds.length > 0 ? (
+                  departments
+                    .filter(dept => schedule.departmentIds.includes(dept.id))
+                    .map((department) => (
+                      <SelectItem key={department.id} value={department.id}>
+                        {department.name}
+                      </SelectItem>
+                    ))
+                ) : (
+                  departments.map((department) => (
+                    <SelectItem key={department.id} value={department.id}>
+                      {department.name}
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label htmlFor="shift_type">Type dienst</Label>
             <Select 
               value={formData.shift_type} 
