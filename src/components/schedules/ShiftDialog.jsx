@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
 import { Loader2, Trash2, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import ShiftConflictDialog from './ShiftConflictDialog';
 
 const shiftTypes = [
   { value: 'regular', label: 'Regulier' },
@@ -65,6 +66,15 @@ export default function ShiftDialog({
   const { currentCompany } = useCompany();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(defaultFormData);
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflicts, setConflicts] = useState([]);
+
+  // Fetch all shifts for conflict detection
+  const { data: allShifts = [] } = useQuery({
+    queryKey: ['shifts', scheduleId],
+    queryFn: () => base44.entities.Shift.filter({ scheduleId }),
+    enabled: !!scheduleId && open
+  });
 
   useEffect(() => {
     if (shift?.id) {
@@ -132,6 +142,25 @@ export default function ShiftDialog({
     }
   });
 
+  // Check for overlapping shifts
+  const checkOverlap = (shift1, shift2) => {
+    const start1 = shift1.start_time;
+    const end1 = shift1.end_time;
+    const start2 = shift2.start_time;
+    const end2 = shift2.end_time;
+
+    // Handle overnight shifts
+    const isOvernight1 = end1 < start1;
+    const isOvernight2 = end2 < start2;
+
+    if (!isOvernight1 && !isOvernight2) {
+      return start1 < end2 && start2 < end1;
+    }
+
+    // If either is overnight, they overlap unless they're completely separate
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -157,10 +186,73 @@ export default function ShiftDialog({
     if (!submitData.departmentId) delete submitData.departmentId;
     if (!submitData.locationId) delete submitData.locationId;
 
+    // Check for overlapping shifts
+    const overlappingShifts = allShifts.filter(existingShift => {
+      // Skip if it's the same shift we're editing
+      if (shift?.id && existingShift.id === shift.id) return false;
+      
+      // Only check shifts for the same employee on the same date
+      if (existingShift.employeeId !== submitData.employeeId) return false;
+      if (existingShift.date !== submitData.date) return false;
+      
+      return checkOverlap(submitData, existingShift);
+    });
+
+    if (overlappingShifts.length > 0) {
+      // Show conflict dialog
+      setConflicts(overlappingShifts);
+      setShowConflictDialog(true);
+      return;
+    }
+
+    // No conflicts, proceed with save
     if (shift?.id) {
       await updateMutation.mutateAsync({ id: shift.id, data: submitData });
     } else {
       await createMutation.mutateAsync(submitData);
+    }
+  };
+
+  const handleResolveConflict = async (shiftsToKeep, shiftsToDelete) => {
+    try {
+      // Delete conflicting shifts
+      for (const shiftId of shiftsToDelete) {
+        await base44.entities.Shift.delete(shiftId);
+      }
+
+      // Save the new/updated shift if it was selected to keep
+      const newShiftSelected = shiftsToKeep.some(s => s.id === 'new' || s.id === shift?.id);
+      if (newShiftSelected) {
+        const departmentId = formData.departmentId || schedule?.departmentIds?.[0] || null;
+        const locationId = formData.locationId || schedule?.locationIds?.[0] || null;
+        
+        const submitData = {
+          ...formData,
+          companyId: currentCompany?.id,
+          scheduleId,
+          departmentId,
+          locationId,
+          break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
+        };
+        
+        delete submitData.has_break;
+        if (!submitData.functionId) delete submitData.functionId;
+        if (!submitData.daypartId) delete submitData.daypartId;
+        if (!submitData.departmentId) delete submitData.departmentId;
+        if (!submitData.locationId) delete submitData.locationId;
+
+        if (shift?.id) {
+          await base44.entities.Shift.update(shift.id, submitData);
+        } else {
+          await base44.entities.Shift.create(submitData);
+        }
+      }
+
+      queryClient.invalidateQueries(['shifts', scheduleId]);
+      setShowConflictDialog(false);
+      onClose();
+    } catch (error) {
+      console.error('Error resolving conflict:', error);
     }
   };
 
@@ -179,8 +271,27 @@ export default function ShiftDialog({
   const sortedDayparts = [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg">
+    <>
+      <ShiftConflictDialog
+        open={showConflictDialog}
+        onClose={() => setShowConflictDialog(false)}
+        conflicts={conflicts}
+        newShift={{
+          ...formData,
+          id: shift?.id,
+          companyId: currentCompany?.id,
+          scheduleId,
+          departmentId: formData.departmentId || schedule?.departmentIds?.[0] || null,
+          locationId: formData.locationId || schedule?.locationIds?.[0] || null,
+        }}
+        onResolve={handleResolveConflict}
+        employees={employees}
+        locations={locations}
+        departments={departments}
+      />
+
+      <Dialog open={open && !showConflictDialog} onOpenChange={onClose}>
+        <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {shift ? 'Dienst bewerken' : 'Nieuwe dienst'}
@@ -399,5 +510,6 @@ export default function ShiftDialog({
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
