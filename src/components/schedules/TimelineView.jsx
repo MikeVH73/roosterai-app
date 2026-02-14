@@ -545,14 +545,20 @@ export default function TimelineView({
 
           // Calculate row height once for all days (for department rows)
           let rowHeightForAllDays = isDepartmentRow ? (() => {
-            const allShiftsInRow = shifts.filter(s => 
-              s.locationId === row.parentLocationId && 
-              s.departmentId === row.data.id
-            );
-            const lanesNeeded = allShiftsInRow.length > 0 
-              ? Math.max(...assignShiftLanes(allShiftsInRow).map(s => (s.laneIndex || 0))) + 1
-              : 1;
-            return Math.max(56, lanesNeeded * 32 + 8);
+            let maxLanesNeeded = 0;
+            weekDays.forEach(day => {
+              const dayShifts = shifts.filter(s => 
+                s.locationId === row.parentLocationId && 
+                s.departmentId === row.data.id &&
+                format(day, 'yyyy-MM-dd') === s.date
+              );
+              if (dayShifts.length > 0) {
+                const lanesForDay = assignShiftLanes(dayShifts);
+                const lanesNeeded = Math.max(...lanesForDay.map(s => (s.laneIndex || 0))) + 1;
+                maxLanesNeeded = Math.max(maxLanesNeeded, lanesNeeded);
+              }
+            });
+            return Math.max(56, maxLanesNeeded * 28 + (maxLanesNeeded - 1) * 2 + 8);
           })() : undefined;
 
           return (
