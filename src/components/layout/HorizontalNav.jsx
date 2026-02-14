@@ -97,7 +97,7 @@ export default function HorizontalNav({ currentPage }) {
               {currentCompany?.logo_url ? (
                 <img src={currentCompany.logo_url} alt={currentCompany.name} className="h-8 w-8 rounded" />
               ) : (
-                <div className="h-8 w-8 rounded flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                <div className="h-8 w-8 rounded flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%)' }}>
                   <span className="text-white font-bold text-sm">
                     {currentCompany?.name?.charAt(0) || 'C'}
                   </span>
@@ -211,7 +211,7 @@ export default function HorizontalNav({ currentPage }) {
               <DropdownMenuTrigger asChild>
                 <button className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-white text-xs" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                    <AvatarFallback className="text-white text-xs" style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%)' }}>
                       {getInitials(user?.full_name)}
                     </AvatarFallback>
                   </Avatar>
