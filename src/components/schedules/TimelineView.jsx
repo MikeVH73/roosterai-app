@@ -544,7 +544,6 @@ export default function TimelineView({
               key={row.id}
               className="flex w-full border-b transition-colors"
               style={{ 
-                minHeight: isDepartmentRow ? `${rowHeightForAllDays}px` : 'auto',
                 borderColor: 'var(--color-border)',
                 backgroundColor: isLocationHeader && dragOverLocation === location.id ? 'var(--color-accent-light)' : 'transparent'
               }}
