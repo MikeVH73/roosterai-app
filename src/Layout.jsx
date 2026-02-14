@@ -1,14 +1,13 @@
 import React from 'react';
 import { CompanyProvider, useCompany } from './components/providers/CompanyProvider';
-import Sidebar from './components/layout/Sidebar';
-import TopBar from './components/layout/TopBar';
+import HorizontalNav from './components/layout/HorizontalNav';
 import { Loader2 } from 'lucide-react';
 
 // Pages that don't need company context
 const publicPages = ['CompanySelect', 'CompanyOnboarding'];
 
 function LayoutContent({ children, currentPageName }) {
-  const { currentCompany, loading, userMemberships } = useCompany();
+  const { currentCompany, loading } = useCompany();
 
   // Show loading state
   if (loading) {
@@ -31,11 +30,11 @@ function LayoutContent({ children, currentPageName }) {
     );
   }
 
-  // Main app layout with sidebar
+  // Main app layout with horizontal navigation
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar currentPage={currentPageName} />
-      <main className="flex-1 min-w-0">
+    <div className="min-h-screen bg-slate-50">
+      <HorizontalNav currentPage={currentPageName} />
+      <main className="w-full">
         {children}
       </main>
     </div>
