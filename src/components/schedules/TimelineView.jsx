@@ -644,7 +644,11 @@ export default function TimelineView({
                   );
                 }
 
-                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 56 : 72, dayShifts.length * 30 + 16);
+                // Calculate number of lanes needed for this cell
+                const lanesForCell = assignShiftLanes(dayShifts).reduce((max, shift) => {
+                  return Math.max(max, (shift.laneIndex || 0) + 1);
+                }, 0);
+                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 56 : 72, lanesForCell * 32 + 8);
 
                 return (
                   <div 
