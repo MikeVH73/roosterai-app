@@ -49,8 +49,8 @@ export default function CompanySelect() {
 
   const planColors = {
     starter: 'bg-slate-100 text-slate-700',
-    pro: 'bg-blue-100 text-blue-700',
-    enterprise: 'bg-purple-100 text-purple-700'
+    pro: 'bg-purple-100 text-purple-700',
+    enterprise: 'bg-violet-100 text-violet-700'
   };
 
   if (loading || isLoading) {
@@ -66,11 +66,11 @@ export default function CompanySelect() {
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
             <Calendar className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">ShiftFlow</h1>
-          <p className="text-slate-500">Selecteer een organisatie om door te gaan</p>
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-primary)' }}>ShiftFlow</h1>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Selecteer een organisatie om door te gaan</p>
         </div>
 
         {/* Company List */}
@@ -81,16 +81,17 @@ export default function CompanySelect() {
               return (
                 <Card 
                   key={company.id}
-                  className="cursor-pointer hover:shadow-lg hover:border-blue-200 transition-all group"
+                  className="cursor-pointer hover:shadow-lg transition-all group"
+                  style={{ borderColor: 'transparent' }}
                   onClick={() => handleSelectCompany(company.id)}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-xl shrink-0">
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
                         {company.name?.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">
+                        <h3 className="font-semibold text-lg transition-colors" style={{ color: 'var(--color-text-primary)' }}>
                           {company.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
@@ -102,7 +103,7 @@ export default function CompanySelect() {
                           </span>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                      <ChevronRight className="w-5 h-5 transition-colors" style={{ color: 'var(--color-text-secondary)' }} />
                     </div>
                   </CardContent>
                 </Card>
@@ -125,7 +126,8 @@ export default function CompanySelect() {
         <Button 
           onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
           variant="outline"
-          className="w-full h-14 border-dashed border-2 hover:border-blue-300 hover:bg-blue-50/50"
+          className="w-full h-14 border-dashed border-2"
+          style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
         >
           <Plus className="w-5 h-5 mr-2" />
           Nieuwe organisatie aanmaken
@@ -134,22 +136,22 @@ export default function CompanySelect() {
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mt-12">
           <div className="text-center">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
+              <Calendar className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
             </div>
-            <p className="text-xs text-slate-500">Slimme roostering</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Slimme roostering</p>
           </div>
           <div className="text-center">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
+              <Sparkles className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
             </div>
-            <p className="text-xs text-slate-500">AI-ondersteuning</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>AI-ondersteuning</p>
           </div>
           <div className="text-center">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Users className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
+              <Users className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
             </div>
-            <p className="text-xs text-slate-500">Team management</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Team management</p>
           </div>
         </div>
       </div>
