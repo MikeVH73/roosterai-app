@@ -268,7 +268,7 @@ export default function Dashboard() {
           <div className="space-y-6">
             {/* AI Assistant Card */}
             {hasPermission('use_ai') && (
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+              <Card className="border-0 shadow-sm bg-gradient-to-br from-sky-500 to-cyan-600 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -283,7 +283,7 @@ export default function Dashboard() {
                     Laat AI je helpen met vervangers zoeken, conflicten oplossen en roosters optimaliseren.
                   </p>
                   <Link to={createPageUrl('AIAssistant')}>
-                    <Button className="w-full bg-white text-purple-600 hover:bg-white/90">
+                    <Button className="w-full bg-white text-cyan-600 hover:bg-white/90">
                       Open AI Assistent
                     </Button>
                   </Link>

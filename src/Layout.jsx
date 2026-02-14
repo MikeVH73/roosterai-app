@@ -48,19 +48,19 @@ export default function Layout({ children, currentPageName }) {
       <CompanyProvider>
         <style>{`
           [data-theme="dark"] {
-          --color-primary: #262344;
-          --color-primary-light: #3d3866;
-          --color-accent: #6366f1;
-          --color-accent-hover: #4f46e5;
-          --color-accent-light: #818cf8;
-          --color-background: #1e1b2e;
-          --color-surface: #2d2a3e;
-          --color-surface-light: #3d3866;
-          --color-text-primary: #f8fafc;
-          --color-text-secondary: #cbd5e1;
-          --color-text-muted: #94a3b8;
-          --color-border: #3d3866;
-        }
+            --color-primary: #262344;
+            --color-primary-light: #3d3866;
+            --color-accent: #38bdf8;
+            --color-accent-hover: #0ea5e9;
+            --color-accent-light: #7dd3fc;
+            --color-background: #1e1b2e;
+            --color-surface: #2d2a3e;
+            --color-surface-light: #3d3866;
+            --color-text-primary: #f8fafc;
+            --color-text-secondary: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-border: #3d3866;
+          }
 
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
@@ -70,13 +70,13 @@ export default function Layout({ children, currentPageName }) {
 
         /* Button styling */
         .btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+          background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%) !important;
           color: white !important;
           border: none !important;
         }
 
         .btn-primary:hover, button[class*="bg-primary"]:hover, button[class*="bg-blue"]:hover {
-          background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+          background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%) !important;
         }
 
         /* Card backgrounds */
@@ -143,18 +143,18 @@ export default function Layout({ children, currentPageName }) {
         }
 
         [data-theme="light"] {
-        --color-primary: #1e293b;
-        --color-primary-light: #334155;
-        --color-accent: #6366f1;
-        --color-accent-hover: #4f46e5;
-        --color-accent-light: #6366f1;
-        --color-background: #f8fafc;
-        --color-surface: #ffffff;
-        --color-surface-light: #f1f5f9;
-        --color-text-primary: #0f172a;
-        --color-text-secondary: #475569;
-        --color-text-muted: #64748b;
-        --color-border: #e2e8f0;
+          --color-primary: #1e293b;
+          --color-primary-light: #334155;
+          --color-accent: #0ea5e9;
+          --color-accent-hover: #0284c7;
+          --color-accent-light: #38bdf8;
+          --color-background: #f8fafc;
+          --color-surface: #ffffff;
+          --color-surface-light: #f1f5f9;
+          --color-text-primary: #0f172a;
+          --color-text-secondary: #475569;
+          --color-text-muted: #64748b;
+          --color-border: #e2e8f0;
         }
         `}</style>
         <LayoutContent currentPageName={currentPageName}>

@@ -309,12 +309,12 @@ export default function Schedules() {
               const shiftCount = getShiftCount(schedule.id);
               
               return (
-                <GlowCard key={schedule.id} glowColor="purple">
+                <GlowCard key={schedule.id} glowColor="cyan">
                   <Card className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                     <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)' }}>
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(148, 163, 184, 0.1) 100%)' }}>
                             <CalendarDays className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
                           </div>
                           <div>

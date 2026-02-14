@@ -233,14 +233,14 @@ export default function Employees() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredEmployees.map((employee) => (
-              <GlowCard key={employee.id} glowColor="blue">
+              <GlowCard key={employee.id} glowColor="cyan">
                 <Card className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                   <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-12 h-12">
                           <AvatarImage src={employee.avatar_url} />
-                          <AvatarFallback className="font-medium text-white" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                          <AvatarFallback className="font-medium text-white" style={{ background: 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}>
                             {getInitials(employee.first_name, employee.last_name)}
                           </AvatarFallback>
                         </Avatar>
