@@ -135,6 +135,14 @@ export default function TimelineView({
           data: department, 
           parentLocationId: location.id 
         });
+        
+        // Add department subtotal row
+        rows.push({
+          type: 'department_subtotal',
+          id: `${location.id}-${department.id}-subtotal`,
+          data: department,
+          parentLocationId: location.id
+        });
       });
 
       // Add location subtotal row
@@ -483,6 +491,7 @@ export default function TimelineView({
         {displayRows.map((row) => {
           const isLocationHeader = row.type === 'location_header';
           const isDepartmentRow = row.type === 'department_row';
+          const isDepartmentSubtotal = row.type === 'department_subtotal';
           const isLocationSubtotal = row.type === 'location_subtotal';
           const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
@@ -502,7 +511,7 @@ export default function TimelineView({
               } : undefined}
             >
               <div className={`w-48 flex-shrink-0 border-r-2 border-slate-800 bg-white p-3 flex items-center gap-2 ${
-                isLocationHeader ? 'cursor-move hover:bg-slate-50' : isLocationSubtotal ? 'bg-blue-50' : 'pl-8'
+                isLocationHeader ? 'cursor-move hover:bg-slate-50' : isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? 'bg-slate-100 pl-8' : 'pl-8'
               } transition-colors`}>
                 {isLocationHeader ? (
                   <>
@@ -517,6 +526,10 @@ export default function TimelineView({
                 ) : isLocationSubtotal ? (
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-blue-900 text-sm">Totaal {row.data.name}</div>
+                  </div>
+                ) : isDepartmentSubtotal ? (
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-slate-700 text-xs italic">Subtotaal {row.data.name}</div>
                   </div>
                 ) : (
                   <>
@@ -554,6 +567,17 @@ export default function TimelineView({
                     const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
                     return sum + duration;
                   }, 0);
+                } else if (isDepartmentSubtotal) {
+                  // Calculate total for this department on this day
+                  dayShifts = shifts.filter(s => 
+                    s.locationId === row.parentLocationId && 
+                    s.departmentId === row.data.id && 
+                    s.date === dateStr
+                  );
+                  totalHours = dayShifts.reduce((sum, shift) => {
+                    const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
+                    return sum + duration;
+                  }, 0);
                 } else {
                   cellDepartmentId = row.data.id;
                   dayShifts = shifts.filter(s => 
@@ -563,19 +587,19 @@ export default function TimelineView({
                   );
                 }
 
-                const cellHeight = isLocationSubtotal ? 40 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
+                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 32 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
 
                 return (
                   <div 
                     key={dayIdx} 
                     className={`border-r-2 border-slate-800 relative transition-colors flex-1 ${
-                      isLocationSubtotal ? 'bg-blue-50' : 'bg-white hover:bg-slate-50/50'
+                      isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? 'bg-slate-100' : 'bg-white hover:bg-slate-50/50'
                     }`}
                     style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
                     data-day-container
                     data-date={dateStr}
                     onClick={(e) => {
-                      if (isLocationSubtotal) return;
+                      if (isLocationSubtotal || isDepartmentSubtotal) return;
                       if (isDraggingOrResizing.current) {
                         isDraggingOrResizing.current = false;
                         return;
@@ -590,19 +614,19 @@ export default function TimelineView({
                       }
                     }}
                     onDragOver={(e) => {
-                      if (isLocationSubtotal) return;
+                      if (isLocationSubtotal || isDepartmentSubtotal) return;
                       e.preventDefault();
                       e.stopPropagation();
                     }}
                     onDrop={(e) => {
-                      if (isLocationSubtotal) return;
+                      if (isLocationSubtotal || isDepartmentSubtotal) return;
                       e.stopPropagation();
                       handleDayDrop(e, cellLocationId, day);
                     }}
                   >
-                    {isLocationSubtotal ? (
+                    {(isLocationSubtotal || isDepartmentSubtotal) ? (
                       <div className="h-full flex items-center justify-center">
-                        <div className="font-bold text-blue-900 text-sm">
+                        <div className={`${isLocationSubtotal ? 'font-bold text-blue-900 text-sm' : 'font-semibold text-slate-700 text-xs'}`}>
                           {totalHours.toFixed(1)}u
                         </div>
                       </div>
