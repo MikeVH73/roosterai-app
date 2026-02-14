@@ -5,10 +5,8 @@ import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
-import ScheduleWeekView from '@/components/schedules/ScheduleWeekView';
-import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
+import VerticalTimelineView from '@/components/schedules/VerticalTimelineView';
 import MiniCalendar from '@/components/schedules/MiniCalendar';
-import MonthCalendarGrid from '@/components/schedules/MonthCalendarGrid';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import { 
   Calendar,
@@ -388,6 +386,12 @@ export default function ScheduleOverview() {
                     relevantDepartmentIds.includes(dp.departmentId)
                   );
 
+                  // Get relevant locations for this schedule
+                  const relevantLocationIds = schedule.locationIds || [];
+                  const relevantLocations = locations.filter(loc => 
+                    relevantLocationIds.includes(loc.id)
+                  );
+
                   // Filter employees for this schedule
                   const scheduleEmployees = employees.filter(emp => 
                     emp.departmentIds?.some(deptId => relevantDepartmentIds.includes(deptId))
@@ -582,14 +586,7 @@ export default function ScheduleOverview() {
                               dayparts={relevantDayparts}
                               functions={functions}
                               onCellClick={(locationId, date) => {
-                                setShiftDialogData({
-                                  open: true,
-                                  shift: null,
-                                  employeeId: null,
-                                  date: format(date, 'yyyy-MM-dd'),
-                                  locationId: locationId,
-                                  scheduleId: schedule.id
-                                });
+                                handleCellClick(null, date, null, schedule.id);
                               }}
                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
                             />
