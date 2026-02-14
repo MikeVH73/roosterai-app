@@ -216,13 +216,14 @@ export default function ScheduleOverview() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <TopBar 
-        title="Rooster Overzicht" 
-        subtitle={`${activeSchedules.length} actieve roosters`}
-      />
+    <div className="bg-slate-50">
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-900">Rooster Overzicht</h1>
+          <p className="text-sm text-slate-500">{activeSchedules.length} actieve roosters</p>
+        </div>
 
-      <div className="p-6 max-w-7xl mx-auto">
+
         {/* Compact Statistics Bar */}
         <div className="flex items-center gap-6 mb-4 px-4 py-3 bg-white rounded-lg shadow-sm border border-slate-100">
           <div className="flex items-center gap-2">
@@ -631,6 +632,7 @@ export default function ScheduleOverview() {
           schedule={schedules.find(s => s.id === currentScheduleId)}
         />
       )}
+      </div>
     </div>
   );
 }
