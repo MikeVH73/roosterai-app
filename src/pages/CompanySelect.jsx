@@ -56,13 +56,13 @@ export default function CompanySelect() {
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Laden...</div>
+        <div className="animate-pulse" style={{ color: 'var(--color-text-secondary)' }}>Laden...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(135deg, #1e1b2e 0%, #262344 50%, #2d2a3e 100%)' }}>
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-10">
@@ -81,11 +81,11 @@ export default function CompanySelect() {
               return (
                 <Card 
                   key={company.id}
-                  className="cursor-pointer hover:shadow-lg transition-all group"
-                  style={{ borderColor: 'transparent' }}
+                  className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group"
+                  style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                   onClick={() => handleSelectCompany(company.id)}
                 >
-                  <CardContent className="p-5">
+                  <CardContent className="p-5" style={{ backgroundColor: 'transparent' }}>
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
                         {company.name?.charAt(0)}
@@ -111,11 +111,11 @@ export default function CompanySelect() {
             })}
           </div>
         ) : (
-          <Card className="mb-8">
-            <CardContent className="p-10 text-center">
-              <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">Geen organisaties</h3>
-              <p className="text-slate-500 text-sm mb-6">
+          <Card className="mb-8" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+            <CardContent className="p-10 text-center" style={{ backgroundColor: 'transparent' }}>
+              <Building2 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-secondary)' }} />
+              <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen organisaties</h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
                 Je bent nog niet lid van een organisatie. Maak een nieuwe aan of vraag een uitnodiging.
               </p>
             </CardContent>
@@ -125,9 +125,8 @@ export default function CompanySelect() {
         {/* Create New Company */}
         <Button 
           onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
-          variant="outline"
-          className="w-full h-14 border-dashed border-2"
-          style={{ borderColor: 'var(--color-accent)', color: 'var(--color-accent)' }}
+          className="w-full h-14"
+          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', border: 'none' }}
         >
           <Plus className="w-5 h-5 mr-2" />
           Nieuwe organisatie aanmaken
