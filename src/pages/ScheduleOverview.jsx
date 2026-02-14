@@ -43,8 +43,9 @@ function calculateNetHours(shift) {
   const [endH, endM] = shift.end_time.split(':').map(Number);
   let hours = (endH * 60 + endM - startH * 60 - startM) / 60;
   if (hours < 0) hours += 24;
-  // Pauze komt BOVENOP de dienst, dus we trekken het NIET af
-  return hours;
+  // Trek pauze af van totale tijd om netto gewerkte uren te krijgen
+  const breakHours = (shift.break_duration || 0) / 60;
+  return hours - breakHours;
 }
 
 export default function ScheduleOverview() {
@@ -506,7 +507,7 @@ export default function ScheduleOverview() {
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
                             {/* Navigation */}
-                            <div className="flex items-center gap-2 rounded-lg p-1" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                            <div className="flex items-center gap-2 rounded-lg p-1" style={{ backgroundColor: 'var(--color-surface)' }}>
                               <Button
                                 variant="ghost"
                                 size="sm"

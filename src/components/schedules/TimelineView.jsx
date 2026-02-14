@@ -20,8 +20,8 @@ const getShiftDuration = (start, end, breakDuration = 0) => {
   const startMins = timeToMinutes(start);
   let endMins = timeToMinutes(end);
   if (endMins <= startMins) endMins += 24 * 60;
-  // Pauze komt BOVENOP de dienst, dus we trekken het NIET af
-  return ((endMins - startMins) / 60).toFixed(1);
+  // Trek pauze af van totale tijd om netto gewerkte uren te krijgen
+  return ((endMins - startMins - breakDuration) / 60).toFixed(1);
 };
 
 export default function TimelineView({ 
