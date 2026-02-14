@@ -327,80 +327,59 @@ export default function TimelineViewGrid({
       )}
       <div ref={timelineRef} className="overflow-auto flex-1 w-full h-full">
         <div className="w-full relative">
-          {/* Header */}
-          <div className="sticky top-0 z-20 border-b" style={{
-            backgroundColor: 'var(--color-surface)',
-            borderColor: 'var(--color-border)'
-          }}>
-            <div className="flex w-full">
-              <div className="w-48 flex-shrink-0 border-r-2 p-3" style={{
-                borderColor: 'var(--color-border)',
-                backgroundColor: 'var(--color-surface-light)'
-              }}>
-                <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>Locaties</div>
-              </div>
-              {weekDays.map((day, dayIdx) => (
-                <div key={dayIdx} className="border-r-2 flex-1" style={{
-                  minWidth: '100px',
-                  borderColor: 'var(--color-border)',
-                  backgroundColor: 'var(--color-surface)'
-                }}>
-                  <div className="text-center py-2.5">
-                    <div className="font-semibold text-sm px-2" style={{ color: 'var(--color-text-primary)' }}>
-                      {format(day, 'EEEE', { locale: nl })}
-                    </div>
-                    <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                      {format(day, 'd MMM', { locale: nl })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Grid rows per location/department */}
-          {sortedLocations.map((location, locIdx) => {
-            const departmentsForLocation = departments
-              .filter(dept => dept.locationIds?.includes(location.id))
-              .sort((a, b) => a.name.localeCompare(b.name));
+           {sortedLocations.map((location, locIdx) => {
+             const departmentsForLocation = departments
+               .filter(dept => dept.locationIds?.includes(location.id))
+               .sort((a, b) => a.name.localeCompare(b.name));
 
-            return (
-              <div key={location.id}>
-                {/* Location header */}
-                <div
-                  className="flex w-full border-b transition-colors"
-                  style={{
-                    borderColor: 'var(--color-border)',
-                    backgroundColor: dragOverLocation === location.id ? 'var(--color-accent-light)' : 'transparent'
-                  }}
-                  draggable
-                  onDragStart={(e) => handleLocationDragStart(e, location.id)}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setDragOverLocation(location.id);
-                  }}
-                  onDrop={(e) => handleLocationDrop(e, location.id)}
-                  onDragLeave={() => setDragOverLocation(null)}
-                >
-                  <div className="w-48 flex-shrink-0 border-r-2 p-3 flex items-center gap-2" style={{
-                    borderColor: 'var(--color-border)',
-                    backgroundColor: 'var(--color-surface)'
-                  }}>
-                    <GripVertical className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
-                    <div className="flex-1">
-                      <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                        {location.name}
-                      </div>
-                    </div>
-                  </div>
-                  {weekDays.map((day, dayIdx) => (
-                    <div key={dayIdx} className="border-r-2 flex-1" style={{
-                      minHeight: '40px',
-                      borderColor: 'var(--color-border)',
-                      backgroundColor: 'var(--color-surface)'
-                    }} />
-                  ))}
-                </div>
+             return (
+               <div key={location.id}>
+                 {/* Location name header - full width */}
+                 <div
+                   className="w-full border-b p-3 transition-colors"
+                   style={{
+                     borderColor: 'var(--color-border)',
+                     backgroundColor: dragOverLocation === location.id ? 'var(--color-accent-light)' : 'var(--color-surface)'
+                   }}
+                   draggable
+                   onDragStart={(e) => handleLocationDragStart(e, location.id)}
+                   onDragOver={(e) => {
+                     e.preventDefault();
+                     setDragOverLocation(location.id);
+                   }}
+                   onDrop={(e) => handleLocationDrop(e, location.id)}
+                   onDragLeave={() => setDragOverLocation(null)}
+                 >
+                   <div className="flex items-center gap-2 cursor-move">
+                     <GripVertical className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--color-text-muted)' }} />
+                     <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                       {location.name}
+                     </div>
+                   </div>
+                 </div>
+
+                 {/* Day headers for this location */}
+                 <div className="w-full border-b" style={{
+                   borderColor: 'var(--color-border)',
+                   backgroundColor: 'var(--color-surface)',
+                   display: 'grid',
+                   gridTemplateColumns: `repeat(${weekDays.length}, 1fr)`
+                 }}>
+                   {weekDays.map((day, dayIdx) => (
+                     <div key={dayIdx} className="border-r p-2 text-center" style={{
+                       borderColor: 'var(--color-border)'
+                     }}>
+                       <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                         {format(day, 'EEEE', { locale: nl })}
+                       </div>
+                       <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                         {format(day, 'd MMM', { locale: nl })}
+                       </div>
+                     </div>
+                   ))}
+                 </div>
 
                 {/* Department rows */}
                 {departmentsForLocation.map((dept, deptIdx) => {
@@ -411,27 +390,27 @@ export default function TimelineViewGrid({
 
                   return (
                     <div key={dept.id}>
+                      {/* Department label header */}
+                      <div className="w-full border-b p-2" style={{
+                        borderColor: 'var(--color-border)',
+                        backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
+                      }}>
+                        <span className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                          {dept.name}
+                        </span>
+                      </div>
+
                       {Array.from({ length: totalRows }).map((_, rowIdx) => (
                         <React.Fragment key={`${dept.id}-row-${rowIdx}`}>
                           <div
-                            className="flex w-full border-b h-10"
+                            className="w-full border-b h-10"
                             style={{
                               borderColor: 'var(--color-border)',
-                              backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
+                              backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)',
+                              display: 'grid',
+                              gridTemplateColumns: `repeat(${weekDays.length}, 1fr)`
                             }}
                           >
-                            {/* Department label on first row */}
-                            <div className="w-48 flex-shrink-0 border-r-2 p-2 flex items-center" style={{
-                              borderColor: 'var(--color-border)',
-                              backgroundColor: rowIdx === 0 ? 'var(--color-surface)' : 'transparent',
-                              fontSize: '12px',
-                              color: 'var(--color-text-primary)'
-                            }}>
-                              {rowIdx === 0 ? (
-                                <span className="font-medium">{dept.name}</span>
-                              ) : null}
-                            </div>
-
                             {/* Day cells with 15-min grid */}
                             {weekDays.map((day, dayIdx) => {
                               const dateStr = format(day, 'yyyy-MM-dd');
@@ -441,32 +420,13 @@ export default function TimelineViewGrid({
                               return (
                                 <div
                                   key={dayIdx}
-                                  className="border-r-2 relative flex-1 flex"
+                                  className="border-r relative"
                                   style={{
-                                    borderColor: 'var(--color-border)',
-                                    minWidth: '100px'
+                                    borderColor: 'var(--color-border)'
                                   }}
                                   onDragOver={(e) => e.preventDefault()}
                                   onDrop={(e) => handleDayDrop(e, location.id, dept.id, day)}
                                 >
-                                  {/* 15-min cell grid */}
-                                  {Array.from({ length: Math.round(CELLS_PER_DAY) }).map((_, cellIdx) => (
-                                    <div
-                                      key={cellIdx}
-                                      className="border-r border-opacity-20 flex-1"
-                                      style={{
-                                        borderColor: 'var(--color-border)',
-                                        minWidth: `${CELL_WIDTH}px`,
-                                        cursor: 'pointer'
-                                      }}
-                                      onClick={() => {
-                                        const clickedMinutes = cellIdx * MINUTES_PER_CELL;
-                                        const clickedTime = minutesToTime(startTimeOffset + clickedMinutes);
-                                        onCellClick?.(location.id, day, dept.id, clickedTime);
-                                      }}
-                                    />
-                                  ))}
-
                                   {/* Shift in this row */}
                                   {shiftForThisRow && (() => {
                                     const employee = getEmployee(shiftForThisRow.employeeId);
@@ -480,51 +440,45 @@ export default function TimelineViewGrid({
                                     let durationMins = shiftEndMins - shiftStartMins;
                                     if (durationMins <= 0) durationMins += 24 * 60;
 
-                                    const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
-                                    const widthPx = durationMins * PIXELS_PER_MINUTE;
                                     const duration = getShiftDuration(shiftForThisRow.start_time, shiftForThisRow.end_time, shiftForThisRow.break_duration);
 
                                     return (
-                                       <div
-                                         className="absolute h-8 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
-                                         style={{
-                                           left: `${leftPx}px`,
-                                           width: `${widthPx}px`,
-                                           backgroundColor: shiftColor,
-                                           top: '1px',
-                                           bottom: '1px'
-                                         }}
-                                         draggable
-                                         onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
-                                         onClick={(e) => {
-                                           e.stopPropagation();
-                                           onShiftClick?.(shiftForThisRow);
-                                         }}
-                                         title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
-                                       >
-                                         <div
-                                           className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
-                                           onMouseDown={(e) => {
-                                             e.stopPropagation();
-                                             e.preventDefault();
-                                             handleResizeStart(e, shiftForThisRow, 'left');
-                                           }}
-                                           onClick={(e) => e.stopPropagation()}
-                                         />
-                                         <div
-                                           className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
-                                           onMouseDown={(e) => {
-                                             e.stopPropagation();
-                                             e.preventDefault();
-                                             handleResizeStart(e, shiftForThisRow, 'right');
-                                           }}
-                                           onClick={(e) => e.stopPropagation()}
-                                         />
-                                         <span className="truncate">
-                                           {employee?.first_name} {duration}u
-                                         </span>
-                                       </div>
-                                     );
+                                      <div
+                                        className="h-full rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate relative"
+                                        style={{
+                                          backgroundColor: shiftColor
+                                        }}
+                                        draggable
+                                        onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onShiftClick?.(shiftForThisRow);
+                                        }}
+                                        title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
+                                      >
+                                        <div
+                                          className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                          onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleResizeStart(e, shiftForThisRow, 'left');
+                                          }}
+                                          onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <div
+                                          className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
+                                          onMouseDown={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleResizeStart(e, shiftForThisRow, 'right');
+                                          }}
+                                          onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <span className="truncate">
+                                          {employee?.first_name} {duration}u
+                                        </span>
+                                      </div>
+                                    );
                                   })()}
                                 </div>
                               );
@@ -534,17 +488,21 @@ export default function TimelineViewGrid({
                           {/* Add row button - on last row */}
                           {rowIdx === totalRows - 1 && (
                             <div
-                              className="flex w-full border-b h-8"
+                              className="w-full border-b h-8"
                               style={{
                                 borderColor: 'var(--color-border)',
-                                backgroundColor: 'var(--color-surface-light)'
+                                backgroundColor: 'var(--color-surface-light)',
+                                display: 'grid',
+                                gridTemplateColumns: `repeat(${weekDays.length}, 1fr)`
                               }}
                             >
-                              <div className="w-48 flex-shrink-0 border-r-2" style={{ borderColor: 'var(--color-border)' }} />
                               <button
                                 onClick={() => handleAddRow(location.id, dept.id)}
-                                className="w-full flex items-center justify-center gap-1 text-xs font-medium hover:bg-blue-100 transition"
-                                style={{ color: 'var(--color-text-secondary)' }}
+                                className="col-span-full flex items-center justify-center gap-1 text-xs font-medium hover:bg-blue-100 transition border-r"
+                                style={{ 
+                                  color: 'var(--color-text-secondary)',
+                                  borderColor: 'var(--color-border)'
+                                }}
                               >
                                 <Plus className="w-3 h-3" />
                                 Rij toevoegen
