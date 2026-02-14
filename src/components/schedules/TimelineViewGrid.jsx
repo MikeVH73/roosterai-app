@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, Fragment } from 'react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { GripVertical, Clock, Plus } from 'lucide-react';
@@ -296,126 +296,127 @@ export default function TimelineViewGrid({
                   return (
                     <div key={dept.id}>
                       {Array.from({ length: totalRows }).map((_, rowIdx) => (
-                        <div
-                          key={`${dept.id}-row-${rowIdx}`}
-                          className="flex w-full border-b h-10"
-                          style={{
-                            borderColor: 'var(--color-border)',
-                            backgroundColor: deptIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
-                          }}
-                        >
-                          {/* Department label on first row */}
-                          <div className="w-48 flex-shrink-0 border-r-2 p-2 flex items-center" style={{
-                            borderColor: 'var(--color-border)',
-                            backgroundColor: rowIdx === 0 ? 'var(--color-surface)' : 'transparent',
-                            fontSize: '12px',
-                            color: 'var(--color-text-primary)'
-                          }}>
-                            {rowIdx === 0 ? (
-                              <span className="font-medium">{dept.name}</span>
-                            ) : null}
+                        <React.Fragment key={`${dept.id}-row-${rowIdx}`}>
+                          <div
+                            className="flex w-full border-b h-10"
+                            style={{
+                              borderColor: 'var(--color-border)',
+                              backgroundColor: deptIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
+                            }}
+                          >
+                            {/* Department label on first row */}
+                            <div className="w-48 flex-shrink-0 border-r-2 p-2 flex items-center" style={{
+                              borderColor: 'var(--color-border)',
+                              backgroundColor: rowIdx === 0 ? 'var(--color-surface)' : 'transparent',
+                              fontSize: '12px',
+                              color: 'var(--color-text-primary)'
+                            }}>
+                              {rowIdx === 0 ? (
+                                <span className="font-medium">{dept.name}</span>
+                              ) : null}
+                            </div>
+
+                            {/* Day cells with 15-min grid */}
+                            {weekDays.map((day, dayIdx) => {
+                              const dateStr = format(day, 'yyyy-MM-dd');
+                              const dayShifts = getShiftsForDepartmentDay(location.id, dept.id, dateStr);
+                              const shiftForThisRow = dayShifts[rowIdx];
+
+                              return (
+                                <div
+                                  key={dayIdx}
+                                  className="border-r-2 relative flex-1 flex"
+                                  style={{
+                                    borderColor: 'var(--color-border)',
+                                    minWidth: '100px'
+                                  }}
+                                  onDragOver={(e) => e.preventDefault()}
+                                  onDrop={(e) => handleDayDrop(e, location.id, dept.id, day)}
+                                >
+                                  {/* 15-min cell grid */}
+                                  {Array.from({ length: Math.round(CELLS_PER_DAY) }).map((_, cellIdx) => (
+                                    <div
+                                      key={cellIdx}
+                                      className="border-r border-opacity-20 flex-1"
+                                      style={{
+                                        borderColor: 'var(--color-border)',
+                                        minWidth: `${CELL_WIDTH}px`,
+                                        cursor: 'pointer'
+                                      }}
+                                      onClick={() => {
+                                        const clickedMinutes = cellIdx * MINUTES_PER_CELL;
+                                        const clickedTime = minutesToTime(startTimeOffset + clickedMinutes);
+                                        onCellClick?.(location.id, day, dept.id, clickedTime);
+                                      }}
+                                    />
+                                  ))}
+
+                                  {/* Shift in this row */}
+                                  {shiftForThisRow && (() => {
+                                    const employee = getEmployee(shiftForThisRow.employeeId);
+                                    const shiftColor = employee?.color || '#94a3b8';
+                                    const shiftStartMins = timeToMinutes(shiftForThisRow.start_time);
+                                    const shiftEndMins = timeToMinutes(shiftForThisRow.end_time);
+
+                                    let offsetFromStart = shiftStartMins - startTimeOffset;
+                                    if (offsetFromStart < 0) offsetFromStart += 24 * 60;
+
+                                    let durationMins = shiftEndMins - shiftStartMins;
+                                    if (durationMins <= 0) durationMins += 24 * 60;
+
+                                    const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
+                                    const widthPx = durationMins * PIXELS_PER_MINUTE;
+                                    const duration = getShiftDuration(shiftForThisRow.start_time, shiftForThisRow.end_time, shiftForThisRow.break_duration);
+
+                                    return (
+                                      <div
+                                        className="absolute h-8 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
+                                        style={{
+                                          left: `${leftPx}px`,
+                                          width: `${widthPx}px`,
+                                          backgroundColor: shiftColor,
+                                          top: '1px',
+                                          bottom: '1px'
+                                        }}
+                                        draggable
+                                        onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          onShiftClick?.(shiftForThisRow);
+                                        }}
+                                        title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
+                                      >
+                                        {employee?.first_name} {duration}u
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              );
+                            })}
                           </div>
 
-                          {/* Day cells with 15-min grid */}
-                          {weekDays.map((day, dayIdx) => {
-                            const dateStr = format(day, 'yyyy-MM-dd');
-                            const dayShifts = getShiftsForDepartmentDay(location.id, dept.id, dateStr);
-                            const shiftForThisRow = dayShifts[rowIdx];
-
-                            return (
-                              <div
-                                key={dayIdx}
-                                className="border-r-2 relative flex-1 flex"
-                                style={{
-                                  borderColor: 'var(--color-border)',
-                                  minWidth: '100px'
-                                }}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={(e) => handleDayDrop(e, location.id, dept.id, day)}
+                          {/* Add row button - on last row */}
+                          {rowIdx === totalRows - 1 && (
+                            <div
+                              className="flex w-full border-b h-8"
+                              style={{
+                                borderColor: 'var(--color-border)',
+                                backgroundColor: 'var(--color-surface-light)'
+                              }}
+                            >
+                              <div className="w-48 flex-shrink-0 border-r-2" style={{ borderColor: 'var(--color-border)' }} />
+                              <button
+                                onClick={() => handleAddRow(location.id, dept.id)}
+                                className="w-full flex items-center justify-center gap-1 text-xs font-medium hover:bg-blue-100 transition"
+                                style={{ color: 'var(--color-text-secondary)' }}
                               >
-                                {/* 15-min cell grid */}
-                                {Array.from({ length: Math.round(CELLS_PER_DAY) }).map((_, cellIdx) => (
-                                  <div
-                                    key={cellIdx}
-                                    className="border-r border-opacity-20 flex-1"
-                                    style={{
-                                      borderColor: 'var(--color-border)',
-                                      minWidth: `${CELL_WIDTH}px`,
-                                      cursor: 'pointer'
-                                    }}
-                                    onClick={() => {
-                                      const clickedMinutes = cellIdx * MINUTES_PER_CELL;
-                                      const clickedTime = minutesToTime(startTimeOffset + clickedMinutes);
-                                      onCellClick?.(location.id, day, dept.id, clickedTime);
-                                    }}
-                                  />
-                                ))}
-
-                                {/* Shift in this row */}
-                                {shiftForThisRow && (() => {
-                                  const employee = getEmployee(shiftForThisRow.employeeId);
-                                  const shiftColor = employee?.color || '#94a3b8';
-                                  const shiftStartMins = timeToMinutes(shiftForThisRow.start_time);
-                                  const shiftEndMins = timeToMinutes(shiftForThisRow.end_time);
-
-                                  let offsetFromStart = shiftStartMins - startTimeOffset;
-                                  if (offsetFromStart < 0) offsetFromStart += 24 * 60;
-
-                                  let durationMins = shiftEndMins - shiftStartMins;
-                                  if (durationMins <= 0) durationMins += 24 * 60;
-
-                                  const leftPx = offsetFromStart * PIXELS_PER_MINUTE;
-                                  const widthPx = durationMins * PIXELS_PER_MINUTE;
-                                  const duration = getShiftDuration(shiftForThisRow.start_time, shiftForThisRow.end_time, shiftForThisRow.break_duration);
-
-                                  return (
-                                    <div
-                                      className="absolute h-8 rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
-                                      style={{
-                                        left: `${leftPx}px`,
-                                        width: `${widthPx}px`,
-                                        backgroundColor: shiftColor,
-                                        top: '1px',
-                                        bottom: '1px'
-                                      }}
-                                      draggable
-                                      onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onShiftClick?.(shiftForThisRow);
-                                      }}
-                                      title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
-                                    >
-                                      {employee?.first_name} {duration}u
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            );
-                          })}
-                        </div>
+                                <Plus className="w-3 h-3" />
+                                Rij toevoegen
+                              </button>
+                            </div>
+                          )}
+                        </React.Fragment>
                       ))}
-
-                      {/* Add row button */}
-                      {rowIdx === baseRowCount - 1 && (
-                        <div
-                          className="flex w-full border-b h-8"
-                          style={{
-                            borderColor: 'var(--color-border)',
-                            backgroundColor: 'var(--color-surface-light)'
-                          }}
-                        >
-                          <div className="w-48 flex-shrink-0 border-r-2" style={{ borderColor: 'var(--color-border)' }} />
-                          <button
-                            onClick={() => handleAddRow(location.id, dept.id)}
-                            className="w-full flex items-center justify-center gap-1 text-xs font-medium hover:bg-blue-100 transition"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            <Plus className="w-3 h-3" />
-                            Rij toevoegen
-                          </button>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
