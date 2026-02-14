@@ -143,7 +143,7 @@ export default function TimelineView({
         dept.locationIds?.includes(location.id)
       ).sort((a, b) => a.name.localeCompare(b.name));
 
-      // Add all department rows first
+      // Add all department rows only (no subtotals)
       departmentsForLocation.forEach((department, idx) => {
         rows.push({ 
           type: 'department_row', 
@@ -153,27 +153,6 @@ export default function TimelineView({
           colorClass: departmentColors[idx % departmentColors.length]
         });
       });
-
-      // Then add all department subtotals
-      departmentsForLocation.forEach((department, idx) => {
-        rows.push({
-          type: 'department_subtotal',
-          id: `${location.id}-${department.id}-subtotal`,
-          data: department,
-          parentLocationId: location.id,
-          colorClass: departmentColors[idx % departmentColors.length]
-        });
-      });
-
-      // Finally add location subtotal row
-      if (departmentsForLocation.length > 0) {
-        rows.push({
-          type: 'location_subtotal',
-          id: `${location.id}-subtotal`,
-          data: location,
-          departments: departmentsForLocation
-        });
-      }
     });
     return rows;
   }, [sortedLocations, departments, schedule?.departmentIds]);
