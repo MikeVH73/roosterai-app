@@ -188,7 +188,6 @@ export default function ShiftDialog({
     // Remove empty fields
     if (!submitData.functionId) delete submitData.functionId;
     if (!submitData.daypartId) delete submitData.daypartId;
-    if (!submitData.departmentId) delete submitData.departmentId;
     if (!submitData.locationId) delete submitData.locationId;
 
     // Check for overlapping shifts
@@ -243,7 +242,6 @@ export default function ShiftDialog({
         delete submitData.has_break;
         if (!submitData.functionId) delete submitData.functionId;
         if (!submitData.daypartId) delete submitData.daypartId;
-        if (!submitData.departmentId) delete submitData.departmentId;
         if (!submitData.locationId) delete submitData.locationId;
 
         if (shift?.id) {
@@ -432,16 +430,15 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="departmentId" style={{ color: 'var(--color-text-primary)' }}>Afdeling</Label>
+            <Label htmlFor="departmentId" style={{ color: 'var(--color-text-primary)' }}>Afdeling *</Label>
             <Select 
-              value={formData.departmentId || 'none'} 
-              onValueChange={(v) => setFormData({ ...formData, departmentId: v === 'none' ? '' : v })}
+              value={formData.departmentId} 
+              onValueChange={(v) => setFormData({ ...formData, departmentId: v })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer afdeling" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Geen</SelectItem>
                 {schedule?.departmentIds && schedule.departmentIds.length > 0 ? (
                   departments
                     .filter(dept => schedule.departmentIds.includes(dept.id))

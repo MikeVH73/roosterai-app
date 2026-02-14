@@ -131,6 +131,15 @@ export default function Layout({ children, currentPageName }) {
           color: var(--color-text-primary);
         }
 
+        /* Button text always visible */
+        button {
+          color: inherit;
+        }
+
+        button[class*="outline"] {
+          color: var(--color-text-primary) !important;
+        }
+
         /* Badges */
         [class*="badge"] {
           border-color: var(--color-border) !important;

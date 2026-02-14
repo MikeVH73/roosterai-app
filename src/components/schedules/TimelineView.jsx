@@ -306,7 +306,7 @@ export default function TimelineView({
     isDraggingOrResizing.current = false;
   };
 
-  const handleDayDrop = async (e, locationId, dateToUse) => {
+  const handleDayDrop = async (e, locationId, departmentId, dateToUse) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -329,6 +329,7 @@ export default function TimelineView({
     try {
       await base44.entities.Shift.update(shift.id, {
         locationId,
+        departmentId,
         date: targetDate
       });
       onShiftUpdate?.(shift, oldData);
@@ -641,7 +642,7 @@ export default function TimelineView({
                   );
                 }
 
-                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 32 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
+                const cellHeight = (isLocationSubtotal || isDepartmentSubtotal) ? 28 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
 
                 return (
                   <div 
@@ -681,7 +682,7 @@ export default function TimelineView({
                     onDrop={(e) => {
                       if (isLocationSubtotal || isDepartmentSubtotal) return;
                       e.stopPropagation();
-                      handleDayDrop(e, cellLocationId, day);
+                      handleDayDrop(e, cellLocationId, cellDepartmentId, day);
                     }}
                   >
                     {(isLocationSubtotal || isDepartmentSubtotal) ? (
