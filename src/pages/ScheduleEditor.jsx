@@ -415,6 +415,7 @@ export default function ScheduleEditor() {
                 schedule={schedule}
                 shifts={shifts}
                 locations={locations}
+                departments={departments}
                 employees={relevantEmployees}
                 functions={functions}
                 dayparts={dayparts}
@@ -423,12 +424,12 @@ export default function ScheduleEditor() {
                 activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
                 onShiftClick={handleShiftClick}
                 onShiftUpdate={handleShiftUpdate}
-                onCellClick={(locationId, date, daypartId, startTime) => {
+                onCellClick={(locationId, date, departmentId, startTime) => {
                   setSelectedShift(null);
                   setSelectedEmployeeId(null);
                   setSelectedDate(format(date, 'yyyy-MM-dd'));
-                  setSelectedDaypartId(daypartId);
-                  // Pre-fill start time if clicked on specific time
+                  setSelectedDaypartId(null);
+                  setSelectedDepartmentId(departmentId);
                   if (startTime) {
                     setSelectedShift({ start_time: startTime });
                   }
