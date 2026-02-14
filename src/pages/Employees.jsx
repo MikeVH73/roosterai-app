@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { GlowCard } from "@/components/ui/glow-card";
 
 export default function Employees() {
   const { currentCompany, hasPermission } = useCompany();
@@ -136,7 +137,7 @@ export default function Employees() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Medewerkers" 
         subtitle={`${employees.length} medewerkers`}
@@ -232,21 +233,22 @@ export default function Employees() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredEmployees.map((employee) => (
-              <Card key={employee.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={employee.avatar_url} />
-                        <AvatarFallback className="bg-blue-100 text-blue-600 font-medium">
-                          {getInitials(employee.first_name, employee.last_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-slate-900">
-                          {employee.first_name} {employee.last_name}
-                        </h3>
-                        <p className="text-sm text-slate-500">{getFunctionName(employee.functionId)}</p>
+              <GlowCard key={employee.id} glowColor="blue">
+                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                  <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={employee.avatar_url} />
+                          <AvatarFallback className="font-medium text-white" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                            {getInitials(employee.first_name, employee.last_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                            {employee.first_name} {employee.last_name}
+                          </h3>
+                          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{getFunctionName(employee.functionId)}</p>
                       </div>
                     </div>
                     {hasPermission('manage_schedules') && (
@@ -274,38 +276,39 @@ export default function Employees() {
                     )}
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    {employee.email && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Mail className="w-4 h-4 text-slate-400" />
-                        <span className="truncate">{employee.email}</span>
+                    <div className="space-y-2 mb-4">
+                      {employee.email && (
+                        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                          <Mail className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                          <span className="truncate">{employee.email}</span>
+                        </div>
+                      )}
+                      {employee.phone && (
+                        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                          <Phone className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                          <span>{employee.phone}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        <Building2 className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                        <span className="truncate">{getDepartmentNames(employee.departmentIds)}</span>
                       </div>
-                    )}
-                    {employee.phone && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Phone className="w-4 h-4 text-slate-400" />
-                        <span>{employee.phone}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Building2 className="w-4 h-4 text-slate-400" />
-                      <span className="truncate">{getDepartmentNames(employee.departmentIds)}</span>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className={statusColors[employee.status]}>
-                      {employee.status === 'active' ? 'Actief' : employee.status === 'inactive' ? 'Inactief' : 'Afwezig'}
-                    </Badge>
-                    <Badge variant="outline">
-                      {contractTypeLabels[employee.contract_type]}
-                    </Badge>
-                    {employee.contract_hours && (
-                      <Badge variant="outline">{employee.contract_hours}u/week</Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={statusColors[employee.status]}>
+                        {employee.status === 'active' ? 'Actief' : employee.status === 'inactive' ? 'Inactief' : 'Afwezig'}
+                      </Badge>
+                      <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                        {contractTypeLabels[employee.contract_type]}
+                      </Badge>
+                      {employee.contract_hours && (
+                        <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>{employee.contract_hours}u/week</Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </GlowCard>
             ))}
           </div>
         )}

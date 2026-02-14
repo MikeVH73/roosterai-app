@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useCompany } from '../providers/CompanyProvider';
+import { useTheme } from '../providers/ThemeProvider';
 import {
   LayoutDashboard,
   Calendar,
@@ -14,7 +15,9 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  Menu
+  Menu,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -43,6 +46,7 @@ const allNavItems = [
 
 export default function HorizontalNav({ currentPage }) {
   const { currentCompany, userRole, user, hasPermission, switchCompany } = useCompany();
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Get user's preferred menu items from their profile, or use defaults
@@ -131,8 +135,19 @@ export default function HorizontalNav({ currentPage }) {
             </div>
           </div>
 
-          {/* Right: More menu + User menu */}
+          {/* Right: Theme toggle + More menu + User menu */}
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-lg"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </Button>
+
             {/* More Menu (Secondary items) - Desktop */}
             {secondaryItems.length > 0 && (
               <DropdownMenu>

@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { GlowCard } from "@/components/ui/glow-card";
 import {
   Dialog,
   DialogContent,
@@ -259,7 +260,7 @@ export default function Schedules() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Roosters" 
         subtitle={`${schedules.length} roosters`}
@@ -308,15 +309,16 @@ export default function Schedules() {
               const shiftCount = getShiftCount(schedule.id);
               
               return (
-                <Card key={schedule.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                          <CalendarDays className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-900">{schedule.name}</h3>
+                <GlowCard key={schedule.id} glowColor="purple">
+                  <Card className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                    <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)' }}>
+                            <CalendarDays className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{schedule.name}</h3>
                           <Badge className={statusConfig[schedule.status].color}>
                             {statusConfig[schedule.status].label}
                           </Badge>
@@ -368,26 +370,27 @@ export default function Schedules() {
                       )}
                     </div>
 
-                    <div className="space-y-2 text-sm text-slate-600 mb-4">
-                      <p>
-                        {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}
-                        <span className="text-slate-400 ml-1">({days} dagen)</span>
-                      </p>
-                      <p className="text-slate-500">{getDepartmentNames(schedule.departmentIds)}</p>
-                    </div>
+                      <div className="space-y-2 text-sm mb-4">
+                        <p style={{ color: 'var(--color-text-secondary)' }}>
+                          {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}
+                          <span style={{ color: 'var(--color-text-muted)' }} className="ml-1">({days} dagen)</span>
+                        </p>
+                        <p style={{ color: 'var(--color-text-muted)' }}>{getDepartmentNames(schedule.departmentIds)}</p>
+                      </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                      <span className="text-sm text-slate-500">
-                        {shiftCount} diensten
-                      </span>
-                      <Link to={createPageUrl('ScheduleEditor') + `?id=${schedule.id}`}>
-                        <Button variant="ghost" size="sm" className="text-blue-600">
-                          Bekijken
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+                        <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                          {shiftCount} diensten
+                        </span>
+                        <Link to={createPageUrl('ScheduleEditor') + `?id=${schedule.id}`}>
+                          <Button variant="ghost" size="sm" style={{ color: 'var(--color-accent)' }}>
+                            Bekijken
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </GlowCard>
               );
             })}
           </div>

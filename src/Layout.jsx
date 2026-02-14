@@ -1,5 +1,6 @@
 import React from 'react';
 import { CompanyProvider, useCompany } from './components/providers/CompanyProvider';
+import { ThemeProvider } from './components/providers/ThemeProvider';
 import HorizontalNav from './components/layout/HorizontalNav';
 import { Loader2 } from 'lucide-react';
 
@@ -43,9 +44,10 @@ function LayoutContent({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
   return (
-    <CompanyProvider>
-      <style>{`
-        :root {
+    <ThemeProvider>
+      <CompanyProvider>
+        <style>{`
+          [data-theme="dark"] {
           --color-primary: #262344;
           --color-primary-light: #3d3866;
           --color-accent: #6366f1;
@@ -138,10 +140,27 @@ export default function Layout({ children, currentPageName }) {
         svg {
           color: inherit;
         }
-      `}</style>
-      <LayoutContent currentPageName={currentPageName}>
+        }
+
+        [data-theme="light"] {
+        --color-primary: #1e293b;
+        --color-primary-light: #334155;
+        --color-accent: #6366f1;
+        --color-accent-hover: #4f46e5;
+        --color-accent-light: #6366f1;
+        --color-background: #f8fafc;
+        --color-surface: #ffffff;
+        --color-surface-light: #f1f5f9;
+        --color-text-primary: #0f172a;
+        --color-text-secondary: #475569;
+        --color-text-muted: #64748b;
+        --color-border: #e2e8f0;
+        }
+        `}</style>
+        <LayoutContent currentPageName={currentPageName}>
         {children}
-      </LayoutContent>
-    </CompanyProvider>
-  );
-}
+        </LayoutContent>
+        </CompanyProvider>
+        </ThemeProvider>
+        );
+        }
