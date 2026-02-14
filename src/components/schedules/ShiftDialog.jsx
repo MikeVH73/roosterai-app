@@ -188,7 +188,6 @@ export default function ShiftDialog({
     // Remove empty fields
     if (!submitData.functionId) delete submitData.functionId;
     if (!submitData.daypartId) delete submitData.daypartId;
-    if (!submitData.departmentId) delete submitData.departmentId;
     if (!submitData.locationId) delete submitData.locationId;
 
     // Check for overlapping shifts
@@ -243,7 +242,6 @@ export default function ShiftDialog({
         delete submitData.has_break;
         if (!submitData.functionId) delete submitData.functionId;
         if (!submitData.daypartId) delete submitData.daypartId;
-        if (!submitData.departmentId) delete submitData.departmentId;
         if (!submitData.locationId) delete submitData.locationId;
 
         if (shift?.id) {
@@ -296,19 +294,23 @@ export default function ShiftDialog({
       />
 
       <Dialog open={open && !showConflictDialog} onOpenChange={onClose}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" style={{ 
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
+          color: 'var(--color-text-primary)'
+        }}>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle style={{ color: 'var(--color-text-primary)' }}>
             {shift ? 'Dienst bewerken' : 'Nieuwe dienst'}
           </DialogTitle>
           {formattedDate && (
-            <p className="text-sm text-slate-500">{formattedDate}</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{formattedDate}</p>
           )}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="employeeId">Medewerker *</Label>
+            <Label htmlFor="employeeId" style={{ color: 'var(--color-text-primary)' }}>Medewerker *</Label>
             <Select 
               value={formData.employeeId} 
               onValueChange={(v) => setFormData({ ...formData, employeeId: v })}
@@ -328,7 +330,7 @@ export default function ShiftDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="start_time">Starttijd *</Label>
+              <Label htmlFor="start_time" style={{ color: 'var(--color-text-primary)' }}>Starttijd *</Label>
               <Input
                 id="start_time"
                 type="time"
@@ -338,7 +340,7 @@ export default function ShiftDialog({
               />
             </div>
             <div>
-              <Label htmlFor="end_time">Eindtijd *</Label>
+              <Label htmlFor="end_time" style={{ color: 'var(--color-text-primary)' }}>Eindtijd *</Label>
               <Input
                 id="end_time"
                 type="time"
@@ -360,7 +362,7 @@ export default function ShiftDialog({
                   break_duration: checked ? (formData.break_duration || 30) : 0
                 })}
               />
-              <Label htmlFor="has_break" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <Label htmlFor="has_break" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" style={{ color: 'var(--color-text-primary)' }}>
                 Pauze toevoegen
               </Label>
             </div>
@@ -369,7 +371,7 @@ export default function ShiftDialog({
               <div className="ml-6 mb-4 space-y-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="break_duration" className="text-sm">Pauze duur (minuten)</Label>
+                    <Label htmlFor="break_duration" className="text-sm" style={{ color: 'var(--color-text-primary)' }}>Pauze duur (minuten)</Label>
                     <Input
                       id="break_duration"
                       type="number"
@@ -380,7 +382,7 @@ export default function ShiftDialog({
                     />
                   </div>
                   <div>
-                    <Label htmlFor="break_start_time" className="text-sm">Pauze start</Label>
+                    <Label htmlFor="break_start_time" className="text-sm" style={{ color: 'var(--color-text-primary)' }}>Pauze start</Label>
                     <Input
                       id="break_start_time"
                       type="time"
@@ -391,7 +393,7 @@ export default function ShiftDialog({
                     />
                   </div>
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   De pauze wordt aan het rooster toegevoegd en komt bovenop de werktijd
                 </p>
               </div>
@@ -399,7 +401,7 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="locationId">Locatie *</Label>
+            <Label htmlFor="locationId" style={{ color: 'var(--color-text-primary)' }}>Locatie *</Label>
             <Select 
               value={formData.locationId || 'auto'} 
               onValueChange={(v) => setFormData({ ...formData, locationId: v === 'auto' ? '' : v })}
@@ -428,16 +430,15 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="departmentId">Afdeling</Label>
+            <Label htmlFor="departmentId" style={{ color: 'var(--color-text-primary)' }}>Afdeling *</Label>
             <Select 
-              value={formData.departmentId || 'none'} 
-              onValueChange={(v) => setFormData({ ...formData, departmentId: v === 'none' ? '' : v })}
+              value={formData.departmentId} 
+              onValueChange={(v) => setFormData({ ...formData, departmentId: v })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer afdeling" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Geen</SelectItem>
                 {schedule?.departmentIds && schedule.departmentIds.length > 0 ? (
                   departments
                     .filter(dept => schedule.departmentIds.includes(dept.id))
@@ -458,7 +459,7 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="shift_type">Type dienst</Label>
+            <Label htmlFor="shift_type" style={{ color: 'var(--color-text-primary)' }}>Type dienst</Label>
             <Select 
               value={formData.shift_type} 
               onValueChange={(v) => setFormData({ ...formData, shift_type: v })}
@@ -477,7 +478,7 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="functionId">Functie</Label>
+            <Label htmlFor="functionId" style={{ color: 'var(--color-text-primary)' }}>Functie</Label>
             <Select 
               value={formData.functionId || 'none'} 
               onValueChange={(v) => setFormData({ ...formData, functionId: v === 'none' ? '' : v })}
@@ -497,7 +498,7 @@ export default function ShiftDialog({
           </div>
 
           <div>
-            <Label htmlFor="notes">Notities</Label>
+            <Label htmlFor="notes" style={{ color: 'var(--color-text-primary)' }}>Notities</Label>
             <Textarea
               id="notes"
               value={formData.notes}
@@ -521,7 +522,10 @@ export default function ShiftDialog({
               </Button>
             )}
             <div className={`flex gap-3 ${!shift?.id ? 'ml-auto' : ''}`}>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} style={{ 
+                color: 'var(--color-text-primary)',
+                borderColor: 'var(--color-border)'
+              }}>
                 Annuleren
               </Button>
               <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
