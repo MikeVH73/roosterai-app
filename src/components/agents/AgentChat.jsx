@@ -126,30 +126,63 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] bg-white rounded-lg border border-slate-200">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-slate-900">Planning Assistent</h3>
-            <p className="text-xs text-slate-500">Stel vragen over roosters en diensten</p>
-          </div>
+    <div className="flex h-[calc(100vh-12rem)] bg-white rounded-lg border border-slate-200">
+      {/* Conversations Sidebar */}
+      <div className="w-64 border-r border-slate-200 flex flex-col">
+        <div className="p-4 border-b border-slate-200">
+          <Button 
+            onClick={createNewConversation}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nieuw gesprek
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={createNewConversation}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nieuw gesprek
-        </Button>
+        <div className="flex-1 overflow-y-auto p-2">
+          {conversations.map((convo) => (
+            <button
+              key={convo.id}
+              onClick={() => loadConversation(convo.id)}
+              className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
+                currentConversation?.id === convo.id
+                  ? 'bg-blue-50 border border-blue-200'
+                  : 'hover:bg-slate-50 border border-transparent'
+              }`}
+            >
+              <p className="text-sm font-medium text-slate-900 truncate">
+                {convo.metadata?.name || 'Gesprek'}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                {new Date(convo.created_date).toLocaleDateString('nl-NL', { 
+                  day: 'numeric', 
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900">Planning Assistent</h3>
+              <p className="text-xs text-slate-500">Stel vragen over roosters en diensten</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="w-12 h-12 text-slate-300 mb-3" />
@@ -173,11 +206,11 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Input */}
-      <form onSubmit={sendMessage} className="p-4 border-t border-slate-200">
+        {/* Input */}
+        <form onSubmit={sendMessage} className="p-4 border-t border-slate-200">
         <div className="flex gap-2">
           <Input
             value={inputMessage}
@@ -194,7 +227,8 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
             <Send className="w-4 h-4" />
           </Button>
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
