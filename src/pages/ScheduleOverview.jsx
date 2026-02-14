@@ -209,63 +209,60 @@ export default function ScheduleOverview() {
 
   if (schedulesLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)' }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-accent)' }} />
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-50">
+    <div style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh' }}>
       <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900">Rooster Overzicht</h1>
-          <p className="text-sm text-slate-500">{activeSchedules.length} actieve roosters</p>
-        </div>
-
-
-        {/* Compact Statistics Bar */}
-        <div className="flex items-center gap-6 mb-4 px-4 py-3 bg-white rounded-lg shadow-sm border border-slate-100">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">Gepubliceerd</p>
-              <p className="text-lg font-bold text-slate-900">{publishedSchedules.length}</p>
-            </div>
+        {/* Compact Statistics Bar with Title */}
+        <div className="flex items-center justify-between mb-6 px-6 py-4 rounded-lg shadow-sm" style={{ backgroundColor: 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}>
+          {/* Left: Title */}
+          <div>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Rooster Overzicht</h1>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{activeSchedules.length} actieve roosters</p>
           </div>
-          <div className="w-px h-8 bg-slate-200" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-slate-600" />
+          
+          {/* Right: Statistics Icons */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)' }}>
+                <Calendar className="w-5 h-5" style={{ color: '#22c55e' }} />
+              </div>
+              <div>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Gepubliceerd</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{publishedSchedules.length}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-slate-500">Concepten</p>
-              <p className="text-lg font-bold text-slate-900">{draftSchedules.length}</p>
+            <div className="w-px h-10" style={{ backgroundColor: 'var(--color-border)' }} />
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(148, 163, 184, 0.15) 0%, rgba(148, 163, 184, 0.05) 100%)' }}>
+                <TrendingUp className="w-5 h-5" style={{ color: '#94a3b8' }} />
+              </div>
+              <div>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Concepten</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{draftSchedules.length}</p>
+              </div>
             </div>
-          </div>
-          <div className="w-px h-8 bg-slate-200" />
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-              <Users className="w-4 h-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">Medewerkers</p>
-              <p className="text-lg font-bold text-slate-900">{employees.length}</p>
+            <div className="w-px h-10" style={{ backgroundColor: 'var(--color-border)' }} />
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0.05) 100%)' }}>
+                <Users className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+              </div>
+              <div>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Medewerkers</p>
+                <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{employees.length}</p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Schedule Tabs */}
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="border-b border-slate-200">
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              Roosters
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
+        <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+          <CardContent className="p-0" style={{ backgroundColor: 'transparent' }}>
             {activeSchedules.length === 0 ? (
               <div className="p-12 text-center">
                 <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
@@ -279,7 +276,7 @@ export default function ScheduleOverview() {
               </div>
             ) : (
               <Tabs value={selectedScheduleId || activeSchedules[0]?.id} onValueChange={setSelectedScheduleId}>
-                <div className="px-4 pt-4 pb-2 overflow-x-auto bg-gradient-to-b from-slate-50 to-white">
+                <div className="px-4 pt-4 pb-2 overflow-x-auto" style={{ background: 'linear-gradient(to bottom, var(--color-surface-light), var(--color-surface))' }}>
                   <div className="flex gap-2">
                     {activeSchedules.map(schedule => {
                       const hasConflicts = scheduleConflicts[schedule.id];
@@ -292,10 +289,17 @@ export default function ScheduleOverview() {
                           className={`
                             relative min-w-[180px] max-w-[220px] px-4 py-3 rounded-t-xl font-medium text-sm transition-all
                             ${isActive 
-                              ? 'bg-white shadow-lg -mb-px z-10 text-slate-900' 
-                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
+                              ? 'shadow-lg -mb-px z-10' 
+                              : 'hover:opacity-80'
                             }
                           `}
+                          style={isActive ? {
+                            backgroundColor: 'var(--color-surface)',
+                            color: 'var(--color-text-primary)'
+                          } : {
+                            backgroundColor: 'var(--color-surface-light)',
+                            color: 'var(--color-text-secondary)'
+                          }}
                         >
                           <div className="flex flex-col items-start gap-1.5">
                             <div className="flex items-center gap-2 w-full">
@@ -314,7 +318,7 @@ export default function ScheduleOverview() {
                             </div>
                           </div>
                           {isActive && (
-                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-xl" />
+                            <div className="absolute bottom-0 left-0 right-0 h-1 rounded-t-xl" style={{ background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-light))' }} />
                           )}
                         </button>
                       );
@@ -439,42 +443,51 @@ export default function ScheduleOverview() {
                   };
                   
                   return (
-                    <div key={schedule.id} className="border-t-2 border-slate-200">
-                      <div className="flex">
-                        {/* Mini Calendar Sidebar */}
-                        {miniCalendarOpen && (
-                          <div className="w-80 border-r border-slate-200 p-6 bg-slate-50 flex-shrink-0">
-                            <MiniCalendar
-                              selectedDate={currentWeekStart}
-                              onDateSelect={handleDateSelect}
-                            />
-                          </div>
+                    <div key={schedule.id} style={{ borderTop: '2px solid var(--color-border)' }}>
+                      {/* Main Content - Full Width */}
+                      <div className="p-6">
+                        {/* Mini Calendar Toggle Button - Collapsed by default */}
+                        {!miniCalendarOpen && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setMiniCalendarOpen(true)}
+                            className="mb-4"
+                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                          >
+                            <Menu className="w-4 h-4 mr-2" />
+                            Toon kalender
+                          </Button>
                         )}
-
-                        {/* Main Content */}
-                        <div className="flex-1 p-6 min-w-0">
+                        
+                        {/* Mini Calendar Overlay */}
+                        {miniCalendarOpen && (
+                          <>
+                            <div 
+                              className="fixed inset-0 bg-black/50 z-40"
+                              onClick={() => setMiniCalendarOpen(false)}
+                            />
+                            <div className="fixed left-0 top-0 bottom-0 w-80 p-6 z-50 shadow-2xl" style={{ backgroundColor: 'var(--color-surface)' }}>
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Kalender</h3>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setMiniCalendarOpen(false)}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <MiniCalendar
+                                selectedDate={currentWeekStart}
+                                onDateSelect={handleDateSelect}
+                              />
+                            </div>
+                          </>
+                        )}
                         {/* Compact Header with Controls */}
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            {/* Toggle Mini Calendar */}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setMiniCalendarOpen(!miniCalendarOpen)}
-                              className="h-7 px-2 border-slate-300"
-                            >
-                              {miniCalendarOpen ? (
-                                <>
-                                  <X className="w-4 h-4 mr-1" />
-                                  <span className="text-xs">Verberg kalender</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Menu className="w-4 h-4 mr-1" />
-                                  <span className="text-xs">Toon kalender</span>
-                                </>
-                              )}
-                            </Button>
                             {/* View Mode Selector */}
                             <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
                               <Button
@@ -551,13 +564,14 @@ export default function ScheduleOverview() {
                           </div>
                           
                           <Button 
-                            size="sm"
-                            onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
-                            className="bg-blue-600 hover:bg-blue-700 h-7 px-3 text-xs"
+                          size="sm"
+                          onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
+                          className="h-7 px-3 text-xs"
+                          style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
                           >
-                            Bewerken
+                          Bewerken
                           </Button>
-                        </div>
+                          </div>
 
                         {hasConflicts && (
                           <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -600,7 +614,6 @@ export default function ScheduleOverview() {
                             />
                           )}
                         </div>
-                      </div>
                       </div>
                     </div>
                   );
