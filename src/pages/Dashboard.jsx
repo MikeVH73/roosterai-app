@@ -22,12 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GlowCard } from "@/components/ui/glow-card";
-import { EtheralShadow } from "@/components/ui/etheral-shadow";
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
-
-// ⚠️ Set to false to disable the background effect
-const ENABLE_ETHERAL_SHADOW = true;
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   const colorClasses = {
@@ -132,24 +128,13 @@ export default function Dashboard() {
   const pendingRequests = vacationRequests.length + swapRequests.length;
 
   return (
-    <div className="min-h-screen bg-slate-50 relative">
-      {ENABLE_ETHERAL_SHADOW && (
-        <EtheralShadow
-          color="rgba(100, 120, 180, 0.3)"
-          animation={{ scale: 100, speed: 90 }}
-          noise={{ opacity: 0.8, scale: 1.2 }}
-          sizing="fill"
-          style={{ zIndex: 0 }}
-        />
-      )}
-      
-      <div className="relative z-10">
-        <TopBar 
-          title="Dashboard" 
-          subtitle={format(new Date(), "EEEE d MMMM yyyy", { locale: nl })}
-        />
+    <div className="min-h-screen bg-slate-50">
+      <TopBar 
+        title="Dashboard" 
+        subtitle={format(new Date(), "EEEE d MMMM yyyy", { locale: nl })}
+      />
 
-        <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6 max-w-7xl mx-auto">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
@@ -373,7 +358,6 @@ export default function Dashboard() {
               </CardContent>
             </Card>
           </div>
-        </div>
         </div>
       </div>
     </div>
