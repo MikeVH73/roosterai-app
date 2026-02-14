@@ -823,7 +823,8 @@ export default function TimelineView({
           </div>
           {weekDays.map((day, dayIdx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
-            const allDayShifts = shifts.filter(s => s.date === dateStr);
+            const visibleLocationIds = sortedLocations.map(loc => loc.id);
+            const allDayShifts = shifts.filter(s => s.date === dateStr && visibleLocationIds.includes(s.locationId));
             const grandTotal = allDayShifts.reduce((sum, shift) => {
               const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
               return sum + duration;
@@ -862,8 +863,10 @@ export default function TimelineView({
           }}>
             <div className="font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>
               {(() => {
+                const visibleLocationIds = sortedLocations.map(loc => loc.id);
                 const weekTotal = shifts.filter(s => 
-                  weekDays.some(day => format(day, 'yyyy-MM-dd') === s.date)
+                  weekDays.some(day => format(day, 'yyyy-MM-dd') === s.date) && 
+                  visibleLocationIds.includes(s.locationId)
                 ).reduce((sum, shift) => {
                   const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
                   return sum + duration;
