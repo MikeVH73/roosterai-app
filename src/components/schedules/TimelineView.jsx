@@ -136,6 +136,16 @@ export default function TimelineView({
           parentLocationId: location.id 
         });
       });
+
+      // Add location subtotal row
+      if (departmentsForLocation.length > 0) {
+        rows.push({
+          type: 'location_subtotal',
+          id: `${location.id}-subtotal`,
+          data: location,
+          departments: departmentsForLocation
+        });
+      }
     });
     return rows;
   }, [sortedLocations, departments, schedule?.departmentIds]);
@@ -473,7 +483,8 @@ export default function TimelineView({
         {displayRows.map((row) => {
           const isLocationHeader = row.type === 'location_header';
           const isDepartmentRow = row.type === 'department_row';
-          const location = isLocationHeader ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
+          const isLocationSubtotal = row.type === 'location_subtotal';
+          const location = isLocationHeader ? row.data : isLocationSubtotal ? row.data : sortedLocations.find(l => l.id === row.parentLocationId);
 
           return (
             <div
@@ -491,7 +502,7 @@ export default function TimelineView({
               } : undefined}
             >
               <div className={`w-48 flex-shrink-0 border-r-2 border-slate-800 bg-white p-3 flex items-center gap-2 ${
-                isLocationHeader ? 'cursor-move hover:bg-slate-50' : 'pl-8'
+                isLocationHeader ? 'cursor-move hover:bg-slate-50' : isLocationSubtotal ? 'bg-blue-50' : 'pl-8'
               } transition-colors`}>
                 {isLocationHeader ? (
                   <>
@@ -503,6 +514,10 @@ export default function TimelineView({
                       )}
                     </div>
                   </>
+                ) : isLocationSubtotal ? (
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-blue-900 text-sm">Totaal {row.data.name}</div>
+                  </div>
                 ) : (
                   <>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
@@ -521,6 +536,7 @@ export default function TimelineView({
                 let dayShifts = [];
                 let cellLocationId = location.id;
                 let cellDepartmentId = null;
+                let totalHours = 0;
 
                 if (isLocationHeader) {
                   dayShifts = shifts.filter(s => 
@@ -528,6 +544,16 @@ export default function TimelineView({
                     s.date === dateStr && 
                     !s.departmentId
                   );
+                } else if (isLocationSubtotal) {
+                  // Calculate total for this location on this day
+                  dayShifts = shifts.filter(s => 
+                    s.locationId === location.id && 
+                    s.date === dateStr
+                  );
+                  totalHours = dayShifts.reduce((sum, shift) => {
+                    const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
+                    return sum + duration;
+                  }, 0);
                 } else {
                   cellDepartmentId = row.data.id;
                   dayShifts = shifts.filter(s => 
@@ -537,16 +563,19 @@ export default function TimelineView({
                   );
                 }
 
-                const cellHeight = Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
+                const cellHeight = isLocationSubtotal ? 40 : Math.max(isDepartmentRow ? 60 : 80, dayShifts.length * 38 + 20);
 
                 return (
                   <div 
                     key={dayIdx} 
-                    className="border-r-2 border-slate-800 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
+                    className={`border-r-2 border-slate-800 relative transition-colors flex-1 ${
+                      isLocationSubtotal ? 'bg-blue-50' : 'bg-white hover:bg-slate-50/50'
+                    }`}
                     style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
                     data-day-container
                     data-date={dateStr}
                     onClick={(e) => {
+                      if (isLocationSubtotal) return;
                       if (isDraggingOrResizing.current) {
                         isDraggingOrResizing.current = false;
                         return;
@@ -561,26 +590,36 @@ export default function TimelineView({
                       }
                     }}
                     onDragOver={(e) => {
+                      if (isLocationSubtotal) return;
                       e.preventDefault();
                       e.stopPropagation();
                     }}
                     onDrop={(e) => {
+                      if (isLocationSubtotal) return;
                       e.stopPropagation();
                       handleDayDrop(e, cellLocationId, day);
                     }}
                   >
-                    {hourMarkers.map((marker, idx) => (
-                      <div
-                        key={`grid-${idx}`}
-                        className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
-                        style={{ left: `${marker.position}px` }}
-                      />
-                    ))}
+                    {isLocationSubtotal ? (
+                      <div className="h-full flex items-center justify-center">
+                        <div className="font-bold text-blue-900 text-sm">
+                          {totalHours.toFixed(1)}u
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {hourMarkers.map((marker, idx) => (
+                          <div
+                            key={`grid-${idx}`}
+                            className="absolute inset-y-0 border-r border-slate-300 pointer-events-none"
+                            style={{ left: `${marker.position}px` }}
+                          />
+                        ))}
 
-                    <div className="absolute inset-0 pointer-events-none" data-empty-area />
+                        <div className="absolute inset-0 pointer-events-none" data-empty-area />
 
-                    <div className="absolute inset-0 p-1 pointer-events-none">
-                      {assignShiftLanes(dayShifts).map((shift) => {
+                        <div className="absolute inset-0 p-1 pointer-events-none">
+                          {assignShiftLanes(dayShifts).map((shift) => {
                         const employee = getEmployee(shift.employeeId);
                         const func = getFunction(shift.functionId);
                         const shiftColor = employee?.color || func?.color || '#94a3b8';
@@ -675,6 +714,8 @@ export default function TimelineView({
                         );
                       })}
                     </div>
+                      </>
+                    )}
                   </div>
                 );
               })}
@@ -682,8 +723,35 @@ export default function TimelineView({
           );
         })}
         
+        {/* Grand total row */}
+        <div className="flex w-full border-t-2 border-slate-900 bg-blue-100">
+          <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 p-3">
+            <div className="font-bold text-slate-900 text-sm">Totaal Rooster</div>
+          </div>
+          {weekDays.map((day, dayIdx) => {
+            const dateStr = format(day, 'yyyy-MM-dd');
+            const allDayShifts = shifts.filter(s => s.date === dateStr);
+            const grandTotal = allDayShifts.reduce((sum, shift) => {
+              const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
+              return sum + duration;
+            }, 0);
+
+            return (
+              <div 
+                key={dayIdx}
+                className="border-r-2 border-slate-800 flex-1 bg-blue-100 flex items-center justify-center"
+                style={{ minWidth: '100px', minHeight: '40px' }}
+              >
+                <div className="font-bold text-blue-900 text-base">
+                  {grandTotal.toFixed(1)}u
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         {/* Extra ruimte onder de laatste locatie */}
-        <div className="h-32 bg-slate-50/30 border-b border-slate-200" />
+        <div className="h-8 bg-slate-50/30 border-b border-slate-200" />
         </div>
       </div>
     </div>
