@@ -32,7 +32,7 @@ function LayoutContent({ children, currentPageName }) {
 
   // Main app layout with horizontal navigation
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <HorizontalNav currentPage={currentPageName} />
       <main className="w-full">
         {children}
@@ -44,6 +44,34 @@ function LayoutContent({ children, currentPageName }) {
 export default function Layout({ children, currentPageName }) {
   return (
     <CompanyProvider>
+      <style>{`
+        :root {
+          --color-primary: #262344;
+          --color-primary-light: #3d3866;
+          --color-accent: #7c3aed;
+          --color-accent-hover: #6d28d9;
+          --color-background: #f8fafc;
+          --color-surface: #ffffff;
+          --color-text-primary: #1e293b;
+          --color-text-secondary: #64748b;
+        }
+        
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        .btn-primary {
+          background-color: var(--color-accent) !important;
+        }
+        
+        .btn-primary:hover {
+          background-color: var(--color-accent-hover) !important;
+        }
+        
+        .bg-primary-dark {
+          background-color: var(--color-primary);
+        }
+      `}</style>
       <LayoutContent currentPageName={currentPageName}>
         {children}
       </LayoutContent>
