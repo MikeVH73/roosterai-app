@@ -79,7 +79,7 @@ export default function HorizontalNav({ currentPage }) {
   };
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <nav className="sticky top-0 z-50" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}>
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Company name & primary navigation */}
@@ -87,22 +87,23 @@ export default function HorizontalNav({ currentPage }) {
             {/* Company Info */}
             <button 
               onClick={switchCompany}
-              className="flex items-center gap-3 hover:bg-slate-50 px-3 py-2 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
+              style={{ hover: { backgroundColor: 'var(--color-surface-light)' } }}
             >
               {currentCompany?.logo_url ? (
                 <img src={currentCompany.logo_url} alt={currentCompany.name} className="h-8 w-8 rounded" />
               ) : (
-                <div className="h-8 w-8 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <div className="h-8 w-8 rounded flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
                   <span className="text-white font-bold text-sm">
                     {currentCompany?.name?.charAt(0) || 'C'}
                   </span>
                 </div>
               )}
               <div className="text-left hidden sm:block">
-                <div className="font-semibold text-slate-900 text-sm">{currentCompany?.name}</div>
-                <div className="text-xs text-slate-500 capitalize">{userRole?.replace('_', ' ')}</div>
+                <div className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>{currentCompany?.name}</div>
+                <div className="text-xs capitalize" style={{ color: 'var(--color-text-secondary)' }}>{userRole?.replace('_', ' ')}</div>
               </div>
-              <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
+              <ChevronDown className="w-4 h-4 hidden sm:block" style={{ color: 'var(--color-text-secondary)' }} />
             </button>
 
             {/* Primary Navigation - Desktop */}
@@ -114,11 +115,13 @@ export default function HorizontalNav({ currentPage }) {
                   <Link
                     key={item.id}
                     to={createPageUrl(item.page)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    style={isActive ? { 
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                      color: 'var(--color-accent-light)'
+                    } : { 
+                      color: 'var(--color-text-primary)'
+                    }}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{item.label}</span>
@@ -191,19 +194,19 @@ export default function HorizontalNav({ currentPage }) {
             {/* User Menu - Desktop */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="hidden lg:flex items-center gap-2 hover:bg-slate-50 px-2 py-1.5 rounded-lg transition-colors">
+                <button className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
+                    <AvatarFallback className="text-white text-xs" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
                       {getInitials(user?.full_name)}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className="w-4 h-4" style={{ color: 'var(--color-text-secondary)' }} />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="font-medium text-slate-900 text-sm">{user?.full_name}</p>
-                  <p className="text-xs text-slate-500">{user?.email}</p>
+              <DropdownMenuContent align="end" className="w-56" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--color-border)' }}>
+                  <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{user?.full_name}</p>
+                  <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{user?.email}</p>
                 </div>
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                   <LogOut className="w-4 h-4 mr-3" />
