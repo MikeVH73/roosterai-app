@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 const glowColorMap = {
   blue: { base: 220, spread: 200 },
+  cyan: { base: 190, spread: 250 },
   purple: { base: 280, spread: 300 },
   green: { base: 120, spread: 200 },
   red: { base: 0, spread: 200 },
