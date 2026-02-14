@@ -20,7 +20,7 @@ export default function TopBar({ title, subtitle, actions }) {
   };
 
   return (
-    <header className="bg-slate-200 px-6 h-16 border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-white/80 backdrop-blur-md px-6 h-16 border-b border-slate-200/50 flex items-center justify-between sticky top-0 z-10 shadow-sm">
       <div>
         <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
         {subtitle &&
