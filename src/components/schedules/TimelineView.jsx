@@ -79,16 +79,24 @@ export default function TimelineView({
   if (totalMinutes <= 0) totalMinutes += 24 * 60;
   const totalHours = totalMinutes / 60;
   
-  // Calculate day width dynamically based on available width and number of active days
+  // Calculate day width dynamically - fill entire available width
   const numActiveDays = weekDays.length;
-  const minDayWidth = 200;
-  let calculatedDayWidth = minDayWidth;
-  if (numActiveDays > 0 && timelineWidth > 0) {
-    calculatedDayWidth = Math.max(minDayWidth, timelineWidth / numActiveDays);
-  }
+  const LOCATION_COL_WIDTH = 192; // w-48 = 192px
+  const availableWidth = timelineWidth - LOCATION_COL_WIDTH;
+  const DAY_WIDTH = numActiveDays > 0 && availableWidth > 0 
+    ? availableWidth / numActiveDays 
+    : 800;
   
-  const DAY_WIDTH = calculatedDayWidth;
   const PIXELS_PER_MINUTE = DAY_WIDTH / totalMinutes;
+  
+  // Calculate responsive font size based on day width
+  const getFontSize = () => {
+    if (DAY_WIDTH < 120) return 'text-[9px]';
+    if (DAY_WIDTH < 150) return 'text-[10px]';
+    return 'text-[11px]';
+  };
+  
+  const fontSizeClass = getFontSize();
 
 
 
@@ -338,21 +346,21 @@ export default function TimelineView({
           </div>
         </div>
       )}
-      <div ref={timelineRef} className="overflow-x-auto overflow-y-auto flex-1">
-        <div className="min-w-max relative">
+      <div ref={timelineRef} className="overflow-y-auto flex-1 w-full">
+        <div className="w-full relative">
         <div className="sticky top-0 z-20 bg-white border-b border-slate-300">
-          <div className="flex">
+          <div className="flex w-full">
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50 p-3">
               <div className="font-semibold text-slate-700 text-sm">Locaties</div>
             </div>
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="border-r border-slate-200" style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px` }}>
+              <div key={dayIdx} className="border-r border-slate-200 flex-1" style={{ minWidth: '100px' }}>
                 <div className="text-center bg-white py-2.5">
-                  <div className="font-semibold text-slate-800 text-sm">
+                  <div className={`font-semibold text-slate-800 ${DAY_WIDTH < 120 ? 'text-xs' : 'text-sm'} truncate px-2`}>
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
-                  <div className="text-xs text-slate-600">
+                  <div className={`text-slate-600 ${DAY_WIDTH < 120 ? 'text-[10px]' : 'text-xs'}`}>
                     {format(day, 'd MMM', { locale: nl })}
                   </div>
                 </div>
@@ -361,18 +369,18 @@ export default function TimelineView({
           </div>
 
           {/* Timeline with hours spanning all days */}
-          <div className="flex border-t border-slate-200">
+          <div className="flex border-t border-slate-200 w-full">
             <div className="w-48 flex-shrink-0 border-r border-slate-300 bg-slate-50" />
 
             {weekDays.map((day, dayIdx) => (
-              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50" style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, height: '32px' }}>
+              <div key={dayIdx} className="relative border-r border-slate-200 bg-slate-50 flex-1" style={{ minWidth: '100px', height: '32px' }}>
                 {hourMarkers.map((marker, idx) => (
                   <div 
                     key={idx} 
                     className="absolute inset-y-0 border-l border-slate-300"
                     style={{ left: `${marker.position}px` }}
                   >
-                    <span className="absolute top-1 left-0.5 text-[11px] text-slate-600 font-medium">
+                    <span className={`absolute top-1 left-0.5 text-slate-600 font-medium ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[11px]'}`}>
                       {marker.label.replace(':00', '')}
                     </span>
                   </div>
@@ -380,12 +388,12 @@ export default function TimelineView({
               </div>
             ))}
           </div>
-        </div>
+          </div>
 
         {sortedLocations.map((location) => (
           <div
             key={location.id}
-            className={`flex border-b border-slate-200 hover:bg-slate-50/50 transition-colors ${
+            className={`flex w-full border-b border-slate-200 hover:bg-slate-50/50 transition-colors ${
               dragOverLocation === location.id ? 'bg-blue-50' : ''
             }`}
             draggable
@@ -415,8 +423,8 @@ export default function TimelineView({
               return (
                 <div 
                   key={dayIdx} 
-                  className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors" 
-                  style={{ width: `${DAY_WIDTH}px`, flex: `1 0 ${DAY_WIDTH}px`, minHeight: `${cellHeight}px` }}
+                  className="border-r border-slate-200 relative bg-white hover:bg-slate-50/50 transition-colors flex-1" 
+                  style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
                   data-day-container
                   data-date={format(currentDay, 'yyyy-MM-dd')}
                   onClick={(e) => {
@@ -494,7 +502,7 @@ export default function TimelineView({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div 
-                            className="absolute inset-0 px-2 py-1 text-[11px] text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10"
+                            className={`absolute inset-0 px-2 py-1 ${fontSizeClass} text-white font-semibold truncate flex items-center gap-1.5 cursor-move z-10`}
                             draggable
                             onDragStart={(e) => handleShiftDragStart(e, shift)}
                             onDragEnd={handleShiftDragEnd}
@@ -527,7 +535,7 @@ export default function TimelineView({
                               {employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'}
                             </span>
                             {widthPx > 60 && (
-                              <span className="text-white/95 text-[10px] flex-shrink-0 font-semibold ml-auto">
+                              <span className={`text-white/95 flex-shrink-0 font-semibold ml-auto ${DAY_WIDTH < 120 ? 'text-[9px]' : 'text-[10px]'}`}>
                                 {duration}
                               </span>
                             )}
