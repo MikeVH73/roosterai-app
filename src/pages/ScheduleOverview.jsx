@@ -565,7 +565,7 @@ export default function ScheduleOverview() {
                           </div>
                         )}
 
-                        {/* Schedule Grid - Always Timeline View */}
+                        {/* Schedule Grid - Always Vertical Timeline View */}
                         <div className="w-full overflow-auto">
                           {weekDays.length === 0 ? (
                             <div className="p-12 text-center" style={{ color: 'var(--color-text-muted)' }}>
@@ -573,17 +573,24 @@ export default function ScheduleOverview() {
                               <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
                             </div>
                           ) : (
-                            <ScheduleWeekView
+                            <VerticalTimelineView
                               schedule={schedule}
                               weekDays={weekDays}
-                              employees={scheduleEmployees}
+                              locations={relevantLocations}
                               shifts={scheduleShifts}
-                              departments={departments}
+                              employees={scheduleEmployees}
                               dayparts={relevantDayparts}
-                              locations={locations}
                               functions={functions}
-                              staffingRequirements={staffingRequirements}
-                              onCellClick={(employeeId, date, daypartId) => handleCellClick(employeeId, date, daypartId, schedule.id)}
+                              onCellClick={(locationId, date) => {
+                                setShiftDialogData({
+                                  open: true,
+                                  shift: null,
+                                  employeeId: null,
+                                  date: format(date, 'yyyy-MM-dd'),
+                                  locationId: locationId,
+                                  scheduleId: schedule.id
+                                });
+                              }}
                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
                             />
                           )}
