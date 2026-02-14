@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { GlowCard } from "@/components/ui/glow-card";
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -33,26 +34,28 @@ function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   };
 
   return (
-    <Card className="border-0 shadow-sm">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">{title}</p>
-            <p className="text-3xl font-bold text-slate-900 mt-1">{value}</p>
-            {trend && (
-              <div className="flex items-center gap-1 mt-2">
-                <TrendingUp className="w-3 h-3 text-green-500" />
-                <span className="text-xs text-green-600 font-medium">{trend}</span>
-                <span className="text-xs text-slate-400">{trendLabel}</span>
-              </div>
-            )}
+    <GlowCard glowColor={color} className="shadow-sm">
+      <Card className="border-0 shadow-none bg-white/80">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">{title}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{value}</p>
+              {trend && (
+                <div className="flex items-center gap-1 mt-2">
+                  <TrendingUp className="w-3 h-3 text-green-500" />
+                  <span className="text-xs text-green-600 font-medium">{trend}</span>
+                  <span className="text-xs text-slate-400">{trendLabel}</span>
+                </div>
+              )}
+            </div>
+            <div className={`p-3 rounded-xl ${colorClasses[color]}`}>
+              <Icon className="w-6 h-6" />
+            </div>
           </div>
-          <div className={`p-3 rounded-xl ${colorClasses[color]}`}>
-            <Icon className="w-6 h-6" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </GlowCard>
   );
 }
 
