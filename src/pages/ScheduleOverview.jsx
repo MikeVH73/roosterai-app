@@ -579,16 +579,24 @@ export default function ScheduleOverview() {
                           ) : (
                             <VerticalTimelineView
                               schedule={schedule}
-                              weekDays={weekDays}
-                              locations={relevantLocations}
                               shifts={scheduleShifts}
-                              employees={scheduleEmployees}
-                              dayparts={relevantDayparts}
+                              locations={locations}
+                              employees={employees}
                               functions={functions}
-                              onCellClick={(locationId, date) => {
-                                handleCellClick(null, date, null, schedule.id);
-                              }}
+                              departments={departments}
+                              currentWeekStart={currentWeekStart}
                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
+                              onShiftUpdate={(shift, oldData) => {
+                                // No undo stack in overview, just refetch
+                              }}
+                              onCellClick={(locationId, date, daypartId, departmentId, startTime) => {
+                                setSelectedShift(startTime ? { start_time: startTime } : null);
+                                setSelectedEmployeeId(null);
+                                setSelectedDate(format(date, 'yyyy-MM-dd'));
+                                setSelectedDaypartId(daypartId);
+                                setCurrentScheduleId(schedule.id);
+                                setShiftDialogOpen(true);
+                              }}
                             />
                           )}
                         </div>
