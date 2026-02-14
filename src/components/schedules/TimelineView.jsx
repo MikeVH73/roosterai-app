@@ -114,6 +114,20 @@ export default function TimelineView({
     });
   }, [locations, locationOrder, schedule?.locationIds]);
 
+  // Department color palette
+  const departmentColors = [
+    'bg-blue-50',
+    'bg-green-50', 
+    'bg-yellow-50',
+    'bg-purple-50',
+    'bg-pink-50',
+    'bg-indigo-50',
+    'bg-orange-50',
+    'bg-teal-50',
+    'bg-cyan-50',
+    'bg-lime-50'
+  ];
+
   const displayRows = useMemo(() => {
     const rows = [];
     const scheduleDepartmentIds = schedule?.departmentIds || [];
@@ -128,24 +142,29 @@ export default function TimelineView({
         dept.locationIds?.includes(location.id)
       ).sort((a, b) => a.name.localeCompare(b.name));
 
-      departmentsForLocation.forEach(department => {
+      // Add all department rows first
+      departmentsForLocation.forEach((department, idx) => {
         rows.push({ 
           type: 'department_row', 
           id: `${location.id}-${department.id}`, 
           data: department, 
-          parentLocationId: location.id 
+          parentLocationId: location.id,
+          colorClass: departmentColors[idx % departmentColors.length]
         });
-        
-        // Add department subtotal row
+      });
+
+      // Then add all department subtotals
+      departmentsForLocation.forEach((department, idx) => {
         rows.push({
           type: 'department_subtotal',
           id: `${location.id}-${department.id}-subtotal`,
           data: department,
-          parentLocationId: location.id
+          parentLocationId: location.id,
+          colorClass: departmentColors[idx % departmentColors.length]
         });
       });
 
-      // Add location subtotal row
+      // Finally add location subtotal row
       if (departmentsForLocation.length > 0) {
         rows.push({
           type: 'location_subtotal',
@@ -593,7 +612,7 @@ export default function TimelineView({
                   <div 
                     key={dayIdx} 
                     className={`border-r-2 border-slate-800 relative transition-colors flex-1 ${
-                      isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? 'bg-slate-100' : 'bg-white hover:bg-slate-50/50'
+                      isLocationSubtotal ? 'bg-blue-50' : isDepartmentSubtotal ? row.colorClass : isDepartmentRow ? row.colorClass : 'bg-white hover:bg-slate-50/50'
                     }`}
                     style={{ minWidth: '100px', minHeight: `${cellHeight}px` }}
                     data-day-container
@@ -747,10 +766,10 @@ export default function TimelineView({
           );
         })}
         
-        {/* Grand total row */}
-        <div className="flex w-full border-t-2 border-slate-900 bg-blue-100">
+        {/* Grand total row - Daily totals */}
+        <div className="flex w-full border-t-2 border-slate-900 bg-slate-800">
           <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 p-3">
-            <div className="font-bold text-slate-900 text-sm">Totaal Rooster</div>
+            <div className="font-bold text-white text-sm">Totaal per Dag</div>
           </div>
           {weekDays.map((day, dayIdx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
@@ -763,15 +782,35 @@ export default function TimelineView({
             return (
               <div 
                 key={dayIdx}
-                className="border-r-2 border-slate-800 flex-1 bg-blue-100 flex items-center justify-center"
-                style={{ minWidth: '100px', minHeight: '40px' }}
+                className="border-r-2 border-slate-800 flex-1 bg-slate-800 flex items-center justify-center"
+                style={{ minWidth: '100px', minHeight: '44px' }}
               >
-                <div className="font-bold text-blue-900 text-base">
+                <div className="font-bold text-white text-base">
                   {grandTotal.toFixed(1)}u
                 </div>
               </div>
             );
           })}
+        </div>
+
+        {/* Week total row */}
+        <div className="flex w-full border-t border-slate-700 bg-slate-900">
+          <div className="w-48 flex-shrink-0 border-r-2 border-slate-800 p-3">
+            <div className="font-bold text-white text-sm">Totaal Week</div>
+          </div>
+          <div className="flex-1 bg-slate-900 flex items-center justify-center border-r-2 border-slate-800">
+            <div className="font-bold text-white text-lg">
+              {(() => {
+                const weekTotal = shifts.filter(s => 
+                  weekDays.some(day => format(day, 'yyyy-MM-dd') === s.date)
+                ).reduce((sum, shift) => {
+                  const duration = parseFloat(getShiftDuration(shift.start_time, shift.end_time, shift.break_duration));
+                  return sum + duration;
+                }, 0);
+                return `${weekTotal.toFixed(1)}u`;
+              })()}
+            </div>
+          </div>
         </div>
 
         {/* Extra ruimte onder de laatste locatie */}
