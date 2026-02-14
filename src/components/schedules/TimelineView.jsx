@@ -677,6 +677,7 @@ export default function TimelineView({
                     className="border-r-2 relative transition-colors flex-1"
                     style={{ 
                       minWidth: '100px', 
+                      height: isDepartmentRow ? `${cellHeight}px` : undefined,
                       minHeight: `${cellHeight}px`,
                       borderColor: 'var(--color-border)',
                       backgroundColor: isLocationSubtotal ? 'var(--color-surface-light)' : 
