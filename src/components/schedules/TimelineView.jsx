@@ -20,7 +20,8 @@ const getShiftDuration = (start, end, breakDuration = 0) => {
   const startMins = timeToMinutes(start);
   let endMins = timeToMinutes(end);
   if (endMins <= startMins) endMins += 24 * 60;
-  return ((endMins - startMins - breakDuration) / 60).toFixed(1);
+  // Pauze komt BOVENOP de dienst, dus we trekken het NIET af
+  return ((endMins - startMins) / 60).toFixed(1);
 };
 
 export default function TimelineView({ 
@@ -487,9 +488,10 @@ export default function TimelineView({
             {weekDays.map((day, dayIdx) => (
               <div key={dayIdx} className="border-r-2 flex-1" style={{ 
                 minWidth: '100px',
-                borderColor: 'var(--color-border)'
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-surface)'
               }}>
-                <div className="text-center py-2.5" style={{ backgroundColor: 'var(--color-surface)' }}>
+                <div className="text-center py-2.5">
                   <div className={`font-semibold ${DAY_WIDTH < 120 ? 'text-xs' : 'text-sm'} truncate px-2`} style={{ color: 'var(--color-text-primary)' }}>
                     {format(day, 'EEEE', { locale: nl })}
                   </div>
