@@ -54,8 +54,9 @@ export default function Layout({ children, currentPageName }) {
           --color-background: #1e1b2e;
           --color-surface: #2d2a3e;
           --color-surface-light: #3d3866;
-          --color-text-primary: #ffffff;
-          --color-text-secondary: #a8a4b8;
+          --color-text-primary: #f8fafc;
+          --color-text-secondary: #cbd5e1;
+          --color-text-muted: #94a3b8;
           --color-border: #3d3866;
         }
 
@@ -65,6 +66,7 @@ export default function Layout({ children, currentPageName }) {
           color: var(--color-text-primary);
         }
 
+        /* Button styling */
         .btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
           background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
           color: white !important;
@@ -75,35 +77,42 @@ export default function Layout({ children, currentPageName }) {
           background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
         }
 
-        .bg-primary-dark {
-          background-color: var(--color-primary);
-        }
-
-        /* Card overrides */
-        [class*="bg-white"] {
+        /* Card backgrounds */
+        [class*="bg-white"]:not(.avatar-fallback) {
           background-color: var(--color-surface) !important;
-          color: var(--color-text-primary) !important;
         }
 
-        [class*="bg-slate-50"], [class*="bg-gray-50"] {
+        [class*="bg-slate-50"], [class*="bg-gray-50"], [class*="bg-blue-50"] {
           background-color: var(--color-surface-light) !important;
         }
 
-        /* Text color overrides */
-        [class*="text-slate-900"], [class*="text-gray-900"] {
+        /* Text colors - be more specific */
+        h1, h2, h3, h4, h5, h6 {
           color: var(--color-text-primary) !important;
         }
 
-        [class*="text-slate-600"], [class*="text-slate-500"], [class*="text-gray-600"], [class*="text-gray-500"] {
+        p, span, div {
+          color: inherit;
+        }
+
+        .text-slate-900, .text-gray-900 {
+          color: var(--color-text-primary) !important;
+        }
+
+        .text-slate-700, .text-gray-700 {
           color: var(--color-text-secondary) !important;
         }
 
-        /* Border overrides */
+        .text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500, .text-slate-400 {
+          color: var(--color-text-muted) !important;
+        }
+
+        /* Borders */
         [class*="border-slate"], [class*="border-gray"] {
           border-color: var(--color-border) !important;
         }
 
-        /* Input overrides */
+        /* Inputs */
         input, textarea, select {
           background-color: var(--color-surface-light) !important;
           color: var(--color-text-primary) !important;
@@ -111,7 +120,23 @@ export default function Layout({ children, currentPageName }) {
         }
 
         input::placeholder, textarea::placeholder {
-          color: var(--color-text-secondary) !important;
+          color: var(--color-text-muted) !important;
+        }
+
+        /* Dropdown menus */
+        [role="menu"], [role="menuitem"] {
+          background-color: var(--color-surface);
+          color: var(--color-text-primary);
+        }
+
+        /* Badges */
+        [class*="badge"] {
+          border-color: var(--color-border) !important;
+        }
+
+        /* Icons should inherit color */
+        svg {
+          color: inherit;
         }
       `}</style>
       <LayoutContent currentPageName={currentPageName}>
