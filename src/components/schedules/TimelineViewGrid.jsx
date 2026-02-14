@@ -359,7 +359,7 @@ export default function TimelineViewGrid({
           </div>
 
           {/* Grid rows per location/department */}
-          {sortedLocations.map(location => {
+          {sortedLocations.map((location, locIdx) => {
             const departmentsForLocation = departments
               .filter(dept => dept.locationIds?.includes(location.id))
               .sort((a, b) => a.name.localeCompare(b.name));
@@ -417,7 +417,7 @@ export default function TimelineViewGrid({
                             className="flex w-full border-b h-10"
                             style={{
                               borderColor: 'var(--color-border)',
-                              backgroundColor: deptIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
+                              backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
                             }}
                           >
                             {/* Department label on first row */}
