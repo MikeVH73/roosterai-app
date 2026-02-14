@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import DaypartScheduleGrid from '@/components/schedules/DaypartScheduleGrid';
-import TimelineView from '@/components/schedules/TimelineView';
+import TimelineViewGrid from '@/components/schedules/TimelineViewGrid';
 import VerticalTimelineView from '@/components/schedules/VerticalTimelineView';
 import {
   ChevronLeft,
@@ -414,31 +414,30 @@ export default function ScheduleEditor() {
                 }}
               />
             ) : viewMode === 'timeline' ? (
-              <TimelineView
-                schedule={schedule}
-                shifts={shifts}
-                locations={locations}
-                departments={departments}
-                employees={relevantEmployees}
-                functions={functions}
-                dayparts={dayparts}
-                currentWeekStart={currentWeekStart}
-                selectedDayparts={selectedTimelineDayparts}
-                activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
-                onShiftClick={handleShiftClick}
-                onShiftUpdate={handleShiftUpdate}
-                onCellClick={(locationId, date, departmentId, startTime) => {
-                  setSelectedShift(null);
-                  setSelectedEmployeeId(null);
-                  setSelectedDate(format(date, 'yyyy-MM-dd'));
-                  setSelectedDaypartId(null);
-                  setSelectedDepartmentId(departmentId);
-                  if (startTime) {
-                    setSelectedShift({ start_time: startTime });
-                  }
-                  setShiftDialogOpen(true);
-                }}
-                />
+               <TimelineViewGrid
+                 schedule={schedule}
+                 shifts={shifts}
+                 locations={locations}
+                 departments={departments}
+                 employees={relevantEmployees}
+                 functions={functions}
+                 dayparts={dayparts}
+                 currentWeekStart={currentWeekStart}
+                 activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
+                 onShiftClick={handleShiftClick}
+                 onShiftUpdate={handleShiftUpdate}
+                 onCellClick={(locationId, date, departmentId, startTime) => {
+                   setSelectedShift(null);
+                   setSelectedEmployeeId(null);
+                   setSelectedDate(format(date, 'yyyy-MM-dd'));
+                   setSelectedDaypartId(null);
+                   setSelectedDepartmentId(departmentId);
+                   if (startTime) {
+                     setSelectedShift({ start_time: startTime });
+                   }
+                   setShiftDialogOpen(true);
+                 }}
+                 />
             ) : viewMode === 'dayparts' && relevantDayparts.length > 0 ? (
               <DaypartScheduleGrid
                 dayparts={relevantDayparts}

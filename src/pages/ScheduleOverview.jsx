@@ -5,7 +5,7 @@ import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
-import TimelineView from '@/components/schedules/TimelineView';
+import TimelineViewGrid from '@/components/schedules/TimelineViewGrid';
 import MiniCalendar from '@/components/schedules/MiniCalendar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
 import { 
@@ -588,30 +588,29 @@ export default function ScheduleOverview() {
                               <p>Geen dagen in deze periode vallen binnen de rooster periode</p>
                             </div>
                           ) : (
-                            <TimelineView
-                              schedule={schedule}
-                              shifts={scheduleShifts}
-                              locations={locations}
-                              departments={departments}
-                              employees={employees}
-                              functions={functions}
-                              dayparts={dayparts}
-                              currentWeekStart={currentWeekStart}
-                              selectedDayparts={selectedTimelineDayparts}
-                              activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
-                              onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
-                              onShiftUpdate={(shift, oldData) => {
-                                queryClient.invalidateQueries(['all-shifts', companyId]);
-                              }}
-                              onCellClick={(locationId, date, departmentId, startTime) => {
-                                setSelectedShift(startTime ? { start_time: startTime } : null);
-                                setSelectedEmployeeId(null);
-                                setSelectedDate(format(date, 'yyyy-MM-dd'));
-                                setSelectedDaypartId(null);
-                                setCurrentScheduleId(schedule.id);
-                                setShiftDialogOpen(true);
-                              }}
-                            />
+                            <TimelineViewGrid
+                               schedule={schedule}
+                               shifts={scheduleShifts}
+                               locations={locations}
+                               departments={departments}
+                               employees={employees}
+                               functions={functions}
+                               dayparts={dayparts}
+                               currentWeekStart={currentWeekStart}
+                               activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
+                               onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
+                               onShiftUpdate={(shift, oldData) => {
+                                 queryClient.invalidateQueries(['all-shifts', companyId]);
+                               }}
+                               onCellClick={(locationId, date, departmentId, startTime) => {
+                                 setSelectedShift(startTime ? { start_time: startTime } : null);
+                                 setSelectedEmployeeId(null);
+                                 setSelectedDate(format(date, 'yyyy-MM-dd'));
+                                 setSelectedDaypartId(null);
+                                 setCurrentScheduleId(schedule.id);
+                                 setShiftDialogOpen(true);
+                               }}
+                             />
                           )}
                         </div>
                       </div>

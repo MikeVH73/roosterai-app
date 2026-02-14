@@ -209,7 +209,7 @@ export default function TimelineViewGrid({
       backgroundColor: 'var(--color-surface)',
       borderColor: 'var(--color-border)'
     }}>
-      <div ref={timelineRef} className="overflow-y-auto flex-1 w-full">
+      <div ref={timelineRef} className="overflow-auto flex-1 w-full h-full">
         <div className="w-full relative">
           {/* Header */}
           <div className="sticky top-0 z-20 border-b" style={{
