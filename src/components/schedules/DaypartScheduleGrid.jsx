@@ -203,9 +203,8 @@ export default function DaypartScheduleGrid({
                     return (
                       <td 
                         key={`${day.toISOString()}_${daypart.id}`}
-                        className="p-2 align-top border-r border-slate-200 last:border-r-0 min-h-[80px] group/cell cursor-pointer hover:bg-slate-50"
+                        className="p-2 align-top border-r border-slate-200 last:border-r-0 min-h-[80px] group/cell relative"
                         style={{ backgroundColor: `${daypart.color}05` || '#FAFAFA' }}
-                        onDoubleClick={() => onCellClick?.(null, dateStr, daypart.id)}
                       >
                         <div className="space-y-1.5 min-h-[60px]">
                           {cellShifts.map((shift) => {
@@ -218,10 +217,6 @@ export default function DaypartScheduleGrid({
                               <div
                                 key={shift.id}
                                 onClick={(e) => {
-                                  e.stopPropagation();
-                                  onShiftClick?.(shift);
-                                }}
-                                onDoubleClick={(e) => {
                                   e.stopPropagation();
                                   onShiftClick?.(shift);
                                 }}
@@ -261,17 +256,17 @@ export default function DaypartScheduleGrid({
                               </div>
                             );
                           })}
-                          
-                          {/* Add button - shows on hover */}
-                          {cellShifts.length === 0 && (
-                            <div className="add-shift-hint h-full min-h-[60px] flex items-center justify-center opacity-0 group-hover/cell:opacity-100 transition-opacity pointer-events-none">
-                              <div className="flex items-center gap-2 text-slate-400 text-xs">
-                                <Plus className="w-4 h-4" />
-                                <span>Dubbelklik om toe te voegen</span>
-                              </div>
-                            </div>
-                          )}
                         </div>
+                        
+                        {/* Add button - always visible in empty cells */}
+                        {cellShifts.length === 0 && (
+                          <button
+                            onClick={() => onCellClick?.(null, dateStr, daypart.id)}
+                            className="absolute top-2 left-2 w-6 h-6 rounded flex items-center justify-center transition-all opacity-30 hover:opacity-100 hover:bg-slate-200"
+                          >
+                            <Plus className="w-4 h-4 text-slate-500" />
+                          </button>
+                        )}
                       </td>
                             );
                           })}
