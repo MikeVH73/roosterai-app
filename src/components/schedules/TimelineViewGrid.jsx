@@ -440,13 +440,20 @@ export default function TimelineViewGrid({
                                     let durationMins = shiftEndMins - shiftStartMins;
                                     if (durationMins <= 0) durationMins += 24 * 60;
 
+                                    const leftPercent = (offsetFromStart / totalMinutes) * 100;
+                                    const widthPercent = (durationMins / totalMinutes) * 100;
+
                                     const duration = getShiftDuration(shiftForThisRow.start_time, shiftForThisRow.end_time, shiftForThisRow.break_duration);
 
                                     return (
                                       <div
-                                        className="h-full rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate relative"
+                                        className="absolute rounded-md shadow-sm border border-white hover:shadow-lg transition-all group pointer-events-auto z-10 flex items-center px-2 text-white text-xs font-semibold truncate"
                                         style={{
-                                          backgroundColor: shiftColor
+                                          backgroundColor: shiftColor,
+                                          left: `${leftPercent}%`,
+                                          width: `${widthPercent}%`,
+                                          top: '2px',
+                                          bottom: '2px'
                                         }}
                                         draggable
                                         onDragStart={(e) => handleShiftDragStart(e, shiftForThisRow)}
