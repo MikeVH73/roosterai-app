@@ -20,7 +20,9 @@ import {
   CalendarDays,
   Settings2,
   Menu,
-  X
+  X,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +62,7 @@ export default function ScheduleOverview() {
   const [miniCalendarOpen, setMiniCalendarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
+  const [fullscreenSchedule, setFullscreenSchedule] = useState(null);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -488,10 +491,12 @@ export default function ScheduleOverview() {
                     return '';
                   };
                   
+                  const isFullscreen = fullscreenSchedule === schedule.id;
+
                   return (
                     <div key={schedule.id} style={{ borderTop: '2px solid var(--color-border)' }}>
                       {/* Main Content - Full Width */}
-                      <div className="p-6">
+                      <div className={isFullscreen ? "fixed inset-0 z-50 p-6 overflow-auto" : "p-6"} style={isFullscreen ? { backgroundColor: 'var(--color-background)' } : {}}>
                         {/* Mini Calendar Toggle Button - Collapsed by default */}
                         {!miniCalendarOpen && (
                           <Button
@@ -593,14 +598,29 @@ export default function ScheduleOverview() {
                             )}
                           </div>
                           
-                          <Button 
-                          size="sm"
-                          onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
-                          className="h-7 px-3 text-xs"
-                          style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
-                          >
-                          Bewerken
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setFullscreenSchedule(isFullscreen ? null : schedule.id)}
+                              className="h-7 px-3 text-xs"
+                              style={{ 
+                                borderColor: 'var(--color-border)', 
+                                color: 'var(--color-text-primary)',
+                                backgroundColor: 'var(--color-surface)'
+                              }}
+                            >
+                              {isFullscreen ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
+                              className="h-7 px-3 text-xs"
+                              style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
+                            >
+                              Bewerken
+                            </Button>
+                          </div>
                           </div>
 
                         {hasConflicts && (
@@ -619,7 +639,24 @@ export default function ScheduleOverview() {
                           className="w-full overflow-auto"
                           onTouchStart={(e) => {
                             if (isMobile) {
-                              e.currentTarget.touchStartX = e.touches[0].clientX;
+                              const target = e.target;
+                              // Only handle swipe if not on a shift element
+                              if (!target.closest('[draggable="true"]')) {
+                                e.currentTarget.touchStartX = e.touches[0].clientX;
+                                e.currentTarget.touchStartY = e.touches[0].clientY;
+                              }
+                            }
+                          }}
+                          onTouchMove={(e) => {
+                            if (isMobile && e.currentTarget.touchStartX) {
+                              const diffX = e.currentTarget.touchStartX - e.touches[0].clientX;
+                              const diffY = Math.abs(e.currentTarget.touchStartY - e.touches[0].clientY);
+                              
+                              // If horizontal swipe is more dominant than vertical
+                              if (Math.abs(diffX) > diffY && Math.abs(diffX) > 10) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }
                             }
                           }}
                           onTouchEnd={(e) => {
@@ -628,12 +665,15 @@ export default function ScheduleOverview() {
                               const diff = e.currentTarget.touchStartX - touchEndX;
                               
                               if (Math.abs(diff) > 50) {
+                                e.preventDefault();
                                 if (diff > 0) {
                                   handleNext();
                                 } else {
                                   handlePrevMobile();
                                 }
                               }
+                              delete e.currentTarget.touchStartX;
+                              delete e.currentTarget.touchStartY;
                             }
                           }}
                         >
