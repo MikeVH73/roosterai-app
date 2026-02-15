@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import AgentChat from '@/components/agents/AgentChat';
+import WhatsAppConfirmDialog from '@/components/ai/WhatsAppConfirmDialog';
 import {
   Sparkles,
   UserX,
@@ -98,6 +99,12 @@ export default function AIAssistant() {
     employeeId: '',
     date: '',
     notes: ''
+  });
+  const [whatsappDialog, setWhatsappDialog] = useState({
+    open: false,
+    employees: [],
+    message: '',
+    context: ''
   });
 
   const { data: schedules = [] } = useQuery({
@@ -244,9 +251,9 @@ export default function AIAssistant() {
                   items: {
                     type: "object",
                     properties: {
+                      employeeId: { type: "string", description: "Employee ID" },
                       name: { type: "string" },
-                      type: { type: "string" },
-                      description: { type: "string" }
+                      reasoning: { type: "string" }
                     }
                   }
                 }
@@ -491,7 +498,39 @@ export default function AIAssistant() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {suggestion.context_type === 'replacement' && suggestion.suggested_patch?.replacements?.length > 0 && (
+                          <Button 
+                            onClick={() => {
+                              const replacementEmployees = suggestion.suggested_patch.replacements
+                                .map(r => employees.find(e => e.id === r.employeeId))
+                                .filter(e => e && e.phone);
+                              
+                              const selectedEmployee = employees.find(e => e.id === actionParams.employeeId);
+                              const message = `Hoi,
+
+Er is een vervangingsverzoek voor ${selectedEmployee?.first_name || 'een medewerker'} op ${actionParams.date || 'aankomende datum'}.
+
+${suggestion.description}
+
+Kun je deze dienst overnemen? Reageer met JA of NEE.
+
+Bedankt!
+${currentCompany?.name}`;
+                              
+                              setWhatsappDialog({
+                                open: true,
+                                employees: replacementEmployees,
+                                message: message,
+                                context: 'AI suggesties voor vervanging'
+                              });
+                            }}
+                            className="bg-green-500 hover:bg-green-600"
+                          >
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            Verstuur WhatsApp ({suggestion.suggested_patch.replacements.filter(r => employees.find(e => e.id === r.employeeId)?.phone).length})
+                          </Button>
+                        )}
                         <Button 
                           onClick={() => handleSuggestionAction(suggestion, 'accepted')}
                           className="bg-green-600 hover:bg-green-700"
@@ -499,27 +538,6 @@ export default function AIAssistant() {
                           <CheckCircle2 className="w-4 h-4 mr-2" />
                           Accepteren
                         </Button>
-                        {suggestion.suggested_patch?.targetEmployee?.phone && (
-                          <Button 
-                            onClick={() => {
-                              const employee = suggestion.suggested_patch.targetEmployee;
-                              const message = `Hoi ${employee.name.split(' ')[0]}, 
-                              
-${suggestion.description}
-
-Kun je aangeven of je beschikbaar bent? Reageer met JA of NEE.
-
-Groet,
-${currentCompany?.name}`;
-                              const whatsappUrl = `https://wa.me/${employee.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-                              window.open(whatsappUrl, '_blank');
-                            }}
-                            className="bg-green-500 hover:bg-green-600"
-                          >
-                            <MessageCircle className="w-4 h-4 mr-2" />
-                            Vraag via WhatsApp
-                          </Button>
-                        )}
                         <Button 
                           variant="outline"
                           onClick={() => handleSuggestionAction(suggestion, 'rejected')}
@@ -688,6 +706,15 @@ ${currentCompany?.name}`;
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* WhatsApp Dialog */}
+      <WhatsAppConfirmDialog
+        open={whatsappDialog.open}
+        onOpenChange={(open) => setWhatsappDialog({ ...whatsappDialog, open })}
+        employees={whatsappDialog.employees}
+        defaultMessage={whatsappDialog.message}
+        context={whatsappDialog.context}
+      />
     </div>
   );
 }
