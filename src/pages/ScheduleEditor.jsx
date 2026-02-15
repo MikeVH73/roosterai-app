@@ -21,7 +21,8 @@ import {
   Building2,
   Undo2,
   Info,
-  ArrowLeft
+  ArrowLeft,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,7 @@ import {
   subWeeks
 } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import WhatsAppInbox from '@/components/whatsapp/WhatsAppInbox';
 
 export default function ScheduleEditor() {
   const navigate = useNavigate();
@@ -71,6 +73,7 @@ export default function ScheduleEditor() {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState([]);
   const [undoStack, setUndoStack] = useState([]);
+  const [whatsappInboxOpen, setWhatsappInboxOpen] = useState(false);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -345,6 +348,13 @@ export default function ScheduleEditor() {
             <Badge className={statusConfig[schedule.status].color}>
               {statusConfig[schedule.status].label}
             </Badge>
+            <Button 
+              variant="outline" 
+              onClick={() => setWhatsappInboxOpen(true)}
+            >
+              <MessageSquare className="w-4 h-4 mr-2 text-green-600" />
+              WhatsApp
+            </Button>
             {canUseAI() && (
               <Button 
                 variant="outline" 
@@ -599,6 +609,12 @@ export default function ScheduleEditor() {
         locations={locations}
         functions={functions}
         schedule={schedule}
+      />
+
+      <WhatsAppInbox
+        open={whatsappInboxOpen}
+        onOpenChange={setWhatsappInboxOpen}
+        scheduleId={scheduleId}
       />
     </div>
   );
