@@ -57,7 +57,7 @@ export default function ScheduleOverview() {
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 })); // Week starts on Monday
   const [viewMode, setViewMode] = useState('week'); // Always week view for timeline
   const [visibleDays, setVisibleDays] = useState([1, 2, 3, 4, 5, 6, 0]); // 1=maandag, 0=zondag
-  const [miniCalendarOpen, setMiniCalendarOpen] = useState(true);
+  const [miniCalendarOpen, setMiniCalendarOpen] = useState(false);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
