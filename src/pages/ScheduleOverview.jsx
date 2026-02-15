@@ -39,11 +39,10 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format, parseISO, isWithinInterval, startOfDay, endOfDay, startOfWeek, startOfMonth, endOfMonth, addDays, addWeeks } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -246,20 +245,18 @@ export default function ScheduleOverview() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Rooster Overzicht</h1>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="rounded-full p-1 hover:bg-white/10 transition-colors">
-                      <Info className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-                    <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                      <strong>Snel overzicht</strong> van alle roosters. Bekijk shifts en maak kleine aanpassingen door te verslepen, resizen of te klikken.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="rounded-full p-1 hover:bg-white/10 transition-colors">
+                    <Info className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="max-w-xs p-3" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                    <strong>Snel overzicht</strong> van alle roosters. Bekijk shifts en maak kleine aanpassingen door te verslepen, resizen of te klikken.
+                  </p>
+                </PopoverContent>
+              </Popover>
             </div>
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{activeSchedules.length} actieve roosters</p>
           </div>
