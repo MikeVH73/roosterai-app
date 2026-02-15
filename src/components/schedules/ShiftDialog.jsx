@@ -20,10 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Trash2, Clock } from 'lucide-react';
+import { Loader2, Trash2, Clock, Repeat } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import ShiftConflictDialog from './ShiftConflictDialog';
+import RecurringShiftDialog from './RecurringShiftDialog';
 
 const shiftTypes = [
   { value: 'regular', label: 'Regulier' },
@@ -69,6 +70,7 @@ export default function ShiftDialog({
   const [formData, setFormData] = useState(defaultFormData);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflicts, setConflicts] = useState([]);
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
 
   // Fetch all shifts for conflict detection
   const { data: allShifts = [] } = useQuery({
@@ -265,6 +267,56 @@ export default function ShiftDialog({
     }
   };
 
+  const handleRecurringSubmit = async (recurringConfig) => {
+    const departmentId = formData.departmentId || schedule?.departmentIds?.[0] || null;
+    const locationId = formData.locationId || schedule?.locationIds?.[0] || null;
+    
+    const baseShiftData = {
+      ...formData,
+      companyId: currentCompany?.id,
+      scheduleId,
+      departmentId,
+      locationId,
+      break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
+    };
+    
+    delete baseShiftData.has_break;
+    if (!baseShiftData.functionId) delete baseShiftData.functionId;
+    if (!baseShiftData.daypartId) delete baseShiftData.daypartId;
+    if (!baseShiftData.locationId) delete baseShiftData.locationId;
+
+    // Generate dates based on recurring pattern
+    const startDate = new Date(formData.date);
+    const endDate = new Date(recurringConfig.endDate);
+    const shiftsToCreate = [];
+
+    let currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      const shouldInclude = recurringConfig.recurringType === 'daily' || 
+        (recurringConfig.recurringType === 'weekly' && recurringConfig.selectedDays.includes(currentDate.getDay()));
+      
+      if (shouldInclude) {
+        shiftsToCreate.push({
+          ...baseShiftData,
+          date: currentDate.toISOString().split('T')[0]
+        });
+      }
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Create all shifts
+    try {
+      await base44.entities.Shift.bulkCreate(shiftsToCreate);
+      queryClient.invalidateQueries(['shifts', scheduleId]);
+      setShowRecurringDialog(false);
+      onClose();
+    } catch (error) {
+      console.error('Error creating recurring shifts:', error);
+      alert('Er ging iets mis bij het aanmaken van de herhaalde diensten');
+    }
+  };
+
   const isLoading = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   const formattedDate = formData.date 
@@ -275,6 +327,13 @@ export default function ShiftDialog({
 
   return (
     <>
+      <RecurringShiftDialog
+        open={showRecurringDialog}
+        onClose={() => setShowRecurringDialog(false)}
+        onConfirm={handleRecurringSubmit}
+        initialDate={formData.date}
+      />
+
       <ShiftConflictDialog
         open={showConflictDialog}
         onClose={() => setShowConflictDialog(false)}
@@ -293,7 +352,7 @@ export default function ShiftDialog({
         departments={departments}
       />
 
-      <Dialog open={open && !showConflictDialog} onOpenChange={onClose}>
+      <Dialog open={open && !showConflictDialog && !showRecurringDialog} onOpenChange={onClose}>
         <DialogContent className="max-w-lg" style={{ 
           backgroundColor: 'var(--color-surface)',
           borderColor: 'var(--color-border)',
@@ -529,6 +588,18 @@ export default function ShiftDialog({
               }}>
                 Annuleren
               </Button>
+              {!shift?.id && (
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={() => setShowRecurringDialog(true)}
+                  className="border-blue-200 hover:bg-blue-50"
+                  disabled={!formData.employeeId || !formData.date}
+                >
+                  <Repeat className="w-4 h-4 mr-2" />
+                  Herhaaldelijk
+                </Button>
+              )}
               <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
                 {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {shift?.id ? 'Opslaan' : 'Toevoegen'}
