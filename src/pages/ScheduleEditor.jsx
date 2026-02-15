@@ -345,8 +345,8 @@ export default function ScheduleEditor() {
         subtitle={schedule.start_date && schedule.end_date ? `${format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - ${format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}` : 'Geen datum ingesteld'}
         actions={
           <div className="flex items-center gap-3">
-            <Badge className={statusConfig[schedule.status].color}>
-              {statusConfig[schedule.status].label}
+            <Badge className={statusConfig[schedule.status]?.color || statusConfig.draft.color}>
+              {statusConfig[schedule.status]?.label || 'Concept'}
             </Badge>
             <Button 
               variant="outline" 
