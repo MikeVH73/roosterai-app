@@ -179,10 +179,40 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-3" style={{ backgroundColor: 'var(--color-surface-light)' }}>
-              <TabsTrigger value="general" style={{ color: activeTab === 'general' ? 'white' : 'var(--color-text-secondary)' }}>Algemeen</TabsTrigger>
-              <TabsTrigger value="contract" style={{ color: activeTab === 'contract' ? 'white' : 'var(--color-text-secondary)' }}>Contract</TabsTrigger>
-              <TabsTrigger value="preferences" style={{ color: activeTab === 'preferences' ? 'white' : 'var(--color-text-secondary)' }}>Voorkeuren</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 h-11" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+              <TabsTrigger 
+                value="general" 
+                className="h-full"
+                style={{ 
+                  backgroundColor: activeTab === 'general' ? 'var(--color-accent)' : 'transparent',
+                  color: activeTab === 'general' ? 'white' : 'var(--color-text-primary)',
+                  border: 'none'
+                }}
+              >
+                Algemeen
+              </TabsTrigger>
+              <TabsTrigger 
+                value="contract"
+                className="h-full"
+                style={{ 
+                  backgroundColor: activeTab === 'contract' ? 'var(--color-accent)' : 'transparent',
+                  color: activeTab === 'contract' ? 'white' : 'var(--color-text-primary)',
+                  border: 'none'
+                }}
+              >
+                Contract
+              </TabsTrigger>
+              <TabsTrigger 
+                value="preferences"
+                className="h-full"
+                style={{ 
+                  backgroundColor: activeTab === 'preferences' ? 'var(--color-accent)' : 'transparent',
+                  color: activeTab === 'preferences' ? 'white' : 'var(--color-text-primary)',
+                  border: 'none'
+                }}
+              >
+                Voorkeuren
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-y-auto py-4 min-h-[400px]">

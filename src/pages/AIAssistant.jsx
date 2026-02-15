@@ -436,6 +436,7 @@ export default function AIAssistant() {
                   <Card 
                     key={action.id} 
                     className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
                     onClick={() => !aiLimitReached && openActionDialog(action)}
                   >
                     <CardContent className="p-6">
@@ -444,10 +445,10 @@ export default function AIAssistant() {
                           <Icon className={`w-6 h-6 ${action.color}`} />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-slate-900 mb-1">{action.title}</h3>
-                          <p className="text-sm text-slate-500">{action.description}</p>
+                          <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>{action.title}</h3>
+                          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{action.description}</p>
                         </div>
-                        <ArrowRight className="w-5 h-5 text-slate-300" />
+                        <ArrowRight className="w-5 h-5" style={{ color: 'var(--color-text-muted)' }} />
                       </div>
                     </CardContent>
                   </Card>
@@ -458,11 +459,11 @@ export default function AIAssistant() {
 
           <TabsContent value="suggestions">
             {pendingSuggestions.length === 0 ? (
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <CardContent className="p-12 text-center">
-                  <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-medium text-slate-900 mb-2">Geen openstaande suggesties</h3>
-                  <p className="text-slate-500 text-sm">
+                  <Sparkles className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                  <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen openstaande suggesties</h3>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     Start een AI-actie om suggesties te ontvangen.
                   </p>
                 </CardContent>
@@ -470,31 +471,31 @@ export default function AIAssistant() {
             ) : (
               <div className="space-y-4">
                 {pendingSuggestions.map((suggestion) => (
-                  <Card key={suggestion.id} className="border-0 shadow-sm">
+                  <Card key={suggestion.id} className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <Badge variant="secondary" className="mb-2">
                             {contextTypeLabels[suggestion.context_type]}
                           </Badge>
-                          <h3 className="font-semibold text-slate-900">{suggestion.description}</h3>
-                          <p className="text-sm text-slate-500 mt-1">
+                          <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{suggestion.description}</h3>
+                          <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                             {getScheduleName(suggestion.scheduleId)} • {format(parseISO(suggestion.created_date), 'd MMM yyyy HH:mm', { locale: nl })}
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm text-slate-500">Betrouwbaarheid</div>
-                          <div className="font-semibold">{suggestion.confidence_score}%</div>
+                          <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Betrouwbaarheid</div>
+                          <div className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{suggestion.confidence_score}%</div>
                         </div>
                       </div>
 
                       {suggestion.considerations?.length > 0 && (
-                        <div className="bg-slate-50 rounded-lg p-4 mb-4">
-                          <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
+                        <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                          <h4 className="font-medium mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
                             <Info className="w-4 h-4" />
                             Overwegingen
                           </h4>
-                          <ul className="list-disc list-inside space-y-1 text-sm text-slate-600">
+                          <ul className="list-disc list-inside space-y-1 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                             {suggestion.considerations.map((c, i) => (
                               <li key={i}>{c}</li>
                             ))}
@@ -559,11 +560,11 @@ ${currentCompany?.name}`;
 
           <TabsContent value="history">
             {historySuggestions.length === 0 ? (
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <CardContent className="p-12 text-center">
-                  <Clock className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-medium text-slate-900 mb-2">Geen geschiedenis</h3>
-                  <p className="text-slate-500 text-sm">
+                  <Clock className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                  <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen geschiedenis</h3>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     Verwerkte AI-suggesties verschijnen hier.
                   </p>
                 </CardContent>
@@ -571,7 +572,7 @@ ${currentCompany?.name}`;
             ) : (
               <div className="space-y-3">
                 {historySuggestions.map((suggestion) => (
-                  <Card key={suggestion.id} className="border-0 shadow-sm">
+                  <Card key={suggestion.id} className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -584,13 +585,13 @@ ${currentCompany?.name}`;
                             {suggestion.status === 'accepted' ? 'Geaccepteerd' : 'Afgewezen'}
                           </Badge>
                           <div>
-                            <p className="font-medium text-slate-900">{suggestion.description}</p>
-                            <p className="text-sm text-slate-500">
+                            <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{suggestion.description}</p>
+                            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                               {getScheduleName(suggestion.scheduleId)}
                             </p>
                           </div>
                         </div>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                           {format(parseISO(suggestion.processed_at || suggestion.created_date), 'd MMM yyyy', { locale: nl })}
                         </span>
                       </div>
