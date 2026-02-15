@@ -313,7 +313,25 @@ export default function ScheduleEditor() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <TopBar 
-        title={schedule.name}
+        title={
+          <div className="flex items-center gap-2">
+            <span>{schedule.name}</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="rounded-full p-1 hover:bg-white/10 transition-colors">
+                    <Info className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs p-3" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                  <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                    <strong>Volledig bewerk rooster</strong> met AI-assistent, conflict detectie, undo functionaliteit en publiceer opties.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        }
         subtitle={`${format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - ${format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}`}
         actions={
           <div className="flex items-center gap-3">
