@@ -20,7 +20,8 @@ import {
   Loader2,
   Building2,
   Undo2,
-  Info
+  Info,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -314,7 +315,15 @@ export default function ScheduleEditor() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <TopBar 
         title={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(createPageUrl('ScheduleOverview'))}
+              className="h-8 px-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
             <span>{schedule.name}</span>
             <Popover>
               <PopoverTrigger asChild>

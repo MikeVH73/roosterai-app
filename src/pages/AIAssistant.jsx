@@ -316,7 +316,7 @@ export default function AIAssistant() {
 
       <div className="p-6 max-w-7xl mx-auto">
         {/* AI Usage Banner */}
-        <Card className="mb-6 border-0 shadow-sm bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+        <Card className="mb-6 border-0 shadow-sm text-white" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 50%, var(--color-accent) 100%)' }}>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -359,7 +359,7 @@ export default function AIAssistant() {
             <TabsTrigger value="suggestions">
               Suggesties
               {pendingSuggestions.length > 0 && (
-                <Badge className="ml-2 bg-purple-500">{pendingSuggestions.length}</Badge>
+                <Badge className="ml-2" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>{pendingSuggestions.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="history">Geschiedenis</TabsTrigger>
@@ -622,7 +622,7 @@ ${currentCompany?.name}`;
               <Button 
                 onClick={handleExecuteAction}
                 disabled={isProcessing || !actionParams.scheduleId}
-                className="bg-purple-600 hover:bg-purple-700"
+                style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
               >
                 {isProcessing ? (
                   <>
