@@ -534,7 +534,7 @@ export default function ScheduleEditor() {
                               <td 
                                 key={day.toISOString()} 
                                 className="p-2 border-r border-slate-100 last:border-r-0 align-top min-h-20 cursor-pointer hover:bg-blue-50/50 transition-colors"
-                                onClick={() => handleCellClick(employee.id, day)}
+                                onDoubleClick={() => handleCellClick(employee.id, day)}
                               >
                                 <div className="space-y-1 min-h-16">
                                   {cellShifts.map((shift) => (
