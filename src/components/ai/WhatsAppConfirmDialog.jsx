@@ -16,26 +16,38 @@ export default function WhatsAppConfirmDialog({
   companyId = null,
   scheduleId = null,
   aiSuggestionId = null,
-  subject = 'WhatsApp bericht'
+  subject = 'WhatsApp bericht',
+  allowSelection = false
 }) {
   const [message, setMessage] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
   const [results, setResults] = useState([]);
   const [sent, setSent] = useState(false);
+  const [selectedEmployees, setSelectedEmployees] = useState([]);
 
   React.useEffect(() => {
     if (open) {
       setMessage(defaultMessage);
       setResults([]);
       setSent(false);
+      setSelectedEmployees(allowSelection ? [] : employees);
     }
-  }, [open, defaultMessage]);
+  }, [open, defaultMessage, allowSelection, employees]);
+
+  const toggleEmployee = (empId) => {
+    setSelectedEmployees(prev => 
+      prev.some(e => e.id === empId)
+        ? prev.filter(e => e.id !== empId)
+        : [...prev, employees.find(e => e.id === empId)]
+    );
+  };
 
   const handleSend = async () => {
     setSending(true);
     const newResults = [];
+    const employeesToSend = allowSelection ? selectedEmployees : employees;
 
-    for (const employee of employees) {
+    for (const employee of employeesToSend) {
       if (!employee.phone) {
         newResults.push({
           employee: employee,
@@ -90,13 +102,14 @@ export default function WhatsAppConfirmDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-green-600" />
-            WhatsApp Berichten Versturen
+            <MessageCircle className="w-5 h-5 text-[#10b981]" />
+            {context || 'WhatsApp Berichten Versturen'}
           </DialogTitle>
-          <DialogDescription>
-            {context && <p className="text-sm mb-2">{context}</p>}
-            Verzend een WhatsApp bericht naar de geselecteerde medewerkers
-          </DialogDescription>
+          {allowSelection && (
+            <DialogDescription>
+              Selecteer medewerkers en verzend een WhatsApp bericht
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {!sent ? (
@@ -104,17 +117,29 @@ export default function WhatsAppConfirmDialog({
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Ontvangers ({employees.length})
+                  {allowSelection ? `Medewerkers (${selectedEmployees.length} geselecteerd)` : `Ontvangers (${employees.length})`}
                 </label>
-                <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-lg max-h-32 overflow-y-auto">
-                  {employees.map((emp) => (
-                    <Badge key={emp.id} variant="outline" className="flex items-center gap-2">
-                      {emp.first_name} {emp.last_name}
-                      {!emp.phone && (
-                        <span className="text-red-500 text-xs">⚠️ Geen tel.</span>
-                      )}
-                    </Badge>
-                  ))}
+                <div className="flex flex-wrap gap-2 p-3 bg-[#1e293b] rounded-lg max-h-40 overflow-y-auto border border-[#334155]">
+                  {employees.map((emp) => {
+                    const isSelected = allowSelection ? selectedEmployees.some(e => e.id === emp.id) : true;
+                    return (
+                      <Badge 
+                        key={emp.id} 
+                        variant="outline"
+                        className={`flex items-center gap-2 cursor-pointer transition-all border ${
+                          isSelected 
+                            ? 'bg-[#0ea5e9] border-[#38bdf8] text-white' 
+                            : 'bg-[#334155] border-[#475569] text-slate-300 hover:bg-[#475569]'
+                        }`}
+                        onClick={() => allowSelection && toggleEmployee(emp.id)}
+                      >
+                        {emp.first_name} {emp.last_name}
+                        {!emp.phone && (
+                          <span className="text-red-400 text-xs">⚠️ Geen tel.</span>
+                        )}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -141,8 +166,8 @@ export default function WhatsAppConfirmDialog({
               </Button>
               <Button 
                 onClick={handleSend} 
-                disabled={sending || !message.trim() || employees.length === 0}
-                className="bg-green-600 hover:bg-green-700"
+                disabled={sending || !message.trim() || (allowSelection && selectedEmployees.length === 0)}
+                className="bg-[#10b981] hover:bg-[#059669] text-white"
               >
                 {sending ? (
                   <>
@@ -152,7 +177,7 @@ export default function WhatsAppConfirmDialog({
                 ) : (
                   <>
                     <Send className="w-4 h-4 mr-2" />
-                    Verstuur naar {employees.length} {employees.length === 1 ? 'persoon' : 'personen'}
+                    Verstuur naar {allowSelection ? selectedEmployees.length : employees.length} {(allowSelection ? selectedEmployees.length : employees.length) === 1 ? 'persoon' : 'personen'}
                   </>
                 )}
               </Button>

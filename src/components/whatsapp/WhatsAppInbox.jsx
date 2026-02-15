@@ -60,7 +60,7 @@ export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
             </DialogTitle>
             <Button
               onClick={() => setSendDialogOpen(true)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-[#10b981] hover:bg-[#059669] text-white"
             >
               <Send className="w-4 h-4 mr-2" />
               Nieuw bericht
@@ -145,12 +145,13 @@ export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
       <WhatsAppConfirmDialog
         open={sendDialogOpen}
         onOpenChange={setSendDialogOpen}
-        employees={employees.filter(e => e.phone)}
+        employees={employees}
         defaultMessage=""
         context="Handmatig bericht"
         companyId={currentCompany?.id}
         scheduleId={scheduleId}
         subject="Handmatig bericht"
+        allowSelection={true}
       />
     </Dialog>
   );
