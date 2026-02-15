@@ -12,7 +12,11 @@ export default function WhatsAppConfirmDialog({
   onOpenChange, 
   employees = [],
   defaultMessage = '',
-  context = ''
+  context = '',
+  companyId = null,
+  scheduleId = null,
+  aiSuggestionId = null,
+  subject = 'WhatsApp bericht'
 }) {
   const [message, setMessage] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
@@ -45,7 +49,11 @@ export default function WhatsAppConfirmDialog({
         const response = await base44.functions.invoke('sendWhatsAppMessage', {
           phoneNumber: employee.phone,
           message: message,
-          employeeName: `${employee.first_name} ${employee.last_name}`
+          employeeName: `${employee.first_name} ${employee.last_name}`,
+          companyId: companyId,
+          scheduleId: scheduleId,
+          aiSuggestionId: aiSuggestionId,
+          subject: subject
         });
 
         newResults.push({
