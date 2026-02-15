@@ -170,16 +170,16 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col" style={{ backgroundColor: 'var(--color-surface)' }}>
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle style={{ color: 'var(--color-text-primary)' }}>
             {employee ? 'Medewerker bewerken' : 'Nieuwe medewerker'}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3" style={{ backgroundColor: 'var(--color-surface-light)' }}>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="contract">Contract</TabsTrigger>
               <TabsTrigger value="preferences">Voorkeuren</TabsTrigger>
@@ -253,7 +253,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                 </div>
 
                 <div>
-                  <Label>Afdelingen</Label>
+                  <Label style={{ color: 'var(--color-text-primary)' }}>Afdelingen</Label>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {departments.map((dept) => (
                       <div key={dept.id} className="flex items-center space-x-2">
@@ -262,7 +262,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                           checked={formData.departmentIds.includes(dept.id)}
                           onCheckedChange={() => toggleDepartment(dept.id)}
                         />
-                        <Label htmlFor={`dept-${dept.id}`} className="text-sm font-normal cursor-pointer">
+                        <Label htmlFor={`dept-${dept.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
                           {dept.name}
                         </Label>
                       </div>
@@ -359,7 +359,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
 
               <TabsContent value="preferences" className="space-y-4 mt-0 h-full">
                 <div>
-                  <Label>Voorkeursdagen</Label>
+                  <Label style={{ color: 'var(--color-text-primary)' }}>Voorkeursdagen</Label>
                   <div className="grid grid-cols-4 gap-2 mt-2">
                     {daysOfWeek.map((day) => (
                       <div key={day.value} className="flex items-center space-x-2">
@@ -368,7 +368,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                           checked={(formData.preferences.preferred_days || []).includes(day.value)}
                           onCheckedChange={() => toggleDay(day.value)}
                         />
-                        <Label htmlFor={`day-${day.value}`} className="text-sm font-normal cursor-pointer">
+                        <Label htmlFor={`day-${day.value}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
                           {day.label}
                         </Label>
                       </div>
@@ -377,7 +377,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                 </div>
 
                 <div>
-                  <Label>Voorkeursdiensten</Label>
+                  <Label style={{ color: 'var(--color-text-primary)' }}>Voorkeursdiensten</Label>
                   <div className="grid grid-cols-4 gap-2 mt-2">
                     {shiftTypes.map((shift) => (
                       <div key={shift.value} className="flex items-center space-x-2">
@@ -386,7 +386,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                           checked={(formData.preferences.preferred_shifts || []).includes(shift.value)}
                           onCheckedChange={() => toggleShift(shift.value)}
                         />
-                        <Label htmlFor={`shift-${shift.value}`} className="text-sm font-normal cursor-pointer">
+                        <Label htmlFor={`shift-${shift.value}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
                           {shift.label}
                         </Label>
                       </div>
@@ -419,11 +419,11 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
             </div>
           </Tabs>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
             <Button type="button" variant="outline" onClick={onClose}>
               Annuleren
             </Button>
-            <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
+            <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {employee ? 'Opslaan' : 'Toevoegen'}
             </Button>
