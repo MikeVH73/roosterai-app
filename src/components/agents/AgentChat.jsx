@@ -68,7 +68,7 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
   const createNewConversation = async () => {
     try {
       const now = new Date();
-      const conversationTitle = `Gesprek ${now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
+      const conversationTitle = `Nieuw gesprek`;
       
       const conversation = await base44.agents.createConversation({
         agent_name: agentName,
@@ -90,6 +90,8 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
     if (!inputMessage.trim() || !currentConversation || loading) return;
 
     const userMessage = inputMessage.trim();
+    const isFirstMessage = messages.length === 0;
+    
     setInputMessage('');
     setLoading(true);
 
@@ -98,6 +100,23 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
         role: 'user',
         content: userMessage
       });
+
+      // Update conversation title with first message summary
+      if (isFirstMessage) {
+        const shortTitle = userMessage.length > 40 
+          ? userMessage.substring(0, 40) + '...' 
+          : userMessage;
+        
+        await base44.agents.updateConversation(currentConversation.id, {
+          metadata: {
+            name: shortTitle,
+            description: 'Planning assistent gesprek'
+          }
+        });
+        
+        // Refresh conversations list
+        loadConversations();
+      }
     } catch (error) {
       console.error('Failed to send message:', error);
       setInputMessage(userMessage);

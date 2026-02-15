@@ -634,7 +634,7 @@ ${currentCompany?.name}`;
                     <SelectContent>
                       {employees.map((emp) => (
                         <SelectItem key={emp.id} value={emp.id}>
-                          {emp.first_name} {emp.last_name}
+                          {emp.first_name} {emp.last_name} - ID: {emp.employee_number || emp.id.substring(0, 8)}
                         </SelectItem>
                       ))}
                     </SelectContent>
