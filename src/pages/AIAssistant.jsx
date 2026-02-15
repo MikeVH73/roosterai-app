@@ -350,20 +350,68 @@ export default function AIAssistant() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="chat">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Agent Chat
-            </TabsTrigger>
-            <TabsTrigger value="actions">Acties</TabsTrigger>
-            <TabsTrigger value="suggestions">
-              Suggesties
-              {pendingSuggestions.length > 0 && (
-                <Badge className="ml-2" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>{pendingSuggestions.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="history">Geschiedenis</TabsTrigger>
-          </TabsList>
+          <div className="mb-6 rounded-xl p-1" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setActiveTab('chat')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                style={activeTab === 'chat' ? {
+                  backgroundColor: 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
+                } : {
+                  color: 'var(--color-text-secondary)'
+                }}
+              >
+                <MessageCircle className="w-4 h-4" />
+                Agent Chat
+              </button>
+              <button
+                onClick={() => setActiveTab('actions')}
+                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                style={activeTab === 'actions' ? {
+                  backgroundColor: 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
+                } : {
+                  color: 'var(--color-text-secondary)'
+                }}
+              >
+                Acties
+              </button>
+              <button
+                onClick={() => setActiveTab('suggestions')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                style={activeTab === 'suggestions' ? {
+                  backgroundColor: 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
+                } : {
+                  color: 'var(--color-text-secondary)'
+                }}
+              >
+                Suggesties
+                {pendingSuggestions.length > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: 'var(--color-accent)', color: 'white' }}>
+                    {pendingSuggestions.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                style={activeTab === 'history' ? {
+                  backgroundColor: 'var(--color-accent)',
+                  color: 'white',
+                  boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
+                } : {
+                  color: 'var(--color-text-secondary)'
+                }}
+              >
+                Geschiedenis
+              </button>
+            </div>
+          </div>
 
           <TabsContent value="chat">
             <AgentChat agentName="planning_assistent" />
