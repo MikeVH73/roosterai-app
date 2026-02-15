@@ -719,6 +719,9 @@ ${currentCompany?.name}`;
         employees={whatsappDialog.employees}
         defaultMessage={whatsappDialog.message}
         context={whatsappDialog.context}
+        companyId={companyId}
+        scheduleId={actionParams.scheduleId}
+        subject="Vervangingsverzoek"
       />
     </div>
   );
