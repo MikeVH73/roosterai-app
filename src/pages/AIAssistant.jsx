@@ -361,13 +361,14 @@ export default function AIAssistant() {
             <div className="flex gap-1">
               <button
                 onClick={() => setActiveTab('chat')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
                 style={activeTab === 'chat' ? {
                   backgroundColor: 'var(--color-accent)',
                   color: 'white',
                   boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
                 } : {
-                  color: 'var(--color-text-secondary)'
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'transparent'
                 }}
               >
                 <MessageCircle className="w-4 h-4" />
@@ -375,26 +376,28 @@ export default function AIAssistant() {
               </button>
               <button
                 onClick={() => setActiveTab('actions')}
-                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
                 style={activeTab === 'actions' ? {
                   backgroundColor: 'var(--color-accent)',
                   color: 'white',
                   boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
                 } : {
-                  color: 'var(--color-text-secondary)'
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'transparent'
                 }}
               >
                 Acties
               </button>
               <button
                 onClick={() => setActiveTab('suggestions')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
                 style={activeTab === 'suggestions' ? {
                   backgroundColor: 'var(--color-accent)',
                   color: 'white',
                   boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
                 } : {
-                  color: 'var(--color-text-secondary)'
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'transparent'
                 }}
               >
                 Suggesties
@@ -406,13 +409,14 @@ export default function AIAssistant() {
               </button>
               <button
                 onClick={() => setActiveTab('history')}
-                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all"
+                className="px-4 py-2.5 rounded-lg font-medium text-sm transition-all hover:opacity-80"
                 style={activeTab === 'history' ? {
                   backgroundColor: 'var(--color-accent)',
                   color: 'white',
                   boxShadow: '0 2px 8px rgba(56, 189, 248, 0.3)'
                 } : {
-                  color: 'var(--color-text-secondary)'
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'transparent'
                 }}
               >
                 Geschiedenis

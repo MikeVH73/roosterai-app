@@ -180,9 +180,9 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
             <TabsList className="grid w-full grid-cols-3" style={{ backgroundColor: 'var(--color-surface-light)' }}>
-              <TabsTrigger value="general">Algemeen</TabsTrigger>
-              <TabsTrigger value="contract">Contract</TabsTrigger>
-              <TabsTrigger value="preferences">Voorkeuren</TabsTrigger>
+              <TabsTrigger value="general" style={{ color: activeTab === 'general' ? 'white' : 'var(--color-text-secondary)' }}>Algemeen</TabsTrigger>
+              <TabsTrigger value="contract" style={{ color: activeTab === 'contract' ? 'white' : 'var(--color-text-secondary)' }}>Contract</TabsTrigger>
+              <TabsTrigger value="preferences" style={{ color: activeTab === 'preferences' ? 'white' : 'var(--color-text-secondary)' }}>Voorkeuren</TabsTrigger>
             </TabsList>
 
             <div className="flex-1 overflow-y-auto py-4 min-h-[400px]">
