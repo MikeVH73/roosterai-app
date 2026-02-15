@@ -19,7 +19,8 @@ import {
   Users,
   Loader2,
   Building2,
-  Undo2
+  Undo2,
+  Info
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
