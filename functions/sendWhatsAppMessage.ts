@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Only planners and admins can send WhatsApp messages' }, { status: 403 });
     }
 
-    const { phoneNumber, message, employeeName } = await req.json();
+    const { phoneNumber, message, employeeName, companyId, scheduleId, aiSuggestionId, subject } = await req.json();
 
     if (!phoneNumber || !message) {
       return Response.json({ error: 'Phone number and message are required' }, { status: 400 });
@@ -61,10 +61,40 @@ Deno.serve(async (req) => {
 
     if (!whatsappResponse.ok) {
       console.error('WhatsApp API error:', responseData);
+      
+      // Log failed message
+      if (companyId) {
+        await base44.asServiceRole.entities.WhatsAppMessageLog.create({
+          companyId,
+          scheduleId: scheduleId || null,
+          aiSuggestionId: aiSuggestionId || null,
+          recipient_name: employeeName || 'Onbekend',
+          recipient_phone: formattedPhone,
+          subject: subject || 'WhatsApp bericht',
+          status: 'failed',
+          error_message: JSON.stringify(responseData),
+          sent_by: user.email
+        });
+      }
+      
       return Response.json({ 
         error: 'Failed to send WhatsApp message', 
         details: responseData 
       }, { status: whatsappResponse.status });
+    }
+
+    // Log successful message
+    if (companyId) {
+      await base44.asServiceRole.entities.WhatsAppMessageLog.create({
+        companyId,
+        scheduleId: scheduleId || null,
+        aiSuggestionId: aiSuggestionId || null,
+        recipient_name: employeeName || 'Onbekend',
+        recipient_phone: formattedPhone,
+        subject: subject || 'WhatsApp bericht',
+        status: 'sent',
+        sent_by: user.email
+      });
     }
 
     return Response.json({ 
