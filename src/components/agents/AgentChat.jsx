@@ -67,10 +67,13 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
 
   const createNewConversation = async () => {
     try {
+      const now = new Date();
+      const conversationTitle = `Gesprek ${now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
+      
       const conversation = await base44.agents.createConversation({
         agent_name: agentName,
         metadata: {
-          name: 'Nieuwe conversatie',
+          name: conversationTitle,
           description: 'Planning assistent gesprek'
         }
       });
@@ -106,7 +109,7 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
   if (loadingConversations) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-accent)' }} />
       </div>
     );
   }
@@ -126,14 +129,18 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-12rem)] bg-white rounded-lg border border-slate-200">
+    <div className="flex h-[calc(100vh-12rem)] rounded-lg border" style={{ 
+      backgroundColor: 'var(--color-surface)',
+      borderColor: 'var(--color-border)'
+    }}>
       {/* Conversations Sidebar */}
-      <div className="w-64 border-r border-slate-200 flex flex-col">
-        <div className="p-4 border-b border-slate-200">
+      <div className="w-64 border-r flex flex-col" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
           <Button 
             onClick={createNewConversation}
-            className="w-full bg-blue-600 hover:bg-blue-700"
+            style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
             size="sm"
+            className="w-full"
           >
             <Plus className="w-4 h-4 mr-2" />
             Nieuw gesprek
@@ -146,14 +153,27 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
               onClick={() => loadConversation(convo.id)}
               className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
                 currentConversation?.id === convo.id
-                  ? 'bg-blue-50 border border-blue-200'
-                  : 'hover:bg-slate-50 border border-transparent'
+                  ? 'border border-blue-400'
+                  : 'border border-transparent'
               }`}
+              style={currentConversation?.id === convo.id ? {
+                backgroundColor: 'var(--color-surface-light)'
+              } : {}}
+              onMouseEnter={(e) => {
+                if (currentConversation?.id !== convo.id) {
+                  e.currentTarget.style.backgroundColor = 'var(--color-surface-light)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentConversation?.id !== convo.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }
+              }}
             >
-              <p className="text-sm font-medium text-slate-900 truncate">
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
                 {convo.metadata?.name || 'Gesprek'}
               </p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
                 {new Date(convo.created_date).toLocaleDateString('nl-NL', { 
                   day: 'numeric', 
                   month: 'short',
@@ -169,14 +189,14 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%)' }}>
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">Planning Assistent</h3>
-              <p className="text-xs text-slate-500">Stel vragen over roosters en diensten</p>
+              <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Planning Assistent</h3>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Stel vragen over roosters en diensten</p>
             </div>
           </div>
         </div>
@@ -210,7 +230,7 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
         </div>
 
         {/* Input */}
-        <form onSubmit={sendMessage} className="p-4 border-t border-slate-200">
+        <form onSubmit={sendMessage} className="p-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
         <div className="flex gap-2">
           <Input
             value={inputMessage}
@@ -222,7 +242,7 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
           <Button 
             type="submit" 
             disabled={!inputMessage.trim() || loading}
-            className="bg-blue-600 hover:bg-blue-700"
+            style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
           >
             <Send className="w-4 h-4" />
           </Button>
