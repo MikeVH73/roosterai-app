@@ -150,7 +150,7 @@ export default function ScheduleEditor() {
 
   // Get the days to display
   const weekDays = useMemo(() => {
-    if (!schedule) {
+    if (!schedule || !schedule.start_date || !schedule.end_date) {
       return eachDayOfInterval({
         start: currentWeekStart,
         end: endOfWeek(currentWeekStart, { weekStartsOn: 1 })
