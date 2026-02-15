@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, CheckCircle2, XCircle, Calendar, User, Clock } from 'lucide-react';
+import { MessageSquare, CheckCircle2, XCircle, Calendar, User, Clock, Send } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import WhatsAppConfirmDialog from '@/components/ai/WhatsAppConfirmDialog';
 
 export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
   const { currentCompany } = useCompany();
   const [selectedLog, setSelectedLog] = useState(null);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
 
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ['whatsapp-logs', currentCompany?.id, scheduleId],
@@ -33,19 +35,37 @@ export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
     select: (data) => data[0]
   });
 
+  const { data: employees = [] } = useQuery({
+    queryKey: ['employees', currentCompany?.id],
+    queryFn: () => base44.entities.EmployeeProfile.filter({ 
+      companyId: currentCompany.id, 
+      status: 'active' 
+    }),
+    enabled: !!currentCompany?.id && open
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-blue-500" />
-            WhatsApp Berichten
-            {schedule && (
-              <span className="text-sm font-normal text-slate-500">
-                • {schedule.name}
-              </span>
-            )}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-500" />
+              WhatsApp Berichten
+              {schedule && (
+                <span className="text-sm font-normal text-slate-500">
+                  • {schedule.name}
+                </span>
+              )}
+            </DialogTitle>
+            <Button
+              onClick={() => setSendDialogOpen(true)}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Nieuw bericht
+            </Button>
+          </div>
         </DialogHeader>
 
         {isLoading ? (
@@ -121,6 +141,17 @@ export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
           </Button>
         </div>
       </DialogContent>
+
+      <WhatsAppConfirmDialog
+        open={sendDialogOpen}
+        onOpenChange={setSendDialogOpen}
+        employees={employees.filter(e => e.phone)}
+        defaultMessage=""
+        context="Handmatig bericht"
+        companyId={currentCompany?.id}
+        scheduleId={scheduleId}
+        subject="Handmatig bericht"
+      />
     </Dialog>
   );
 }
