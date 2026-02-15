@@ -119,7 +119,12 @@ export default function WhatsAppConfirmDialog({
                 <label className="text-sm font-medium mb-2 block">
                   {allowSelection ? `Medewerkers (${selectedEmployees.length} geselecteerd)` : `Ontvangers (${employees.length})`}
                 </label>
-                <div className="flex flex-wrap gap-2 p-3 bg-[#1e293b] rounded-lg max-h-40 overflow-y-auto border border-[#334155]">
+                {employees.length === 0 ? (
+                  <div className="p-4 bg-[#1e293b] rounded-lg border border-[#334155] text-center">
+                    <p className="text-slate-400 text-sm">Geen actieve medewerkers gevonden</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2 p-3 bg-[#1e293b] rounded-lg max-h-40 overflow-y-auto border border-[#334155]">
                   {employees.map((emp) => {
                     const isSelected = allowSelection ? selectedEmployees.some(e => e.id === emp.id) : true;
                     return (
@@ -141,6 +146,7 @@ export default function WhatsAppConfirmDialog({
                     );
                   })}
                 </div>
+                )}
               </div>
 
               <div>
