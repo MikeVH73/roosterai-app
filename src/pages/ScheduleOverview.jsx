@@ -58,6 +58,17 @@ export default function ScheduleOverview() {
   const [viewMode, setViewMode] = useState('week'); // Always week view for timeline
   const [visibleDays, setVisibleDays] = useState([1, 2, 3, 4, 5, 6, 0]); // 1=maandag, 0=zondag
   const [miniCalendarOpen, setMiniCalendarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
   const [selectedShift, setSelectedShift] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -382,6 +393,7 @@ export default function ScheduleOverview() {
                   };
                   
                   const weekDays = calculateVisibleDays();
+                  const currentMobileDay = isMobile && weekDays.length > 0 ? [weekDays[currentDayIndex] || weekDays[0]] : weekDays;
 
                   // Get relevant departments and dayparts
                   const relevantDepartmentIds = schedule.departmentIds || [];
@@ -413,12 +425,28 @@ export default function ScheduleOverview() {
                   };
 
                   const handleNext = () => {
-                    if (viewMode === 'day') {
+                    if (isMobile) {
+                      if (currentDayIndex < weekDays.length - 1) {
+                        setCurrentDayIndex(currentDayIndex + 1);
+                      } else {
+                        setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+                        setCurrentDayIndex(0);
+                      }
+                    } else if (viewMode === 'day') {
                       setCurrentWeekStart(addDays(currentWeekStart, 1));
                     } else if (viewMode === 'week') {
                       setCurrentWeekStart(addWeeks(currentWeekStart, 1));
                     } else if (viewMode === 'month') {
                       setCurrentWeekStart(addDays(endOfMonth(currentWeekStart), 1));
+                    }
+                  };
+
+                  const handlePrevMobile = () => {
+                    if (currentDayIndex > 0) {
+                      setCurrentDayIndex(currentDayIndex - 1);
+                    } else {
+                      setCurrentWeekStart(addWeeks(currentWeekStart, -1));
+                      setCurrentDayIndex(6);
                     }
                   };
 
@@ -446,6 +474,10 @@ export default function ScheduleOverview() {
                   const dayNamesFull = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
                   
                   const getViewLabel = () => {
+                    if (isMobile && weekDays.length > 0) {
+                      const currentDay = weekDays[currentDayIndex] || weekDays[0];
+                      return format(currentDay, 'EEEE d MMMM', { locale: nl });
+                    }
                     if (viewMode === 'day') {
                       return format(currentWeekStart, 'd MMMM yyyy', { locale: nl });
                     } else if (viewMode === 'week') {
@@ -511,13 +543,13 @@ export default function ScheduleOverview() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handlePrev}
+                                onClick={isMobile ? handlePrevMobile : handlePrev}
                                 className="h-7"
                                 style={{ color: 'var(--color-text-secondary)' }}
                               >
                                 <ChevronLeft className="w-3 h-3" />
                               </Button>
-                              <span className="text-xs font-medium px-3 min-w-[140px] text-center" style={{ color: 'var(--color-text-primary)' }}>
+                              <span className={`text-xs font-medium px-3 text-center ${isMobile ? 'min-w-[180px]' : 'min-w-[140px]'}`} style={{ color: 'var(--color-text-primary)' }}>
                                 {getViewLabel()}
                               </span>
                               <Button
@@ -531,32 +563,34 @@ export default function ScheduleOverview() {
                               </Button>
                             </div>
                             
-                            {/* Day Selector */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-7 px-3 text-xs" style={{ 
-                                  borderColor: 'var(--color-border)', 
-                                  color: 'var(--color-text-primary)',
-                                  backgroundColor: 'var(--color-surface)'
-                                }}>
-                                  <Settings2 className="w-3 h-3 mr-1" />
-                                  Dagen ({visibleDays.length})
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="start">
-                                <DropdownMenuLabel className="text-xs">Zichtbare dagen</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                {[1, 2, 3, 4, 5, 6, 0].map((dayIdx, idx) => (
-                                  <DropdownMenuCheckboxItem
-                                    key={dayIdx}
-                                    checked={visibleDays.includes(dayIdx)}
-                                    onCheckedChange={() => toggleDay(dayIdx)}
-                                  >
-                                    {dayNamesFull[idx]}
-                                  </DropdownMenuCheckboxItem>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            {/* Day Selector - Hidden on mobile */}
+                            {!isMobile && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm" className="h-7 px-3 text-xs" style={{ 
+                                    borderColor: 'var(--color-border)', 
+                                    color: 'var(--color-text-primary)',
+                                    backgroundColor: 'var(--color-surface)'
+                                  }}>
+                                    <Settings2 className="w-3 h-3 mr-1" />
+                                    Dagen ({visibleDays.length})
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start">
+                                  <DropdownMenuLabel className="text-xs">Zichtbare dagen</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  {[1, 2, 3, 4, 5, 6, 0].map((dayIdx, idx) => (
+                                    <DropdownMenuCheckboxItem
+                                      key={dayIdx}
+                                      checked={visibleDays.includes(dayIdx)}
+                                      onCheckedChange={() => toggleDay(dayIdx)}
+                                    >
+                                      {dayNamesFull[idx]}
+                                    </DropdownMenuCheckboxItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
                           </div>
                           
                           <Button 
@@ -581,7 +615,28 @@ export default function ScheduleOverview() {
                         )}
 
                         {/* Schedule Grid - Horizontal Timeline View */}
-                        <div className="w-full overflow-auto">
+                        <div 
+                          className="w-full overflow-auto"
+                          onTouchStart={(e) => {
+                            if (isMobile) {
+                              e.currentTarget.touchStartX = e.touches[0].clientX;
+                            }
+                          }}
+                          onTouchEnd={(e) => {
+                            if (isMobile && e.currentTarget.touchStartX) {
+                              const touchEndX = e.changedTouches[0].clientX;
+                              const diff = e.currentTarget.touchStartX - touchEndX;
+                              
+                              if (Math.abs(diff) > 50) {
+                                if (diff > 0) {
+                                  handleNext();
+                                } else {
+                                  handlePrevMobile();
+                                }
+                              }
+                            }
+                          }}
+                        >
                           {weekDays.length === 0 ? (
                             <div className="p-12 text-center" style={{ color: 'var(--color-text-muted)' }}>
                               <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)', opacity: 0.3 }} />
@@ -596,8 +651,8 @@ export default function ScheduleOverview() {
                                employees={employees}
                                functions={functions}
                                dayparts={dayparts}
-                               currentWeekStart={currentWeekStart}
-                               activeDays={schedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
+                               currentWeekStart={isMobile ? currentMobileDay[0] : currentWeekStart}
+                               activeDays={isMobile ? [currentMobileDay[0].getDay()] : (schedule?.active_days || [0, 1, 2, 3, 4, 5, 6])}
                                onShiftClick={(shift) => handleShiftClick(shift, schedule.id)}
                                onShiftUpdate={(shift, oldData) => {
                                  queryClient.invalidateQueries(['all-shifts', companyId]);
