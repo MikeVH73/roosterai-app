@@ -205,18 +205,13 @@ export default function DaypartScheduleGrid({
                         key={`${day.toISOString()}_${daypart.id}`}
                         className="p-2 align-top border-r border-slate-200 last:border-r-0 min-h-[80px] group/cell cursor-pointer hover:bg-slate-50"
                         style={{ backgroundColor: `${daypart.color}05` || '#FAFAFA' }}
-                        onDoubleClick={(e) => {
-                          if (e.target === e.currentTarget || e.target.closest('.add-shift-hint')) {
+                        onDoubleClick={() => {
+                          if (cellShifts.length === 0) {
                             onCellClick?.(null, dateStr, daypart.id);
                           }
                         }}
                       >
-                        <div className="space-y-1.5 min-h-[60px]" onDoubleClick={(e) => {
-                          if (cellShifts.length === 0) {
-                            e.stopPropagation();
-                            onCellClick?.(null, dateStr, daypart.id);
-                          }
-                        }}>
+                        <div className="space-y-1.5 min-h-[60px]">
                           {cellShifts.map((shift) => {
                             const employee = getEmployee(shift.employeeId);
                             if (!employee) return null;
@@ -227,6 +222,10 @@ export default function DaypartScheduleGrid({
                               <div
                                 key={shift.id}
                                 onClick={(e) => {
+                                  e.stopPropagation();
+                                  onShiftClick?.(shift);
+                                }}
+                                onDoubleClick={(e) => {
                                   e.stopPropagation();
                                   onShiftClick?.(shift);
                                 }}
