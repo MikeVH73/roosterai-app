@@ -22,7 +22,8 @@ import {
   Menu,
   X,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Info
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format, parseISO, isWithinInterval, startOfDay, endOfDay, startOfWeek, startOfMonth, endOfMonth, addDays, addWeeks } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -237,7 +244,23 @@ export default function ScheduleOverview() {
         <div className="flex items-center justify-between mb-6 px-6 py-4 rounded-lg shadow-sm" style={{ backgroundColor: 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}>
           {/* Left: Title */}
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Rooster Overzicht</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Rooster Overzicht</h1>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="rounded-full p-1 hover:bg-white/10 transition-colors">
+                      <Info className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                    <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                      <strong>Snel overzicht</strong> van alle roosters. Bekijk shifts en maak kleine aanpassingen door te verslepen, resizen of te klikken.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{activeSchedules.length} actieve roosters</p>
           </div>
           
