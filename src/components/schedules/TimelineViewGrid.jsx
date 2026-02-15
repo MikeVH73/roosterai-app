@@ -420,13 +420,24 @@ export default function TimelineViewGrid({
                               return (
                                 <div
                                   key={dayIdx}
-                                  className="border-r relative"
+                                  className="border-r relative group/cell"
                                   style={{
                                     borderColor: 'var(--color-border)'
                                   }}
                                   onDragOver={(e) => e.preventDefault()}
                                   onDrop={(e) => handleDayDrop(e, location.id, dept.id, day)}
                                 >
+                                  {/* Add button - only visible when cell is empty and on hover */}
+                                  {!shiftForThisRow && (
+                                    <button
+                                      onClick={() => onCellClick?.(location.id, day, dept.id)}
+                                      className="absolute top-1 left-1 w-5 h-5 rounded flex items-center justify-center transition-all opacity-0 group-hover/cell:opacity-30 hover:!opacity-100 hover:bg-slate-200 z-20"
+                                      style={{ color: 'var(--color-text-muted)' }}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  
                                   {/* Shift in this row */}
                                   {shiftForThisRow && (() => {
                                     const employee = getEmployee(shiftForThisRow.employeeId);
