@@ -35,13 +35,21 @@ export default function WhatsAppInbox({ open, onOpenChange, scheduleId }) {
     select: (data) => data[0]
   });
 
-  const { data: employees = [] } = useQuery({
+  const { data: employees = [], isLoading: employeesLoading } = useQuery({
     queryKey: ['employees', currentCompany?.id],
-    queryFn: () => base44.entities.EmployeeProfile.filter({ 
-      companyId: currentCompany.id, 
-      status: 'active' 
-    }),
-    enabled: !!currentCompany?.id && open
+    queryFn: async () => {
+      if (!currentCompany?.id) return [];
+      try {
+        return await base44.entities.EmployeeProfile.filter({ 
+          companyId: currentCompany.id, 
+          status: 'active' 
+        });
+      } catch (error) {
+        console.error('Error loading employees:', error);
+        return [];
+      }
+    },
+    enabled: open && !!currentCompany?.id
   });
 
   return (
