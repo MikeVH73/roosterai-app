@@ -103,19 +103,31 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
 
       // Update conversation title with first message summary
       if (isFirstMessage) {
-        const shortTitle = userMessage.length > 40 
-          ? userMessage.substring(0, 40) + '...' 
+        const shortTitle = userMessage.length > 50 
+          ? userMessage.substring(0, 50) + '...' 
           : userMessage;
         
-        await base44.agents.updateConversation(currentConversation.id, {
-          metadata: {
-            name: shortTitle,
-            description: 'Planning assistent gesprek'
-          }
-        });
-        
-        // Refresh conversations list
-        loadConversations();
+        try {
+          await base44.agents.updateConversation(currentConversation.id, {
+            metadata: {
+              name: shortTitle,
+              description: 'Planning assistent gesprek'
+            }
+          });
+          
+          // Update local state
+          setConversations(prev => prev.map(c => 
+            c.id === currentConversation.id 
+              ? { ...c, metadata: { ...c.metadata, name: shortTitle } }
+              : c
+          ));
+          setCurrentConversation(prev => ({
+            ...prev,
+            metadata: { ...prev.metadata, name: shortTitle }
+          }));
+        } catch (error) {
+          console.error('Failed to update conversation title:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to send message:', error);
