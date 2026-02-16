@@ -59,9 +59,13 @@ export default function RecurringShiftDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" style={{
+        backgroundColor: 'var(--color-surface)',
+        borderColor: 'var(--color-border)',
+        color: 'var(--color-text-primary)'
+      }}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Repeat className="w-5 h-5 text-[#38bdf8]" />
             Herhaling instellen
           </DialogTitle>

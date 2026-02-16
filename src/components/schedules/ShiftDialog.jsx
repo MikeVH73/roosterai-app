@@ -285,23 +285,36 @@ export default function ShiftDialog({
     if (!baseShiftData.daypartId) delete baseShiftData.daypartId;
     if (!baseShiftData.locationId) delete baseShiftData.locationId;
 
-    // Generate dates based on recurring pattern
-    const startDate = new Date(formData.date);
-    const endDate = new Date(recurringConfig.endDate);
+    // Generate dates based on recurring pattern using date-fns for reliable date handling
+    const startDate = parseISO(formData.date);
+    const endDate = parseISO(recurringConfig.endDate);
     const shiftsToCreate = [];
 
     let currentDate = new Date(startDate);
-    while (currentDate <= endDate) {
+    
+    // Add extra day to ensure we include the end date
+    const finalDate = new Date(endDate);
+    finalDate.setDate(finalDate.getDate() + 1);
+
+    while (currentDate < finalDate) {
+      const dayOfWeek = currentDate.getDay();
       const shouldInclude = recurringConfig.recurringType === 'daily' || 
-        (recurringConfig.recurringType === 'weekly' && recurringConfig.selectedDays.includes(currentDate.getDay()));
+        (recurringConfig.recurringType === 'weekly' && recurringConfig.selectedDays.includes(dayOfWeek));
       
       if (shouldInclude) {
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const dateString = `${year}-${month}-${day}`;
+        
         shiftsToCreate.push({
           ...baseShiftData,
-          date: currentDate.toISOString().split('T')[0]
+          date: dateString
         });
       }
       
+      // Create new date object to avoid mutation issues
+      currentDate = new Date(currentDate);
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
