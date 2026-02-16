@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, Trash2, Clock, Repeat } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, addDays, differenceInDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import ShiftConflictDialog from './ShiftConflictDialog';
 import RecurringShiftDialog from './RecurringShiftDialog';
@@ -285,37 +285,26 @@ export default function ShiftDialog({
     if (!baseShiftData.daypartId) delete baseShiftData.daypartId;
     if (!baseShiftData.locationId) delete baseShiftData.locationId;
 
-    // Generate dates based on recurring pattern using date-fns for reliable date handling
+    // Use date-fns for reliable date calculations
     const startDate = parseISO(formData.date);
     const endDate = parseISO(recurringConfig.endDate);
     const shiftsToCreate = [];
-
-    let currentDate = new Date(startDate);
     
-    // Add extra day to ensure we include the end date
-    const finalDate = new Date(endDate);
-    finalDate.setDate(finalDate.getDate() + 1);
+    const totalDays = differenceInDays(endDate, startDate) + 1;
 
-    while (currentDate < finalDate) {
+    for (let i = 0; i < totalDays; i++) {
+      const currentDate = addDays(startDate, i);
       const dayOfWeek = currentDate.getDay();
+      
       const shouldInclude = recurringConfig.recurringType === 'daily' || 
         (recurringConfig.recurringType === 'weekly' && recurringConfig.selectedDays.includes(dayOfWeek));
       
       if (shouldInclude) {
-        const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const day = String(currentDate.getDate()).padStart(2, '0');
-        const dateString = `${year}-${month}-${day}`;
-        
         shiftsToCreate.push({
           ...baseShiftData,
-          date: dateString
+          date: format(currentDate, 'yyyy-MM-dd')
         });
       }
-      
-      // Create new date object to avoid mutation issues
-      currentDate = new Date(currentDate);
-      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     // Create all shifts
