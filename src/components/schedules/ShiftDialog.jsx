@@ -364,10 +364,25 @@ export default function ShiftDialog({
         (recurringConfig.recurringType === 'weekly' && recurringConfig.selectedDays.includes(dayOfWeek));
       
       if (shouldInclude) {
-        shiftsToCreate.push({
-          ...baseShiftData,
-          date: format(currentDate, 'yyyy-MM-dd')
-        });
+        const dateStr = format(currentDate, 'yyyy-MM-dd');
+        
+        // Check if a shift already exists for this employee on this date and time
+        const existingShift = allShifts.find(s => 
+          s.employeeId === baseShiftData.employeeId &&
+          s.date === dateStr &&
+          s.start_time === baseShiftData.start_time &&
+          s.end_time === baseShiftData.end_time &&
+          s.locationId === baseShiftData.locationId &&
+          s.departmentId === baseShiftData.departmentId
+        );
+        
+        // Only create if no duplicate exists
+        if (!existingShift) {
+          shiftsToCreate.push({
+            ...baseShiftData,
+            date: dateStr
+          });
+        }
       }
     }
 

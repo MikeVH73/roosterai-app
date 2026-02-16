@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,15 @@ export default function RecurringShiftDialog({
   const [recurringType, setRecurringType] = useState('daily'); // daily, weekly, custom
   const [endDate, setEndDate] = useState('');
   const [selectedDays, setSelectedDays] = useState([1, 2, 3, 4, 5]); // Monday to Friday by default
+
+  // Reset state when dialog opens
+  useEffect(() => {
+    if (open) {
+      setRecurringType('daily');
+      setEndDate('');
+      setSelectedDays([1, 2, 3, 4, 5]);
+    }
+  }, [open]);
 
   const weekDays = [
     { id: 1, label: 'Ma', fullLabel: 'Maandag' },
