@@ -28,15 +28,14 @@ Deno.serve(async (req) => {
     const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
     const ACCESS_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
 
-    // Uitgebreide logging voor debugging
-    console.log('=== WhatsApp TOKEN DEBUG ===');
+    // KRITIEKE DEBUG INFO
+    console.log('🔍 === WhatsApp TOKEN DEBUG ===');
     console.log('Bron: Deno.env.get("WHATSAPP_ACCESS_TOKEN")');
-    console.log('Token aanwezig:', !!ACCESS_TOKEN);
-    console.log('Token lengte:', ACCESS_TOKEN ? ACCESS_TOKEN.length : 0);
-    console.log('Token fingerprint (laatste 6):', ACCESS_TOKEN ? '...' + ACCESS_TOKEN.slice(-6) : 'NIET GEVONDEN');
+    console.log('WA token last6:', ACCESS_TOKEN?.slice(-6) || 'GEEN TOKEN');
+    console.log('Token lengte:', ACCESS_TOKEN?.length || 0);
     console.log('PHONE_NUMBER_ID:', PHONE_NUMBER_ID);
-    console.log('Timestamp:', new Date().toISOString());
-    console.log('============================');
+    console.log('Deploy timestamp:', new Date().toISOString());
+    console.log('=================================');
 
     if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
       return Response.json({ error: 'WhatsApp credentials not configured' }, { status: 500 });
