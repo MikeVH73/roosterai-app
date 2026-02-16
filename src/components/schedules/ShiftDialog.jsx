@@ -284,7 +284,8 @@ export default function ShiftDialog({
           s.end_time === shift.end_time &&
           s.locationId === shift.locationId &&
           s.departmentId === shift.departmentId &&
-          s.date >= shift.date
+          s.date >= shift.date &&
+          s.scheduleId === shift.scheduleId
         );
         
         for (const shiftToDelete of similarShifts) {
@@ -297,7 +298,8 @@ export default function ShiftDialog({
           s.start_time === shift.start_time &&
           s.end_time === shift.end_time &&
           s.locationId === shift.locationId &&
-          s.departmentId === shift.departmentId
+          s.departmentId === shift.departmentId &&
+          s.scheduleId === shift.scheduleId
         );
         
         for (const shiftToDelete of similarShifts) {
@@ -306,11 +308,12 @@ export default function ShiftDialog({
       }
 
       queryClient.invalidateQueries(['shifts', scheduleId]);
-      setShowDeleteDialog(false);
-      onClose();
     } catch (error) {
       console.error('Error deleting shifts:', error);
       alert('Er ging iets mis bij het verwijderen van de diensten');
+    } finally {
+      setShowDeleteDialog(false);
+      onClose();
     }
   };
 
@@ -626,19 +629,19 @@ export default function ShiftDialog({
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            {shift?.id && (
-              <Button 
-                type="button" 
-                variant="ghost" 
-                onClick={handleDelete}
-                disabled={isLoading}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Verwijderen
-              </Button>
-            )}
             <div className={`flex gap-3 ${!shift?.id ? 'ml-auto' : ''}`}>
+              {shift?.id && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                  className="text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Verwijderen
+                </Button>
+              )}
               <Button type="button" variant="outline" onClick={onClose} style={{ 
                 color: 'var(--color-text-primary)',
                 borderColor: 'var(--color-border)',
