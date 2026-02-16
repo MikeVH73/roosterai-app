@@ -65,14 +65,14 @@ export default function RecurringShiftDialog({
             <Repeat className="w-5 h-5 text-[#38bdf8]" />
             Herhaling instellen
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription style={{ color: 'var(--color-text-secondary)' }}>
             Plan deze dienst herhaaldelijk in volgens een patroon
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div>
-            <Label>Herhaalpatroon</Label>
+            <Label style={{ color: 'var(--color-text-primary)' }}>Herhaalpatroon</Label>
             <Select value={recurringType} onValueChange={setRecurringType}>
               <SelectTrigger>
                 <SelectValue />
@@ -86,7 +86,7 @@ export default function RecurringShiftDialog({
 
           {recurringType === 'weekly' && (
             <div>
-              <Label className="mb-3 block">Selecteer dagen</Label>
+              <Label className="mb-3 block" style={{ color: 'var(--color-text-primary)' }}>Selecteer dagen</Label>
               <div className="flex gap-2">
                 {weekDays.map(day => (
                   <button
@@ -111,7 +111,7 @@ export default function RecurringShiftDialog({
           )}
 
           <div>
-            <Label htmlFor="endDate">Herhalen tot *</Label>
+            <Label htmlFor="endDate" style={{ color: 'var(--color-text-primary)' }}>Herhalen tot *</Label>
             <Input
               id="endDate"
               type="date"
@@ -120,7 +120,7 @@ export default function RecurringShiftDialog({
               min={initialDate}
               className="mt-1"
             />
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
               De dienst wordt herhaald tot en met deze datum
             </p>
           </div>
