@@ -132,9 +132,10 @@ export default function RecurringShiftDialog({
               onChange={(e) => setEndDate(e.target.value)}
               min={initialDate}
               className="mt-1"
+              placeholder="dd-mm-jjjj"
             />
             <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-              De dienst wordt herhaald tot en met deze datum
+              Klik op het kalendericoon om een datum te selecteren
             </p>
           </div>
 

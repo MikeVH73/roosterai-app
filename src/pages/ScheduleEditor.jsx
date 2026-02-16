@@ -270,6 +270,10 @@ export default function ScheduleEditor() {
     );
   };
 
+  const goToToday = () => {
+    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  };
+
   const getFunctionColor = (funcId) => {
     const func = functions.find(f => f.id === funcId);
     return func?.color || '#3B82F6';
@@ -401,6 +405,9 @@ export default function ScheduleEditor() {
                 <Button variant="ghost" size="sm" onClick={() => navigateWeek('next')} style={{ color: 'var(--color-text-primary)' }}>
                   Volgende week
                   <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={goToToday} style={{ color: 'var(--color-text-primary)' }}>
+                  Naar vandaag
                 </Button>
               </div>
               

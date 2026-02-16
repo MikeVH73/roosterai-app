@@ -354,9 +354,10 @@ export default function ShiftDialog({
     const endDate = parseISO(recurringConfig.endDate);
     const shiftsToCreate = [];
     
-    const totalDays = differenceInDays(endDate, startDate) + 1;
+    const totalDays = differenceInDays(endDate, startDate);
 
-    for (let i = 0; i < totalDays; i++) {
+    // Start from day 1 (skip the initial date since it will be created separately if user submits)
+    for (let i = 1; i <= totalDays; i++) {
       const currentDate = addDays(startDate, i);
       const dayOfWeek = currentDate.getDay();
       
@@ -386,17 +387,18 @@ export default function ShiftDialog({
       }
     }
 
-    // Create all shifts
+    // Create all recurring shifts
     try {
       for (const shiftData of shiftsToCreate) {
         await base44.entities.Shift.create(shiftData);
       }
       queryClient.invalidateQueries(['shifts', scheduleId]);
-      setShowRecurringDialog(false);
-      onClose();
     } catch (error) {
       console.error('Error creating recurring shifts:', error);
-      alert('Er ging iets mis bij het aanmaken van de herhaaldelijke diensten');
+      alert('Er ging iets mis bij het aanmaken van de herhaaldiensten');
+      throw error;
+    } finally {
+      setShowRecurringDialog(false);
     }
   };
 
@@ -682,12 +684,37 @@ export default function ShiftDialog({
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => setShowRecurringDialog(true)}
+                  onClick={async () => {
+                    // First save the current shift, then open recurring dialog
+                    const departmentId = formData.departmentId || schedule?.departmentIds?.[0] || null;
+                    const locationId = formData.locationId || schedule?.locationIds?.[0] || null;
+                    
+                    const submitData = {
+                      ...formData,
+                      companyId: currentCompany?.id,
+                      scheduleId,
+                      departmentId,
+                      locationId,
+                      break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
+                    };
+                    
+                    delete submitData.has_break;
+                    if (!submitData.functionId) delete submitData.functionId;
+                    if (!submitData.daypartId) delete submitData.daypartId;
+                    if (!submitData.locationId) delete submitData.locationId;
+
+                    try {
+                      await createMutation.mutateAsync(submitData);
+                      setShowRecurringDialog(true);
+                    } catch (error) {
+                      console.error('Error creating initial shift:', error);
+                    }
+                  }}
                   className="border-blue-200 hover:bg-blue-50"
-                  disabled={!formData.employeeId || !formData.date}
+                  disabled={!formData.employeeId || !formData.date || isLoading}
                 >
                   <Repeat className="w-4 h-4 mr-2" />
-                  Herhaaldelijk
+                  Herhaaldiensten
                 </Button>
               )}
               <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
