@@ -277,30 +277,44 @@ export default function ShiftDialog({
         // Delete only this shift
         await base44.entities.Shift.delete(shift.id);
       } else if (deleteOption === 'future') {
-        // Delete this and all future similar shifts
-        const similarShifts = allShifts.filter(s => 
-          s.employeeId === shift.employeeId &&
-          s.start_time === shift.start_time &&
-          s.end_time === shift.end_time &&
-          s.locationId === shift.locationId &&
-          s.departmentId === shift.departmentId &&
-          s.date >= shift.date &&
-          s.scheduleId === shift.scheduleId
-        );
+        // Delete this and all future similar shifts on the same day of week
+        const shiftDate = parseISO(shift.date);
+        const shiftDayOfWeek = shiftDate.getDay();
+        
+        const similarShifts = allShifts.filter(s => {
+          const sDate = parseISO(s.date);
+          const sDayOfWeek = sDate.getDay();
+          
+          return s.employeeId === shift.employeeId &&
+            s.start_time === shift.start_time &&
+            s.end_time === shift.end_time &&
+            s.locationId === shift.locationId &&
+            s.departmentId === shift.departmentId &&
+            s.scheduleId === shift.scheduleId &&
+            s.date >= shift.date &&
+            sDayOfWeek === shiftDayOfWeek;
+        });
         
         for (const shiftToDelete of similarShifts) {
           await base44.entities.Shift.delete(shiftToDelete.id);
         }
       } else if (deleteOption === 'all') {
-        // Delete all similar shifts
-        const similarShifts = allShifts.filter(s => 
-          s.employeeId === shift.employeeId &&
-          s.start_time === shift.start_time &&
-          s.end_time === shift.end_time &&
-          s.locationId === shift.locationId &&
-          s.departmentId === shift.departmentId &&
-          s.scheduleId === shift.scheduleId
-        );
+        // Delete all similar shifts on the same day of week
+        const shiftDate = parseISO(shift.date);
+        const shiftDayOfWeek = shiftDate.getDay();
+        
+        const similarShifts = allShifts.filter(s => {
+          const sDate = parseISO(s.date);
+          const sDayOfWeek = sDate.getDay();
+          
+          return s.employeeId === shift.employeeId &&
+            s.start_time === shift.start_time &&
+            s.end_time === shift.end_time &&
+            s.locationId === shift.locationId &&
+            s.departmentId === shift.departmentId &&
+            s.scheduleId === shift.scheduleId &&
+            sDayOfWeek === shiftDayOfWeek;
+        });
         
         for (const shiftToDelete of similarShifts) {
           await base44.entities.Shift.delete(shiftToDelete.id);
