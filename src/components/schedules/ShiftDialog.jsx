@@ -25,6 +25,7 @@ import { format, parseISO, addDays, differenceInDays } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import ShiftConflictDialog from './ShiftConflictDialog';
 import RecurringShiftDialog from './RecurringShiftDialog';
+import DeleteShiftDialog from './DeleteShiftDialog';
 
 const shiftTypes = [
   { value: 'regular', label: 'Regulier' },
@@ -71,6 +72,7 @@ export default function ShiftDialog({
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflicts, setConflicts] = useState([]);
   const [showRecurringDialog, setShowRecurringDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Fetch all shifts for conflict detection
   const { data: allShifts = [] } = useQuery({
@@ -261,9 +263,54 @@ export default function ShiftDialog({
     }
   };
 
-  const handleDelete = async () => {
-    if (shift && window.confirm('Weet je zeker dat je deze dienst wilt verwijderen?')) {
-      await deleteMutation.mutateAsync(shift.id);
+  const handleDelete = () => {
+    if (shift) {
+      setShowDeleteDialog(true);
+    }
+  };
+
+  const handleDeleteConfirm = async (deleteOption) => {
+    if (!shift) return;
+
+    try {
+      if (deleteOption === 'single') {
+        // Delete only this shift
+        await base44.entities.Shift.delete(shift.id);
+      } else if (deleteOption === 'future') {
+        // Delete this and all future similar shifts
+        const similarShifts = allShifts.filter(s => 
+          s.employeeId === shift.employeeId &&
+          s.start_time === shift.start_time &&
+          s.end_time === shift.end_time &&
+          s.locationId === shift.locationId &&
+          s.departmentId === shift.departmentId &&
+          s.date >= shift.date
+        );
+        
+        for (const shiftToDelete of similarShifts) {
+          await base44.entities.Shift.delete(shiftToDelete.id);
+        }
+      } else if (deleteOption === 'all') {
+        // Delete all similar shifts
+        const similarShifts = allShifts.filter(s => 
+          s.employeeId === shift.employeeId &&
+          s.start_time === shift.start_time &&
+          s.end_time === shift.end_time &&
+          s.locationId === shift.locationId &&
+          s.departmentId === shift.departmentId
+        );
+        
+        for (const shiftToDelete of similarShifts) {
+          await base44.entities.Shift.delete(shiftToDelete.id);
+        }
+      }
+
+      queryClient.invalidateQueries(['shifts', scheduleId]);
+      setShowDeleteDialog(false);
+      onClose();
+    } catch (error) {
+      console.error('Error deleting shifts:', error);
+      alert('Er ging iets mis bij het verwijderen van de diensten');
     }
   };
 
@@ -331,6 +378,13 @@ export default function ShiftDialog({
 
   return (
     <>
+      <DeleteShiftDialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDeleteConfirm}
+        shift={shift}
+      />
+
       <RecurringShiftDialog
         open={showRecurringDialog}
         onClose={() => setShowRecurringDialog(false)}
@@ -356,7 +410,7 @@ export default function ShiftDialog({
         departments={departments}
       />
 
-      <Dialog open={open && !showConflictDialog && !showRecurringDialog} onOpenChange={onClose}>
+      <Dialog open={open && !showConflictDialog && !showRecurringDialog && !showDeleteDialog} onOpenChange={onClose}>
         <DialogContent className="max-w-lg" style={{ 
           backgroundColor: 'var(--color-surface)',
           borderColor: 'var(--color-border)',
