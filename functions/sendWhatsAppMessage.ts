@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     const { phoneNumber, message, employeeName, companyId, scheduleId, aiSuggestionId, subject } = await req.json();
 
     if (!phoneNumber || !message) {
-      return Response.json({ error: 'Phone numbe and message are required' }, { status: 400 });
+      return Response.json({ error: 'Phone number and message are required' }, { status: 400 });
     }
 
     const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
