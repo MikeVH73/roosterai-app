@@ -62,7 +62,7 @@ export default function RecurringShiftDialog({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Repeat className="w-5 h-5 text-blue-600" />
+            <Repeat className="w-5 h-5 text-[#38bdf8]" />
             Herhaling instellen
           </DialogTitle>
           <DialogDescription>
@@ -95,8 +95,8 @@ export default function RecurringShiftDialog({
                     onClick={() => toggleDay(day.id)}
                     className={`w-10 h-10 rounded-lg font-medium text-sm transition-all ${
                       selectedDays.includes(day.id)
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-[#38bdf8] text-white shadow-md'
+                        : 'bg-[#3d3866] text-slate-300 hover:bg-[#475569]'
                     }`}
                     title={day.fullLabel}
                   >
@@ -126,8 +126,8 @@ export default function RecurringShiftDialog({
           </div>
 
           {endDate && initialDate && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800">
+            <div className="bg-[#2d2a3e] border border-[#3d3866] rounded-lg p-3">
+              <p className="text-sm text-slate-300">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 {recurringType === 'daily' ? (
                   <>Deze dienst wordt <strong>dagelijks</strong> ingepland van {initialDate} tot {endDate}</>
@@ -146,7 +146,7 @@ export default function RecurringShiftDialog({
           <Button 
             onClick={handleConfirm}
             disabled={!endDate || (recurringType === 'weekly' && selectedDays.length === 0)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-[#38bdf8] hover:bg-[#0ea5e9]"
           >
             Bevestigen
           </Button>
