@@ -307,13 +307,15 @@ export default function ShiftDialog({
 
     // Create all shifts
     try {
-      await base44.entities.Shift.bulkCreate(shiftsToCreate);
+      for (const shiftData of shiftsToCreate) {
+        await base44.entities.Shift.create(shiftData);
+      }
       queryClient.invalidateQueries(['shifts', scheduleId]);
       setShowRecurringDialog(false);
       onClose();
     } catch (error) {
       console.error('Error creating recurring shifts:', error);
-      alert('Er ging iets mis bij het aanmaken van de herhaalde diensten');
+      alert('Er ging iets mis bij het aanmaken van de herhaaldelijke diensten');
     }
   };
 
