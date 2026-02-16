@@ -28,6 +28,14 @@ Deno.serve(async (req) => {
     const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
     const ACCESS_TOKEN = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
 
+    // Uitgebreide logging voor debugging
+    console.log('=== WhatsApp API Debug Info ===');
+    console.log('PHONE_NUMBER_ID:', PHONE_NUMBER_ID);
+    console.log('ACCESS_TOKEN (eerste 8 chars):', ACCESS_TOKEN ? ACCESS_TOKEN.substring(0, 8) + '...' : 'NIET GEVONDEN');
+    console.log('ACCESS_TOKEN lengte:', ACCESS_TOKEN ? ACCESS_TOKEN.length : 0);
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('===============================');
+
     if (!PHONE_NUMBER_ID || !ACCESS_TOKEN) {
       return Response.json({ error: 'WhatsApp credentials not configured' }, { status: 500 });
     }
@@ -37,6 +45,12 @@ Deno.serve(async (req) => {
     if (!formattedPhone.startsWith('31') && formattedPhone.length === 9) {
       formattedPhone = '31' + formattedPhone;
     }
+
+    console.log('=== WhatsApp API Request ===');
+    console.log('Endpoint:', `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`);
+    console.log('To (formatted):', formattedPhone);
+    console.log('Message length:', message.length);
+    console.log('============================');
 
     const whatsappResponse = await fetch(
       `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
@@ -59,8 +73,21 @@ Deno.serve(async (req) => {
 
     const responseData = await whatsappResponse.json();
 
+    console.log('=== WhatsApp API Response ===');
+    console.log('Status:', whatsappResponse.status);
+    console.log('Status Text:', whatsappResponse.statusText);
+    console.log('Response:', JSON.stringify(responseData, null, 2));
+    console.log('=============================');
+
     if (!whatsappResponse.ok) {
-      console.error('WhatsApp API error:', responseData);
+      console.error('WhatsApp API error details:', {
+        status: whatsappResponse.status,
+        error_message: responseData.error?.message,
+        error_code: responseData.error?.code,
+        error_type: responseData.error?.type,
+        error_subcode: responseData.error?.error_subcode,
+        fbtrace_id: responseData.error?.fbtrace_id
+      });
       
       // Log failed message
       if (companyId) {
