@@ -102,8 +102,8 @@ export default function InvitationManager() {
 
   const sendInvitationMutation = useMutation({
     mutationFn: async (invitation) => {
-      // Use base44 invite system to send the invitation email
-      await base44.users.inviteUser(invitation.email, 'user');
+      // Invite via base44 platform (sends login/register email automatically)
+      await base44.users.inviteUser(invitation.email, invitation.company_role === 'company_admin' ? 'admin' : 'user');
 
       await base44.entities.Invitation.update(invitation.id, {
         status: 'sent',
@@ -113,7 +113,7 @@ export default function InvitationManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['invitations', companyId]);
-      toast.success('Uitnodiging verzonden');
+      toast.success('Uitnodiging verzonden via e-mail');
     },
     onError: async (error, invitation) => {
       await base44.entities.Invitation.update(invitation.id, {
@@ -122,7 +122,7 @@ export default function InvitationManager() {
         send_attempts: (invitation.send_attempts || 0) + 1
       });
       queryClient.invalidateQueries(['invitations', companyId]);
-      toast.error('Uitnodiging kon niet worden verzonden');
+      toast.error(`Uitnodiging mislukt: ${error.message}`);
     }
   });
 
