@@ -56,7 +56,7 @@ export default function WeekChart({ shifts, weekStart }) {
               {data.map((entry, index) => (
                 <Cell
                   key={index}
-                  fill={entry.isToday ? '#38bdf8' : entry.count === peakDay?.count && entry.count > 0 ? '#818cf8' : 'var(--color-surface-light)'}
+                  fill={entry.isToday ? '#38bdf8' : entry.count === peakDay?.count && entry.count > 0 ? '#6366f1' : 'var(--color-surface-light)'}
                 />
               ))}
             </Bar>
