@@ -63,8 +63,8 @@ export default function WeekChart({ shifts, weekStart }) {
           </BarChart>
         </ResponsiveContainer>
         <div className="flex gap-4 mt-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-sky-400 inline-block" /> Vandaag</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-indigo-400 inline-block" /> Drukste dag</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{backgroundColor:'#38bdf8'}} /> Vandaag</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{backgroundColor:'#6366f1'}} /> Drukste dag</span>
         </div>
       </CardContent>
     </Card>
