@@ -222,50 +222,13 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Pending Requests */}
-            {hasPermission('manage_requests') && pendingRequests > 0 && (
-              <Card className="border-0 shadow-sm border-l-4 border-l-orange-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5 text-orange-500" />
-                    Openstaande verzoeken
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {vacationRequests.slice(0, 3).map((request) => {
-                      const employee = employees.find(e => e.id === request.employeeId);
-                      return (
-                        <div key={request.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-50">
-                          <div>
-                            <p className="font-medium text-slate-900">
-                              {employee?.first_name} {employee?.last_name}
-                            </p>
-                            <p className="text-sm text-slate-500">
-                              Verlof: {format(parseISO(request.start_date), 'd MMM', { locale: nl })} - {format(parseISO(request.end_date), 'd MMM', { locale: nl })}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="ghost" className="text-green-600 hover:text-green-700 hover:bg-green-50">
-                              <CheckCircle2 className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                              <XCircle className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {pendingRequests > 3 && (
-                      <Link to={createPageUrl('VacationRequests')}>
-                        <Button variant="ghost" className="w-full text-slate-600">
-                          Bekijk alle {pendingRequests} verzoeken
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Action Items */}
+            {hasPermission('manage_requests') && (
+              <ActionItems
+                vacationRequests={vacationRequests}
+                swapRequests={swapRequests}
+                aiSuggestions={aiSuggestions}
+              />
             )}
           </div>
 
