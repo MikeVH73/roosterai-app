@@ -132,6 +132,17 @@ export default function CompanySelect() {
           Nieuwe organisatie aanmaken
         </Button>
 
+        {/* Logout */}
+        <div className="text-center mt-6">
+          <button
+            onClick={() => base44.auth.logout()}
+            className="text-sm underline"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Uitloggen
+          </button>
+        </div>
+
         {/* Features */}
         <div className="grid grid-cols-3 gap-4 mt-12">
           <div className="text-center">
