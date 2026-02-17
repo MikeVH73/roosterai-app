@@ -235,9 +235,13 @@ export default function Dashboard() {
 
           {/* Right Sidebar */}
           <div className="space-y-6">
+            {/* Department Distribution */}
+            {departments.length > 0 && (
+              <DepartmentDistribution employees={employees} departments={departments} />
+            )}
             {/* AI Assistant Card */}
             {hasPermission('use_ai') && (
-              <Card className="border-0 shadow-sm bg-gradient-to-br from-sky-500 to-cyan-600 text-white">
+              <Card className="border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%)' }}>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
