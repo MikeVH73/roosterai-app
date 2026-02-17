@@ -32,11 +32,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'WhatsApp credentials not configured' }, { status: 500 });
     }
 
-    // Format phone number - remove all non-digits and ensure it starts with country code
+    // Format phone number - remove all non-digits
     let formattedPhone = phoneNumber.replace(/\D/g, '');
-    if (!formattedPhone.startsWith('31') && formattedPhone.length === 9) {
+    // Remove leading zero (Dutch mobile: 0641... -> 641...)
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = formattedPhone.substring(1);
+    }
+    // Add country code 31 if not already present
+    if (!formattedPhone.startsWith('31')) {
       formattedPhone = '31' + formattedPhone;
     }
+    console.log('Sending WhatsApp to formatted number:', formattedPhone, '(original:', phoneNumber, ')');
 
     const whatsappResponse = await fetch(
       `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
