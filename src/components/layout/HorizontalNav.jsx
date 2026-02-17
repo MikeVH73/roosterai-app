@@ -48,6 +48,12 @@ export default function HorizontalNav({ currentPage }) {
   const { currentCompany, userRole, user, hasPermission, switchCompany } = useCompany();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSwitchCompany = () => {
+    switchCompany();
+    navigate(createPageUrl('CompanySelect'));
+  };
 
   // Get user's preferred menu items from their profile, or use defaults
   const userPreferences = user?.preferences || {};
