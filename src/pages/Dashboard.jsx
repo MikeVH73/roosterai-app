@@ -173,12 +173,12 @@ export default function Dashboard() {
             {/* Week Chart */}
             <WeekChart shifts={thisWeekShifts} weekStart={weekStart} />
             {/* Active Schedules */}
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">Actieve roosters</CardTitle>
+                  <CardTitle className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Actieve roosters</CardTitle>
                   <Link to={createPageUrl('Schedules')}>
-                    <Button variant="ghost" size="sm" className="text-blue-600">
+                    <Button variant="ghost" size="sm" style={{ color: '#38bdf8' }}>
                       Alle roosters
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
@@ -192,20 +192,24 @@ export default function Dashboard() {
                       <Link 
                         key={schedule.id} 
                         to={createPageUrl('ScheduleEditor') + `?id=${schedule.id}`}
-                        className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                        className="flex items-center justify-between p-4 rounded-xl transition-colors"
+                        style={{ backgroundColor: 'var(--color-surface-light)' }}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <CalendarDays className="w-5 h-5 text-blue-600" />
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(56,189,248,0.15)' }}>
+                            <CalendarDays className="w-5 h-5" style={{ color: '#38bdf8' }} />
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">{schedule.name}</p>
-                            <p className="text-sm text-slate-500">
+                            <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{schedule.name}</p>
+                            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
                               {format(parseISO(schedule.start_date), 'd MMM', { locale: nl })} - {format(parseISO(schedule.end_date), 'd MMM yyyy', { locale: nl })}
                             </p>
                           </div>
                         </div>
-                        <Badge variant={schedule.status === 'published' ? 'default' : 'secondary'}>
+                        <Badge style={schedule.status === 'published'
+                          ? { backgroundColor: 'rgba(74,222,128,0.15)', color: '#4ade80', border: 'none' }
+                          : { backgroundColor: 'rgba(148,163,184,0.15)', color: '#94a3b8', border: 'none' }
+                        }>
                           {schedule.status === 'published' ? 'Gepubliceerd' : 'Concept'}
                         </Badge>
                       </Link>
@@ -213,8 +217,8 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 mb-4">Nog geen roosters aangemaakt</p>
+                    <CalendarDays className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--color-text-muted)' }} />
+                    <p className="mb-4" style={{ color: 'var(--color-text-muted)' }}>Nog geen roosters aangemaakt</p>
                     <Link to={createPageUrl('Schedules')}>
                       <Button size="sm">Eerste rooster maken</Button>
                     </Link>
