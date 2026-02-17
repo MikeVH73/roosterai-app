@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
       status: 'active'
     });
 
-    if (!membership.length || !['planner', 'company_admin'].includes(membership[0].company_role)) {
+    if (!membership.length || !['planne', 'company_admin'].includes(membership[0].company_role)) {
       return Response.json({ error: 'Forbidden: Only planners and admins can send WhatsApp messages' }, { status: 403 });
     }
 
