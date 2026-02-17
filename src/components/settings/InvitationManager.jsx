@@ -102,25 +102,8 @@ export default function InvitationManager() {
 
   const sendInvitationMutation = useMutation({
     mutationFn: async (invitation) => {
-      const inviteUrl = `${window.location.origin}/set-password?token=${invitation.token}`;
-      
-      await base44.integrations.Core.SendEmail({
-        to: invitation.email,
-        subject: `Uitnodiging voor ${currentCompany?.name} - ShiftFlow`,
-        body: `
-Hallo,
-
-Je bent uitgenodigd om deel te nemen aan ${currentCompany?.name} op ShiftFlow.
-
-Klik op de volgende link om je account te activeren en een wachtwoord in te stellen:
-${inviteUrl}
-
-Deze link is 7 dagen geldig.
-
-Met vriendelijke groet,
-${currentCompany?.name}
-        `.trim()
-      });
+      // Use base44 invite system to send the invitation email
+      await base44.users.inviteUser(invitation.email, 'user');
 
       await base44.entities.Invitation.update(invitation.id, {
         status: 'sent',
