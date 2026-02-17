@@ -30,9 +30,9 @@ export default function DepartmentDistribution({ employees, departments }) {
   if (data.length === 0) return null;
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold">Medewerkers per afdeling</CardTitle>
+        <CardTitle className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Medewerkers per afdeling</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={200}>

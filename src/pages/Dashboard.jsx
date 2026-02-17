@@ -29,31 +29,32 @@ import DepartmentDistribution from '@/components/dashboard/DepartmentDistributio
 import ActionItems from '@/components/dashboard/ActionItems';
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-green-50 text-green-600',
-    purple: 'bg-purple-50 text-purple-600',
-    orange: 'bg-orange-50 text-orange-600',
+  const iconColors = {
+    blue: { bg: 'rgba(56,189,248,0.15)', color: '#38bdf8' },
+    green: { bg: 'rgba(74,222,128,0.15)', color: '#4ade80' },
+    purple: { bg: 'rgba(129,140,248,0.15)', color: '#818cf8' },
+    orange: { bg: 'rgba(251,146,60,0.15)', color: '#fb923c' },
   };
+  const ic = iconColors[color] || iconColors.blue;
 
   return (
     <GlowCard glowColor={color} className="shadow-sm">
-      <Card className="border-0 shadow-none bg-white/80">
+      <Card className="border-0 shadow-none" style={{ backgroundColor: 'var(--color-surface)' }}>
         <CardContent className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">{title}</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{value}</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>{title}</p>
+              <p className="text-3xl font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>{value}</p>
               {trend && (
                 <div className="flex items-center gap-1 mt-2">
-                  <TrendingUp className="w-3 h-3 text-green-500" />
-                  <span className="text-xs text-green-600 font-medium">{trend}</span>
-                  <span className="text-xs text-slate-400">{trendLabel}</span>
+                  <TrendingUp className="w-3 h-3" style={{ color: '#4ade80' }} />
+                  <span className="text-xs font-medium" style={{ color: '#4ade80' }}>{trend}</span>
+                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{trendLabel}</span>
                 </div>
               )}
             </div>
-            <div className={`p-3 rounded-xl ${colorClasses[color]}`}>
-              <Icon className="w-6 h-6" />
+            <div className="p-3 rounded-xl" style={{ backgroundColor: ic.bg }}>
+              <Icon className="w-6 h-6" style={{ color: ic.color }} />
             </div>
           </div>
         </CardContent>
