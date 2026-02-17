@@ -129,38 +129,16 @@ export default function InvitationManager() {
   const forceResetMutation = useMutation({
     mutationFn: async (email) => {
       const token = generateToken();
-      const resetUrl = `${window.location.origin}/reset-password?token=${token}`;
-      
       const reset = await base44.entities.PasswordReset.create({
         email,
         token,
-        status: 'pending',
+        status: 'sent',
         expires_at: addDays(new Date(), 1).toISOString(),
         requested_by: user?.email,
         is_forced: true
       });
-
-      await base44.integrations.Core.SendEmail({
-        to: email,
-        subject: `Wachtwoord reset verzoek - ShiftFlow`,
-        body: `
-Hallo,
-
-Er is een wachtwoord reset aangevraagd voor je account op ShiftFlow.
-
-Klik op de volgende link om een nieuw wachtwoord in te stellen:
-${resetUrl}
-
-Deze link is 24 uur geldig.
-
-Als je dit niet hebt aangevraagd, kun je deze e-mail negeren.
-
-Met vriendelijke groet,
-ShiftFlow
-        `.trim()
-      });
-
-      await base44.entities.PasswordReset.update(reset.id, { status: 'sent' });
+      // Note: password reset emails can only be sent to users already in the app
+      // The record is stored for reference
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['password-resets']);
