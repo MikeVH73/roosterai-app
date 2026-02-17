@@ -96,7 +96,7 @@ export default function HorizontalNav({ currentPage }) {
           <div className="flex items-center gap-6">
             {/* Company Info */}
             <button 
-              onClick={switchCompany}
+              onClick={handleSwitchCompany}
               className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
               style={{ hover: { backgroundColor: 'var(--color-surface-light)' } }}
             >
