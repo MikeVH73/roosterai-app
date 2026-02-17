@@ -273,50 +273,50 @@ export default function Dashboard() {
             )}
 
             {/* Quick Stats */}
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-semibold">Organisatie</CardTitle>
+                <CardTitle className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>Organisatie</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-600">
+                    <div className="flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
                       <Building2 className="w-4 h-4" />
                       <span className="text-sm">Afdelingen</span>
                     </div>
-                    <span className="font-semibold">{departments.length}</span>
+                    <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{departments.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-600">
+                    <div className="flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
                       <Users className="w-4 h-4" />
                       <span className="text-sm">Medewerkers</span>
                     </div>
-                    <span className="font-semibold">{employees.length}</span>
+                    <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{employees.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-600">
+                    <div className="flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
                       <Calendar className="w-4 h-4" />
                       <span className="text-sm">Roosters</span>
                     </div>
-                    <span className="font-semibold">{schedules.length}</span>
+                    <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{schedules.length}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Subscription Status */}
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-slate-500">Abonnement</span>
-                  <Badge className="bg-blue-100 text-blue-700">
+                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Abonnement</span>
+                  <Badge style={{ backgroundColor: 'rgba(56,189,248,0.15)', color: '#38bdf8', border: 'none' }}>
                     {currentCompany?.subscription_plan?.charAt(0).toUpperCase() + currentCompany?.subscription_plan?.slice(1)}
                   </Badge>
                 </div>
                 {currentCompany?.subscription_status === 'trial' && (
-                  <div className="p-3 rounded-lg bg-amber-50 text-amber-800 text-sm">
+                  <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'rgba(251,191,36,0.1)', color: '#fbbf24' }}>
                     <p className="font-medium">Proefperiode actief</p>
-                    <p className="text-xs mt-1">
+                    <p className="text-xs mt-1" style={{ color: '#fcd34d' }}>
                       Verloopt op {currentCompany?.trial_ends_at ? format(parseISO(currentCompany.trial_ends_at), 'd MMMM yyyy', { locale: nl }) : 'Onbekend'}
                     </p>
                   </div>
