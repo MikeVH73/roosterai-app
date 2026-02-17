@@ -24,6 +24,9 @@ import { Badge } from "@/components/ui/badge";
 import { GlowCard } from "@/components/ui/glow-card";
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import WeekChart from '@/components/dashboard/WeekChart';
+import DepartmentDistribution from '@/components/dashboard/DepartmentDistribution';
+import ActionItems from '@/components/dashboard/ActionItems';
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   const colorClasses = {
