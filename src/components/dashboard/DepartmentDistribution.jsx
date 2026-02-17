@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const COLORS = ['#38bdf8', '#818cf8', '#34d399', '#fb923c', '#f472b6', '#a78bfa', '#facc15'];
+const COLORS = ['#38bdf8', '#6366f1', '#8b5cf6', '#a78bfa', '#60a5fa', '#93c5fd', '#c4b5fd'];
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
