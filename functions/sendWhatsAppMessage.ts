@@ -1,5 +1,21 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+function normalizeNlPhone(input: string): string {
+  let p = (input || '').replace(/\D/g, '');
+
+  // +31... or 31...
+  if (p.startsWith('31')) return p;
+
+  // 06xxxxxxxx (10 digits)
+  if (p.startsWith('06') && p.length === 10) return '31' + p.slice(1);
+
+  // 6xxxxxxxx (9 digits, missing leading 0)
+  if (p.length === 9 && p.startsWith('6')) return '31' + p;
+
+  // fallback: return digits as-is
+  return p;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -12,17 +28,41 @@ Deno.serve(async (req) => {
     // Only planner and company_admin can send WhatsApp messages
     const membership = await base44.entities.CompanyMember.filter({
       email: user.email,
-      status: 'active'
+      status: 'active',
     });
 
     if (!membership.length || !['planner', 'company_admin'].includes(membership[0].company_role)) {
-      return Response.json({ error: 'Forbidden: Only planners and admins can send WhatsApp messages' }, { status: 403 });
+      return Response.json(
+        { error: 'Forbidden: Only planners and admins can send WhatsApp messages' },
+        { status: 403 }
+      );
     }
 
-    const { phoneNumber, message, employeeName, companyId, scheduleId, aiSuggestionId, subject } = await req.json();
+    /**
+     * Expected payload (template-first):
+     * - phoneNumber: string (e.g. +316...)
+     * - employeeName: string (for {{1}})
+     * - periodLabel: string (for {{2}} e.g. "week 6 (3–9 feb)")
+     * - rosterUrl: string (for {{3}} deep link)
+     *
+     * Backwards compatible:
+     * - message can be used as rosterUrl if rosterUrl not provided
+     * - subject can be used as periodLabel if periodLabel not provided
+     */
+    const {
+      phoneNumber,
+      employeeName,
+      companyId,
+      scheduleId,
+      aiSuggestionId,
+      subject,
+      periodLabel,
+      rosterUrl,
+      message,
+    } = await req.json();
 
-    if (!phoneNumber || !message) {
-      return Response.json({ error: 'Phone number and message are required' }, { status: 400 });
+    if (!phoneNumber) {
+      return Response.json({ error: 'Phone number is required' }, { status: 400 });
     }
 
     const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
@@ -32,34 +72,50 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'WhatsApp credentials not configured' }, { status: 500 });
     }
 
-    // Format phone number - remove all non-digits
-    let formattedPhone = phoneNumber.replace(/\D/g, '');
-    // Remove leading zero (Dutch mobile: 0641... -> 641...)
-    if (formattedPhone.startsWith('0')) {
-      formattedPhone = formattedPhone.substring(1);
+    const formattedPhone = normalizeNlPhone(phoneNumber);
+
+    // Template parameters
+    const p1 = (employeeName || 'collega').toString(); // {{1}}
+    const p2 = (periodLabel || subject || 'je planning').toString(); // {{2}}
+    const p3 = (rosterUrl || message || '').toString(); // {{3}}
+
+    if (!p3) {
+      return Response.json(
+        { error: 'rosterUrl (or message as fallback) is required for template parameter {{3}}' },
+        { status: 400 }
+      );
     }
-    // Add country code 31 if not already present
-    if (!formattedPhone.startsWith('31')) {
-      formattedPhone = '31' + formattedPhone;
-    }
-    console.log('Sending WhatsApp to formatted number:', formattedPhone, '(original:', phoneNumber, ')');
+
+    // Send TEMPLATE message (production-safe)
+    const payload = {
+      messaging_product: 'whatsapp',
+      to: formattedPhone,
+      type: 'template',
+      template: {
+        name: 'rooster_update_notification',
+        language: { code: 'nl_NL' },
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: p1 },
+              { type: 'text', text: p2 },
+              { type: 'text', text: p3 },
+            ],
+          },
+        ],
+      },
+    };
 
     const whatsappResponse = await fetch(
-      `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
+      `https://graph.facebook.com/v22.0/${PHONE_NUMBER_ID}/messages`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          to: formattedPhone,
-          type: 'text',
-          text: {
-            body: message
-          }
-        })
+        body: JSON.stringify(payload),
       }
     );
 
@@ -67,7 +123,7 @@ Deno.serve(async (req) => {
 
     if (!whatsappResponse.ok) {
       console.error('WhatsApp API error:', responseData);
-      
+
       // Log failed message
       if (companyId) {
         await base44.asServiceRole.entities.WhatsAppMessageLog.create({
@@ -76,17 +132,17 @@ Deno.serve(async (req) => {
           aiSuggestionId: aiSuggestionId || null,
           recipient_name: employeeName || 'Onbekend',
           recipient_phone: formattedPhone,
-          subject: subject || 'WhatsApp bericht',
+          subject: subject || periodLabel || 'WhatsApp template',
           status: 'failed',
           error_message: JSON.stringify(responseData),
-          sent_by: user.email
+          sent_by: user.email,
         });
       }
-      
-      return Response.json({ 
-        error: 'Failed to send WhatsApp message', 
-        details: responseData 
-      }, { status: whatsappResponse.status });
+
+      return Response.json(
+        { error: 'Failed to send WhatsApp template message', details: responseData },
+        { status: whatsappResponse.status }
+      );
     }
 
     // Log successful message
@@ -97,21 +153,22 @@ Deno.serve(async (req) => {
         aiSuggestionId: aiSuggestionId || null,
         recipient_name: employeeName || 'Onbekend',
         recipient_phone: formattedPhone,
-        subject: subject || 'WhatsApp bericht',
+        subject: subject || periodLabel || 'WhatsApp template',
         status: 'sent',
-        sent_by: user.email
+        sent_by: user.email,
       });
     }
 
-    return Response.json({ 
-      success: true, 
+    return Response.json({
+      success: true,
       messageId: responseData.messages?.[0]?.id,
       to: formattedPhone,
-      employeeName
+      employeeName,
+      template: 'rooster_update_notification',
+      language: 'nl_NL',
     });
-
   } catch (error) {
     console.error('Error sending WhatsApp:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: error?.message ?? String(error) }, { status: 500 });
   }
 });
