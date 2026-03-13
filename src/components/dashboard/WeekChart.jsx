@@ -57,8 +57,8 @@ export default function WeekChart({ shifts, weekStart }) {
             </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke="var(--color-border)" 
-              strokeOpacity={0.3}
+              stroke="#94a3b8"
+              strokeOpacity={0.5}
               vertical={false}
             />
             <XAxis 
