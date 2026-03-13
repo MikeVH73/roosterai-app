@@ -65,7 +65,7 @@ export default function CompanySelect() {
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
             <Calendar className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-gray-50 mb-2 text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>RoosterAI</h1>
+          <h1 className="mb-2 text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>RoosterAI</h1>
           <p style={{ color: 'var(--color-text-secondary)' }}>Selecteer een organisatie om door te gaan</p>
         </div>
 
