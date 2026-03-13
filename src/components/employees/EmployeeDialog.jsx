@@ -36,6 +36,7 @@ const defaultFormData = {
   start_date: '',
   functionId: '',
   departmentIds: [],
+  whatsapp_opt_in: false,
   preferences: {
     preferred_days: [],
     preferred_shifts: [],
@@ -256,6 +257,17 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                       onChange={(e) => updateField('phone', e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center space-x-2 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                  <Checkbox
+                    id="whatsapp_opt_in"
+                    checked={formData.whatsapp_opt_in}
+                    onCheckedChange={(checked) => updateField('whatsapp_opt_in', checked)}
+                  />
+                  <Label htmlFor="whatsapp_opt_in" className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
+                    Wil WhatsApp notificaties ontvangen over roosterwijzigingen
+                  </Label>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

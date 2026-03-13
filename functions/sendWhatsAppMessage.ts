@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
     const {
       phoneNumber,
       employeeName,
+      employeeId,
       companyId,
       scheduleId,
       aiSuggestionId,
@@ -63,6 +64,17 @@ Deno.serve(async (req) => {
 
     if (!phoneNumber) {
       return Response.json({ error: 'Phone number is required' }, { status: 400 });
+    }
+
+    // Check if employee has opted in to WhatsApp notifications
+    if (employeeId) {
+      const employee = await base44.asServiceRole.entities.EmployeeProfile.filter({ id: employeeId });
+      if (employee.length > 0 && !employee[0].whatsapp_opt_in) {
+        return Response.json(
+          { error: 'Employee has not opted in to WhatsApp notifications' },
+          { status: 403 }
+        );
+      }
     }
 
     const PHONE_NUMBER_ID = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
