@@ -25,11 +25,7 @@ export default function CompanySelect() {
     enabled: userMemberships.length > 0
   });
 
-  useEffect(() => {
-    if (currentCompany) {
-      navigate(createPageUrl('Dashboard'));
-    }
-  }, [currentCompany, navigate]);
+
 
   const handleSelectCompany = async (companyId) => {
     await selectCompany(companyId);
