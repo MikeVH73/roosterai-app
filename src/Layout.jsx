@@ -22,7 +22,7 @@ function LayoutContent({ children, currentPageName }) {
     );
   }
 
-  // Public pages or company selection needed
+  // Public pages or company selection - always dark gradient background
   if (publicPages.includes(currentPageName) || !currentCompany) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #1e1b2e 0%, #262344 50%, #2d2a3e 100%)' }}>
