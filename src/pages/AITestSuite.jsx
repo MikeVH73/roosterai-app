@@ -277,17 +277,19 @@ Vraag: ${finalPrompt}`;
         const scheduleEnd = new Date(targetSchedule.end_date);
         const today = new Date();
         
-        // Find a week within the schedule period
-        let weekStart, weekEnd;
-        if (today >= scheduleStart && today <= scheduleEnd) {
-          // Use current week if within range
-          weekStart = new Date(today);
-          weekEnd = new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000);
-        } else {
-          // Use first week of schedule
+        // Find next Monday from today
+        let weekStart = new Date(today);
+        const currentDayOfWeek = weekStart.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const daysUntilMonday = currentDayOfWeek === 0 ? 1 : (8 - currentDayOfWeek); // If Sunday, next day is Monday. Otherwise calculate days until next Monday
+        weekStart.setDate(weekStart.getDate() + daysUntilMonday);
+        
+        // If next Monday is before schedule start, use schedule start
+        if (weekStart < scheduleStart) {
           weekStart = new Date(scheduleStart);
-          weekEnd = new Date(scheduleStart.getTime() + 6 * 24 * 60 * 60 * 1000);
         }
+        
+        // Week ends 6 days later (Monday to Sunday = 7 days, but Monday counts as day 0)
+        let weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
         
         // Ensure week doesn't exceed schedule end
         if (weekEnd > scheduleEnd) {
