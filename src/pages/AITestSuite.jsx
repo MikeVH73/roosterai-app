@@ -197,6 +197,12 @@ export default function AITestSuite() {
     enabled: !!companyId
   });
 
+  const { data: dayparts = [] } = useQuery({
+    queryKey: ['dayparts', companyId],
+    queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId }),
+    enabled: !!companyId
+  });
+
   const runTest = async (testCase) => {
     if (!canUseAI()) {
       alert('AI limiet bereikt');
