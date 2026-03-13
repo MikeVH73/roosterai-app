@@ -62,6 +62,36 @@ export default function Layout({ children, currentPageName }) {
             --color-border: #3d3866;
           }
 
+          [data-theme="light"] {
+            --color-primary: #1e293b;
+            --color-primary-light: #334155;
+            --color-accent: #0ea5e9;
+            --color-accent-hover: #0284c7;
+            --color-accent-light: #38bdf8;
+            --color-background: #f8fafc;
+            --color-surface: #ffffff;
+            --color-surface-light: #f1f5f9;
+            --color-text-primary: #0f172a;
+            --color-text-secondary: #475569;
+            --color-text-muted: #64748b;
+            --color-border: #e2e8f0;
+          }
+
+        :root {
+          --color-primary: #1e293b;
+          --color-primary-light: #334155;
+          --color-accent: #0ea5e9;
+          --color-accent-hover: #0284c7;
+          --color-accent-light: #38bdf8;
+          --color-background: #f8fafc;
+          --color-surface: #ffffff;
+          --color-surface-light: #f1f5f9;
+          --color-text-primary: #0f172a;
+          --color-text-secondary: #475569;
+          --color-text-muted: #64748b;
+          --color-border: #e2e8f0;
+        }
+
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
           background-color: var(--color-background);
@@ -149,22 +179,6 @@ export default function Layout({ children, currentPageName }) {
         /* Icons should inherit color */
         svg {
           color: inherit;
-        }
-        }
-
-        [data-theme="light"] {
-          --color-primary: #1e293b;
-          --color-primary-light: #334155;
-          --color-accent: #0ea5e9;
-          --color-accent-hover: #0284c7;
-          --color-accent-light: #38bdf8;
-          --color-background: #f8fafc;
-          --color-surface: #ffffff;
-          --color-surface-light: #f1f5f9;
-          --color-text-primary: #0f172a;
-          --color-text-secondary: #475569;
-          --color-text-muted: #64748b;
-          --color-border: #e2e8f0;
         }
         `}</style>
         <LayoutContent currentPageName={currentPageName}>
