@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
