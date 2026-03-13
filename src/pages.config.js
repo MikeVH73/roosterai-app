@@ -64,6 +64,7 @@ import ScheduleOverview from './pages/ScheduleOverview';
 import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
+import AITestSuite from './pages/AITestSuite';
 import __Layout from './Layout.jsx';
 
 
@@ -85,6 +86,7 @@ export const PAGES = {
     "Schedules": Schedules,
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
+    "AITestSuite": AITestSuite,
 }
 
 export const pagesConfig = {

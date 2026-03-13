@@ -63,6 +63,15 @@ export default function ScheduleEditor() {
   const scheduleId = urlParams.get('id');
 
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    const dateParam = urlParams.get('date');
+    if (dateParam) {
+      try {
+        const targetDate = parseISO(dateParam);
+        return startOfWeek(targetDate, { weekStartsOn: 1 });
+      } catch {
+        return startOfWeek(new Date(), { weekStartsOn: 1 });
+      }
+    }
     return startOfWeek(new Date(), { weekStartsOn: 1 });
   });
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
