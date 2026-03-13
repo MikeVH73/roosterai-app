@@ -348,8 +348,27 @@ VERPLICHT:
         response_json_schema: responseSchema
       });
 
+      console.log('AI Response:', response);
+
       // Test 1: Create actual shifts
-      if (testCase.id === 1 && response.shifts && targetSchedule) {
+      if (testCase.id === 1 && targetSchedule) {
+        // Check if AI actually generated shifts
+        if (!response.shifts || !Array.isArray(response.shifts) || response.shifts.length === 0) {
+          setTestResults({
+            ...testResults,
+            [testCase.id]: {
+              status: 'failed',
+              response: `❌ AI heeft geen shifts gegenereerd!\n\nAI antwoord was:\n${JSON.stringify(response, null, 2)}`,
+              details: 'De AI heeft geen shifts array teruggegeven of deze was leeg',
+              timestamp: new Date().toISOString()
+            }
+          });
+          setIsRunning(false);
+          setCurrentTest(null);
+          return;
+        }
+
+        console.log(`AI genereerde ${response.shifts.length} shifts, gaan aanmaken...`);
         const createdShifts = [];
         const errors = [];
         
@@ -373,6 +392,27 @@ VERPLICHT:
             console.error('Shift creation error:', err);
             errors.push(`${shift.date}: ${err.message}`);
           }
+        }
+
+        // Verify shifts are actually in database
+        const verifyShifts = await base44.entities.Shift.filter({ 
+          scheduleId: targetSchedule.id 
+        });
+        console.log(`Verificatie: ${verifyShifts.length} shifts gevonden in database voor rooster ${targetSchedule.id}`);
+
+        if (createdShifts.length === 0) {
+          setTestResults({
+            ...testResults,
+            [testCase.id]: {
+              status: 'failed',
+              response: `❌ GEEN shifts aangemaakt!\n\nAI genereerde ${response.shifts.length} shifts, maar ze konden niet worden opgeslagen.\n\nFouten:\n${errors.join('\n')}`,
+              details: 'Alle shift creaties zijn mislukt - check de console voor details',
+              timestamp: new Date().toISOString()
+            }
+          });
+          setIsRunning(false);
+          setCurrentTest(null);
+          return;
         }
 
         // Get date range and details of created shifts
