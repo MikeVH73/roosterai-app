@@ -15,12 +15,12 @@ export default function CompanySelect() {
 
   // Fetch company details for all memberships
   const { data: companies = [], isLoading } = useQuery({
-    queryKey: ['companies', userMemberships.map(m => m.companyId)],
+    queryKey: ['companies', userMemberships.map((m) => m.companyId)],
     queryFn: async () => {
       if (userMemberships.length === 0) return [];
-      const companyIds = userMemberships.map(m => m.companyId);
+      const companyIds = userMemberships.map((m) => m.companyId);
       const allCompanies = await base44.entities.Company.list();
-      return allCompanies.filter(c => companyIds.includes(c.id));
+      return allCompanies.filter((c) => companyIds.includes(c.id));
     },
     enabled: userMemberships.length > 0
   });
@@ -33,7 +33,7 @@ export default function CompanySelect() {
   };
 
   const getMembershipRole = (companyId) => {
-    const membership = userMemberships.find(m => m.companyId === companyId);
+    const membership = userMemberships.find((m) => m.companyId === companyId);
     return membership?.company_role;
   };
 
@@ -53,8 +53,8 @@ export default function CompanySelect() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse" style={{ color: 'var(--color-text-secondary)' }}>Laden...</div>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -65,22 +65,22 @@ export default function CompanySelect() {
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
             <Calendar className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-primary)' }}>RoosterAI</h1>
+          <h1 className="text-gray-50 mb-2 text-3xl font-bold" style={{ color: 'var(--color-primary)' }}>RoosterAI</h1>
           <p style={{ color: 'var(--color-text-secondary)' }}>Selecteer een organisatie om door te gaan</p>
         </div>
 
         {/* Company List */}
-        {companies.length > 0 ? (
-          <div className="space-y-3 mb-8">
+        {companies.length > 0 ?
+        <div className="space-y-3 mb-8">
             {companies.map((company) => {
-              const role = getMembershipRole(company.id);
-              return (
-                <Card 
-                  key={company.id}
-                  className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group"
-                  style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-                  onClick={() => handleSelectCompany(company.id)}
-                >
+            const role = getMembershipRole(company.id);
+            return (
+              <Card
+                key={company.id}
+                className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group"
+                style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                onClick={() => handleSelectCompany(company.id)}>
+
                   <CardContent className="p-5" style={{ backgroundColor: 'transparent' }}>
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
@@ -102,12 +102,12 @@ export default function CompanySelect() {
                       <ChevronRight className="w-5 h-5 transition-colors" style={{ color: 'var(--color-text-secondary)' }} />
                     </div>
                   </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        ) : (
-          <Card className="mb-8" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                </Card>);
+
+          })}
+          </div> :
+
+        <Card className="mb-8" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
             <CardContent className="p-10 text-center" style={{ backgroundColor: 'transparent' }}>
               <Building2 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-secondary)' }} />
               <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen organisaties</h3>
@@ -116,14 +116,14 @@ export default function CompanySelect() {
               </p>
             </CardContent>
           </Card>
-        )}
+        }
 
         {/* Create New Company */}
-        <Button 
+        <Button
           onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
           className="w-full h-14"
-          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', border: 'none' }}
-        >
+          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', border: 'none' }}>
+
           <Plus className="w-5 h-5 mr-2" />
           Nieuwe organisatie aanmaken
         </Button>
@@ -133,8 +133,8 @@ export default function CompanySelect() {
           <button
             onClick={() => base44.auth.logout()}
             className="text-sm underline"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
+            style={{ color: 'var(--color-text-secondary)' }}>
+
             Uitloggen
           </button>
         </div>
@@ -161,6 +161,6 @@ export default function CompanySelect() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
