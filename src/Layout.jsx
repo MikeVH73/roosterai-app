@@ -47,37 +47,8 @@ export default function Layout({ children, currentPageName }) {
     <ThemeProvider>
       <CompanyProvider>
         <style>{`
-          [data-theme="dark"] {
-            --color-primary: #262344;
-            --color-primary-light: #3d3866;
-            --color-accent: #38bdf8;
-            --color-accent-hover: #0ea5e9;
-            --color-accent-light: #7dd3fc;
-            --color-background: #1e1b2e;
-            --color-surface: #2d2a3e;
-            --color-surface-light: #3d3866;
-            --color-text-primary: #f8fafc;
-            --color-text-secondary: #cbd5e1;
-            --color-text-muted: #94a3b8;
-            --color-border: #3d3866;
-          }
 
-          [data-theme="light"] {
-            --color-primary: #1e293b;
-            --color-primary-light: #334155;
-            --color-accent: #0ea5e9;
-            --color-accent-hover: #0284c7;
-            --color-accent-light: #38bdf8;
-            --color-background: #f8fafc;
-            --color-surface: #ffffff;
-            --color-surface-light: #f1f5f9;
-            --color-text-primary: #0f172a;
-            --color-text-secondary: #475569;
-            --color-text-muted: #64748b;
-            --color-border: #e2e8f0;
-          }
-
-        :root {
+        :root, [data-theme="light"] {
           --color-primary: #1e293b;
           --color-primary-light: #334155;
           --color-accent: #0ea5e9;
@@ -90,6 +61,21 @@ export default function Layout({ children, currentPageName }) {
           --color-text-secondary: #475569;
           --color-text-muted: #64748b;
           --color-border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+          --color-primary: #1e3a8a;
+          --color-primary-light: #1e40af;
+          --color-accent: #38bdf8;
+          --color-accent-hover: #0ea5e9;
+          --color-accent-light: #7dd3fc;
+          --color-background: #0f172a;
+          --color-surface: #1e293b;
+          --color-surface-light: #334155;
+          --color-text-primary: #ffffff;
+          --color-text-secondary: #e2e8f0;
+          --color-text-muted: #cbd5e1;
+          --color-border: #475569;
         }
 
         body {
