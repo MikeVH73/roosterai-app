@@ -77,7 +77,8 @@ export default function CompanySelect() {
             return (
               <Card
                 key={company.id}
-                className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group bg-slate-800/50 border-slate-700"
+                className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group border-slate-700"
+                style={{ backgroundColor: '#1e293b' }}
                 onClick={() => handleSelectCompany(company.id)}>
 
                   <CardContent className="p-5" style={{ backgroundColor: 'transparent' }}>
