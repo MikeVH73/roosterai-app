@@ -215,7 +215,11 @@ export default function HorizontalNav({ currentPage }) {
             {/* User Menu - Desktop */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors">
+                <button className="hidden lg:flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors hover:bg-opacity-80">
+                  <div className="text-right mr-1">
+                    <p className="font-medium text-xs" style={{ color: 'var(--color-text-primary)' }}>{user?.full_name}</p>
+                    <p className="text-xs capitalize" style={{ color: 'var(--color-text-muted)' }}>{userRole?.replace('_', ' ')}</p>
+                  </div>
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-white text-xs" style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 100%)' }}>
                       {getInitials(user?.full_name)}

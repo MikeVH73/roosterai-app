@@ -45,9 +45,11 @@ export default function DepartmentDistribution({ employees, departments }) {
               outerRadius={80}
               paddingAngle={3}
               dataKey="value"
+              stroke="var(--color-border)"
+              strokeWidth={1}
             >
               {data.map((entry, index) => (
-                <Cell key={index} fill={entry.fill} stroke="none" />
+                <Cell key={index} fill={entry.fill} />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />

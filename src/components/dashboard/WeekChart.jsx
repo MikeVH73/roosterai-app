@@ -49,20 +49,37 @@ export default function WeekChart({ shifts, weekStart }) {
       <CardContent>
         <ResponsiveContainer width="100%" height={160}>
           <BarChart data={data} barSize={28} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-            <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <defs>
+              <linearGradient id="gridColor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--color-border)" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="var(--color-border)" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+            <XAxis 
+              dataKey="day" 
+              tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }} 
+              axisLine={false} 
+              tickLine={false} 
+            />
+            <YAxis 
+              tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} 
+              axisLine={false} 
+              tickLine={false} 
+              allowDecimals={false}
+              stroke="url(#gridColor)"
+            />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(56,189,248,0.06)' }} />
             <Bar dataKey="count" radius={[6, 6, 0, 0]}>
               {data.map((entry, index) => (
                 <Cell
                   key={index}
-                  fill={entry.isToday ? '#38bdf8' : entry.count === peakDay?.count && entry.count > 0 ? '#4ade80' : '#2d2a3e'}
+                  fill={entry.isToday ? '#38bdf8' : entry.count === peakDay?.count && entry.count > 0 ? '#4ade80' : '#94a3b8'}
                 />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-        <div className="flex gap-4 mt-2 text-xs" style={{ color: '#94a3b8' }}>
+        <div className="flex gap-4 mt-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{backgroundColor:'#38bdf8'}} /> Vandaag</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{backgroundColor:'#4ade80'}} /> Drukste dag</span>
         </div>
