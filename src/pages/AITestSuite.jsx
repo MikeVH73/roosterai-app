@@ -296,6 +296,20 @@ Vraag: ${finalPrompt}`;
           weekEnd = new Date(scheduleEnd);
         }
 
+        // Get dayparts for context - MOET EERST
+        const scheduleDayparts = dayparts.filter(dp => 
+          targetSchedule.departmentIds?.includes(dp.departmentId)
+        );
+
+        // Update context data with dayparts
+        contextData.dayparts = scheduleDayparts.map(dp => ({
+          id: dp.id,
+          naam: dp.name,
+          afdelingId: dp.departmentId,
+          startTijd: dp.startTime,
+          eindTijd: dp.endTime
+        }));
+
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
 OPDRACHT: Genereer een COMPLEET rooster met ECHTE medewerkers uit de database.
@@ -307,13 +321,6 @@ ROOSTER DETAILS:
 - Naam: ${targetSchedule.name}
 - Start datum: ${weekStart.toISOString().split('T')[0]}
 - Eind datum: ${weekEnd.toISOString().split('T')[0]}
-- Dagdelen: ${JSON.stringify(scheduleDayparts.map(dp => ({
-  id: dp.id,
-  naam: dp.name,
-  afdelingId: dp.departmentId,
-  startTijd: dp.startTime,
-  eindTijd: dp.endTime
-})))}
 
 VERPLICHT:
 - Gebruik ALLEEN medewerker IDs uit de lijst hierboven (geen nieuwe verzinnen!)
@@ -325,11 +332,6 @@ VERPLICHT:
 - Koppel shifts aan het juiste dagdeel op basis van de tijden
 - Respecteer contracturen
 - Minimaal 11 uur rust tussen diensten`;
-
-        // Get dayparts for context
-        const scheduleDayparts = dayparts.filter(dp => 
-          targetSchedule.departmentIds?.includes(dp.departmentId)
-        );
 
         responseSchema = {
           type: "object",
