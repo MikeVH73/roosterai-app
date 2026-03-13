@@ -373,30 +373,44 @@ VERPLICHT:
           }
         }
 
-        // Get date range of created shifts
+        // Get date range and details of created shifts
         const shiftDates = createdShifts.map(s => s.date).sort();
         const firstDate = shiftDates[0];
         const lastDate = shiftDates[shiftDates.length - 1];
+        
+        // Count shifts per date
+        const shiftsPerDate = {};
+        createdShifts.forEach(s => {
+          shiftsPerDate[s.date] = (shiftsPerDate[s.date] || 0) + 1;
+        });
+        
+        const dateBreakdown = Object.entries(shiftsPerDate)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([date, count]) => `  ${date}: ${count} diensten`)
+          .join('\n');
         
         const statusMsg = createdShifts.length > 0 
           ? `✅ ${createdShifts.length} van ${response.shifts.length} diensten aangemaakt`
           : `❌ Geen diensten aangemaakt`;
         
+        const rosterMsg = `\nRooster: ${targetSchedule.name}`;
+        
         const dateRangeMsg = createdShifts.length > 0
-          ? `\n\nPeriode: ${firstDate} t/m ${lastDate}`
+          ? `\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}`
           : '';
         
         const errorMsg = errors.length > 0 
-          ? `\n\nFouten:\n${errors.slice(0, 3).join('\n')}` 
+          ? `\n\nFouten (${errors.length} totaal):\n${errors.slice(0, 3).join('\n')}` 
           : '';
 
         setTestResults({
           ...testResults,
           [testCase.id]: {
             status: createdShifts.length > 0 ? 'passed' : 'failed',
-            response: `${statusMsg}${dateRangeMsg}\n\n${response.summary || ''}${errorMsg}`,
-            details: createdShifts.length > 0 ? `Bekijk week van ${firstDate}` : 'Geen shifts aangemaakt - check console voor details',
+            response: `${statusMsg}${rosterMsg}${dateRangeMsg}${errorMsg}`,
+            details: createdShifts.length > 0 ? `Bekijk week van ${firstDate} in rooster "${targetSchedule.name}"` : 'Geen shifts aangemaakt - check console voor details',
             scheduleId: targetSchedule.id,
+            scheduleName: targetSchedule.name,
             weekDate: firstDate,
             shiftsCreated: createdShifts.length,
             timestamp: new Date().toISOString()
@@ -577,7 +591,7 @@ VERPLICHT:
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
                                 <ChevronRight className="w-4 h-4 mr-1" />
-                                Open Week ({result.shiftsCreated} diensten)
+                                {result.scheduleName || 'Rooster'} - Week {result.weekDate}
                               </Button>
                             )}
                             <Badge 
