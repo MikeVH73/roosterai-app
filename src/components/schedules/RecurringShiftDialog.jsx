@@ -109,8 +109,12 @@ export default function RecurringShiftDialog({
                     className={`w-10 h-10 rounded-lg font-medium text-sm transition-all ${
                       selectedDays.includes(day.id)
                         ? 'bg-[#38bdf8] text-white shadow-md'
-                        : 'bg-[#3d3866] text-slate-300 hover:bg-[#475569]'
+                        : 'hover:bg-[#475569]'
                     }`}
+                    style={!selectedDays.includes(day.id) ? {
+                      backgroundColor: 'var(--color-surface-light)',
+                      color: 'var(--color-text-primary)'
+                    } : {}}
                     title={day.fullLabel}
                   >
                     {day.label}
@@ -140,8 +144,11 @@ export default function RecurringShiftDialog({
           </div>
 
           {endDate && initialDate && (
-            <div className="bg-[#2d2a3e] border border-[#3d3866] rounded-lg p-3">
-              <p className="text-sm text-slate-300">
+            <div className="rounded-lg p-3 border" style={{
+              backgroundColor: 'var(--color-surface-light)',
+              borderColor: 'var(--color-border)'
+            }}>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 <Calendar className="w-4 h-4 inline mr-1" />
                 {recurringType === 'daily' ? (
                   <>Deze dienst wordt <strong>dagelijks</strong> ingepland van {initialDate} tot {endDate}</>
