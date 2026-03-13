@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AIAssistant from './pages/AIAssistant';
+import AITestSuite from './pages/AITestSuite';
 import Billing from './pages/Billing';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import CompanySelect from './pages/CompanySelect';
@@ -64,12 +65,12 @@ import ScheduleOverview from './pages/ScheduleOverview';
 import Schedules from './pages/Schedules';
 import SwapRequests from './pages/SwapRequests';
 import VacationRequests from './pages/VacationRequests';
-import AITestSuite from './pages/AITestSuite';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "AIAssistant": AIAssistant,
+    "AITestSuite": AITestSuite,
     "Billing": Billing,
     "CompanyOnboarding": CompanyOnboarding,
     "CompanySelect": CompanySelect,
@@ -86,7 +87,6 @@ export const PAGES = {
     "Schedules": Schedules,
     "SwapRequests": SwapRequests,
     "VacationRequests": VacationRequests,
-    "AITestSuite": AITestSuite,
 }
 
 export const pagesConfig = {

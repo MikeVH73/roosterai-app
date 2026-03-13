@@ -307,16 +307,29 @@ ROOSTER DETAILS:
 - Naam: ${targetSchedule.name}
 - Start datum: ${weekStart.toISOString().split('T')[0]}
 - Eind datum: ${weekEnd.toISOString().split('T')[0]}
+- Dagdelen: ${JSON.stringify(scheduleDayparts.map(dp => ({
+  id: dp.id,
+  naam: dp.name,
+  afdelingId: dp.departmentId,
+  startTijd: dp.startTime,
+  eindTijd: dp.endTime
+})))}
 
 VERPLICHT:
 - Gebruik ALLEEN medewerker IDs uit de lijst hierboven (geen nieuwe verzinnen!)
 - Gebruik ALLEEN afdeling IDs uit de lijst hierboven
-- Gebruik ALLEEN functie IDs uit de lijst hierboven  
+- Gebruik ALLEEN functie IDs uit de lijst hierboven
+- Gebruik ALLEEN dagdeel IDs uit de lijst hierboven (BELANGRIJK voor zichtbaarheid!)
 - Maak shifts voor ELKE DAG in de periode
 - Elke medewerker moet meerdere diensten krijgen
-- Gebruik realistische tijden (08:00-16:00, 16:00-00:00, etc.)
+- Koppel shifts aan het juiste dagdeel op basis van de tijden
 - Respecteer contracturen
 - Minimaal 11 uur rust tussen diensten`;
+
+        // Get dayparts for context
+        const scheduleDayparts = dayparts.filter(dp => 
+          targetSchedule.departmentIds?.includes(dp.departmentId)
+        );
 
         responseSchema = {
           type: "object",
@@ -330,6 +343,7 @@ VERPLICHT:
                   employeeId: { type: "string", description: "ID van medewerker uit de lijst" },
                   departmentId: { type: "string", description: "ID van afdeling uit de lijst" },
                   functionId: { type: "string", description: "ID van functie uit de lijst" },
+                  daypartId: { type: "string", description: "ID van dagdeel uit de lijst (optioneel maar aanbevolen)" },
                   date: { type: "string", description: "Datum YYYY-MM-DD tussen start en eind" },
                   start_time: { type: "string", description: "Starttijd HH:mm (bijv 08:00)" },
                   end_time: { type: "string", description: "Eindtijd HH:mm (bijv 16:00)" }
@@ -381,6 +395,7 @@ VERPLICHT:
               scheduleId: targetSchedule.id,
               employeeId: shift.employeeId,
               departmentId: shift.departmentId || null,
+              daypartId: shift.daypartId || null,
               functionId: shift.functionId || null,
               date: shift.date,
               start_time: shift.start_time,
