@@ -398,16 +398,20 @@ export default function Schedules() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" style={{ 
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
+          color: 'var(--color-text-primary)'
+        }}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle style={{ color: 'var(--color-text-primary)' }}>
               {selectedSchedule ? 'Rooster bewerken' : 'Nieuw rooster'}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Naam *</Label>
+              <Label htmlFor="name" style={{ color: 'var(--color-text-primary)' }}>Naam *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -417,7 +421,7 @@ export default function Schedules() {
             </div>
 
             <div>
-              <Label htmlFor="description">Beschrijving</Label>
+              <Label htmlFor="description" style={{ color: 'var(--color-text-primary)' }}>Beschrijving</Label>
               <Input
                 id="description"
                 value={formData.description}
@@ -427,7 +431,7 @@ export default function Schedules() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="start_date">Startdatum *</Label>
+                <Label htmlFor="start_date" style={{ color: 'var(--color-text-primary)' }}>Startdatum *</Label>
                 <Input
                   id="start_date"
                   type="date"
@@ -437,7 +441,7 @@ export default function Schedules() {
                 />
               </div>
               <div>
-                <Label htmlFor="end_date">Einddatum *</Label>
+                <Label htmlFor="end_date" style={{ color: 'var(--color-text-primary)' }}>Einddatum *</Label>
                 <Input
                   id="end_date"
                   type="date"
@@ -450,7 +454,7 @@ export default function Schedules() {
 
             {departments.length > 0 && (
               <div>
-                <Label>Afdelingen (leeg = alle)</Label>
+                <Label style={{ color: 'var(--color-text-primary)' }}>Afdelingen (leeg = alle)</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {departments.map((dept) => (
                     <div key={dept.id} className="flex items-center space-x-2">
@@ -459,7 +463,7 @@ export default function Schedules() {
                         checked={formData.departmentIds.includes(dept.id)}
                         onCheckedChange={() => toggleDepartment(dept.id)}
                       />
-                      <Label htmlFor={`sched-dept-${dept.id}`} className="text-sm font-normal cursor-pointer">
+                      <Label htmlFor={`sched-dept-${dept.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
                         {dept.name}
                       </Label>
                     </div>
@@ -470,7 +474,7 @@ export default function Schedules() {
 
             {locations.length > 0 && (
               <div>
-                <Label>Locaties (leeg = alle)</Label>
+                <Label style={{ color: 'var(--color-text-primary)' }}>Locaties (leeg = alle)</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {locations.map((loc) => (
                     <div key={loc.id} className="flex items-center space-x-2">
@@ -479,7 +483,7 @@ export default function Schedules() {
                         checked={formData.locationIds.includes(loc.id)}
                         onCheckedChange={() => toggleLocation(loc.id)}
                       />
-                      <Label htmlFor={`sched-loc-${loc.id}`} className="text-sm font-normal cursor-pointer">
+                      <Label htmlFor={`sched-loc-${loc.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
                         {loc.name}
                       </Label>
                     </div>
@@ -489,7 +493,7 @@ export default function Schedules() {
             )}
 
             <div>
-              <Label htmlFor="default_view_mode">Standaard weergave</Label>
+              <Label htmlFor="default_view_mode" style={{ color: 'var(--color-text-primary)' }}>Standaard weergave</Label>
               <Select 
                 value={formData.default_view_mode} 
                 onValueChange={(v) => setFormData({ ...formData, default_view_mode: v })}
@@ -507,7 +511,7 @@ export default function Schedules() {
             </div>
 
             <div>
-              <Label>Actieve dagen</Label>
+              <Label style={{ color: 'var(--color-text-primary)' }}>Actieve dagen</Label>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'].map((dayName, index) => (
                   <div key={index} className="flex items-center space-x-2">
@@ -523,7 +527,7 @@ export default function Schedules() {
                         }));
                       }}
                     />
-                    <Label htmlFor={`active-day-${index}`} className="text-sm font-normal cursor-pointer">
+                    <Label htmlFor={`active-day-${index}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
                       {dayName}
                     </Label>
                   </div>
@@ -533,7 +537,7 @@ export default function Schedules() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="timeline_start_time">Tijdlijn starttijd</Label>
+                <Label htmlFor="timeline_start_time" style={{ color: 'var(--color-text-primary)' }}>Tijdlijn starttijd</Label>
                 <Input
                   id="timeline_start_time"
                   type="time"
@@ -542,7 +546,7 @@ export default function Schedules() {
                 />
               </div>
               <div>
-                <Label htmlFor="timeline_end_time">Tijdlijn eindtijd</Label>
+                <Label htmlFor="timeline_end_time" style={{ color: 'var(--color-text-primary)' }}>Tijdlijn eindtijd</Label>
                 <Input
                   id="timeline_end_time"
                   type="time"
@@ -551,12 +555,16 @@ export default function Schedules() {
                 />
               </div>
             </div>
-            <p className="text-xs text-slate-500 -mt-2">
+            <p className="text-xs -mt-2" style={{ color: 'var(--color-text-muted)' }}>
               De tijdlijn toont alleen diensten tussen deze tijden
             </p>
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={handleCloseDialog}>
+              <Button type="button" variant="outline" onClick={handleCloseDialog} style={{ 
+                color: 'var(--color-text-primary)',
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-surface)'
+              }}>
                 Annuleren
               </Button>
               <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
