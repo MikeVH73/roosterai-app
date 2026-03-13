@@ -272,44 +272,72 @@ Vraag: ${finalPrompt}`;
 
       // Special handling for Test 1: Generate actual schedule
       if (testCase.id === 1 && targetSchedule) {
+        // Calculate dates within the schedule range
+        const scheduleStart = new Date(targetSchedule.start_date);
+        const scheduleEnd = new Date(targetSchedule.end_date);
+        const today = new Date();
+        
+        // Find a week within the schedule period
+        let weekStart, weekEnd;
+        if (today >= scheduleStart && today <= scheduleEnd) {
+          // Use current week if within range
+          weekStart = new Date(today);
+          weekEnd = new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000);
+        } else {
+          // Use first week of schedule
+          weekStart = new Date(scheduleStart);
+          weekEnd = new Date(scheduleStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+        }
+        
+        // Ensure week doesn't exceed schedule end
+        if (weekEnd > scheduleEnd) {
+          weekEnd = new Date(scheduleEnd);
+        }
+
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
-OPDRACHT: Genereer een COMPLEET rooster voor volgende week met ECHTE medewerkers uit de database.
+OPDRACHT: Genereer een COMPLEET rooster met ECHTE medewerkers uit de database.
 
 BESCHIKBARE DATA:
 ${JSON.stringify(contextData, null, 2)}
 
-Maak een rooster voor ${targetSchedule.name} van ${targetSchedule.start_date} tot ${targetSchedule.end_date}.
+ROOSTER DETAILS:
+- Naam: ${targetSchedule.name}
+- Start datum: ${weekStart.toISOString().split('T')[0]}
+- Eind datum: ${weekEnd.toISOString().split('T')[0]}
 
-BELANGRIJK:
-- Gebruik ALLEEN medewerker IDs uit de lijst hierboven
-- Gebruik ALLEEN afdeling IDs uit de lijst hierboven  
-- Gebruik ALLEEN functie IDs uit de lijst hierboven
-- Respecteer contracturen van medewerkers
-- Zorg voor minimaal 11 uur rust tussen diensten
-- Verdeel de diensten eerlijk`;
+VERPLICHT:
+- Gebruik ALLEEN medewerker IDs uit de lijst hierboven (geen nieuwe verzinnen!)
+- Gebruik ALLEEN afdeling IDs uit de lijst hierboven
+- Gebruik ALLEEN functie IDs uit de lijst hierboven  
+- Maak shifts voor ELKE DAG in de periode
+- Elke medewerker moet meerdere diensten krijgen
+- Gebruik realistische tijden (08:00-16:00, 16:00-00:00, etc.)
+- Respecteer contracturen
+- Minimaal 11 uur rust tussen diensten`;
 
         responseSchema = {
           type: "object",
           properties: {
             shifts: {
               type: "array",
-              description: "Array van shifts om aan te maken",
+              description: "Array van shifts om aan te maken - minimaal 20 shifts",
               items: {
                 type: "object",
                 properties: {
                   employeeId: { type: "string", description: "ID van medewerker uit de lijst" },
                   departmentId: { type: "string", description: "ID van afdeling uit de lijst" },
                   functionId: { type: "string", description: "ID van functie uit de lijst" },
-                  date: { type: "string", description: "Datum YYYY-MM-DD" },
-                  start_time: { type: "string", description: "Starttijd HH:mm" },
-                  end_time: { type: "string", description: "Eindtijd HH:mm" }
+                  date: { type: "string", description: "Datum YYYY-MM-DD tussen start en eind" },
+                  start_time: { type: "string", description: "Starttijd HH:mm (bijv 08:00)" },
+                  end_time: { type: "string", description: "Eindtijd HH:mm (bijv 16:00)" }
                 },
                 required: ["employeeId", "date", "start_time", "end_time"]
               }
             },
-            summary: { type: "string", description: "Samenvatting" }
-          }
+            summary: { type: "string", description: "Samenvatting met aantal shifts" }
+          },
+          required: ["shifts", "summary"]
         };
       }
 
@@ -321,14 +349,18 @@ BELANGRIJK:
       // Test 1: Create actual shifts
       if (testCase.id === 1 && response.shifts && targetSchedule) {
         const createdShifts = [];
+        const errors = [];
+        
+        console.log('Creating shifts:', response.shifts);
+        
         for (const shift of response.shifts) {
           try {
             const created = await base44.entities.Shift.create({
               companyId,
               scheduleId: targetSchedule.id,
               employeeId: shift.employeeId,
-              departmentId: shift.departmentId,
-              functionId: shift.functionId,
+              departmentId: shift.departmentId || null,
+              functionId: shift.functionId || null,
               date: shift.date,
               start_time: shift.start_time,
               end_time: shift.end_time,
@@ -337,17 +369,37 @@ BELANGRIJK:
             createdShifts.push(created);
           } catch (err) {
             console.error('Shift creation error:', err);
+            errors.push(`${shift.date}: ${err.message}`);
           }
         }
+
+        const statusMsg = createdShifts.length > 0 
+          ? `✅ ${createdShifts.length} van ${response.shifts.length} diensten aangemaakt`
+          : `❌ Geen diensten aangemaakt`;
+        
+        const errorMsg = errors.length > 0 
+          ? `\n\nFouten:\n${errors.slice(0, 3).join('\n')}` 
+          : '';
 
         setTestResults({
           ...testResults,
           [testCase.id]: {
             status: createdShifts.length > 0 ? 'passed' : 'failed',
-            response: `✅ ${createdShifts.length} diensten aangemaakt\n\n${response.summary || ''}`,
-            details: `Bekijk het rooster: /ScheduleEditor?id=${targetSchedule.id}`,
+            response: `${statusMsg}\n\n${response.summary || ''}${errorMsg}`,
+            details: createdShifts.length > 0 ? 'Open rooster in nieuwe tab met knop hieronder' : 'Geen shifts aangemaakt - check console voor details',
             scheduleId: targetSchedule.id,
             shiftsCreated: createdShifts.length,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else if (testCase.id === 1) {
+        // No shifts generated
+        setTestResults({
+          ...testResults,
+          [testCase.id]: {
+            status: 'failed',
+            response: '❌ AI heeft geen shifts gegenereerd',
+            details: JSON.stringify(response, null, 2),
             timestamp: new Date().toISOString()
           }
         });
@@ -506,7 +558,7 @@ BELANGRIJK:
                             {result.scheduleId && (
                               <Button
                                 size="sm"
-                                onClick={() => navigate(`/ScheduleEditor?id=${result.scheduleId}`)}
+                                onClick={() => window.open(`/ScheduleEditor?id=${result.scheduleId}`, '_blank')}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
                                 <ChevronRight className="w-4 h-4 mr-1" />
