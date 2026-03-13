@@ -65,7 +65,7 @@ export default function CompanySelect() {
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
             <Calendar className="w-8 h-8 text-white" />
           </div>
-          <h1 className="mb-2 text-3xl font-bold text-white">RoosterAI</h1>
+          <h1 className="mb-2 text-3xl font-bold" style={{ color: '#ffffff' }}>RoosterAI</h1>
           <p className="text-slate-300">Selecteer een organisatie om door te gaan</p>
         </div>
 
@@ -87,7 +87,7 @@ export default function CompanySelect() {
                         {company.name?.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg text-white">
+                        <h3 className="font-semibold text-lg" style={{ color: '#ffffff' }}>
                           {company.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
@@ -122,7 +122,7 @@ export default function CompanySelect() {
         <Button
           onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
           className="w-full h-14"
-          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: 'white', border: 'none' }}>
+          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: '#ffffff', border: 'none' }}>
 
           <Plus className="w-5 h-5 mr-2" />
           Nieuwe organisatie aanmaken
