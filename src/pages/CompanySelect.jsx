@@ -52,7 +52,7 @@ export default function CompanySelect() {
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse" style={{ color: 'var(--color-text-secondary)' }}>Laden...</div>
+        <div className="animate-pulse text-slate-300">Laden...</div>
       </div>);
 
   }
@@ -65,8 +65,8 @@ export default function CompanySelect() {
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)' }}>
             <Calendar className="w-8 h-8 text-white" />
           </div>
-          <h1 className="mb-2 text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>RoosterAI</h1>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Selecteer een organisatie om door te gaan</p>
+          <h1 className="mb-2 text-3xl font-bold text-white">RoosterAI</h1>
+          <p className="text-slate-300">Selecteer een organisatie om door te gaan</p>
         </div>
 
         {/* Company List */}
@@ -77,8 +77,7 @@ export default function CompanySelect() {
             return (
               <Card
                 key={company.id}
-                className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group"
-                style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+                className="cursor-pointer hover:shadow-lg hover:shadow-purple-500/20 transition-all group bg-slate-800/50 border-slate-700"
                 onClick={() => handleSelectCompany(company.id)}>
 
                   <CardContent className="p-5" style={{ backgroundColor: 'transparent' }}>
@@ -87,19 +86,19 @@ export default function CompanySelect() {
                         {company.name?.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg transition-colors" style={{ color: 'var(--color-text-primary)' }}>
+                        <h3 className="font-semibold text-lg text-white">
                           {company.name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="secondary" className={planColors[company.subscription_plan]}>
                             {company.subscription_plan?.charAt(0).toUpperCase() + company.subscription_plan?.slice(1)}
                           </Badge>
-                          <span className="text-sm text-slate-500">
+                          <span className="text-sm text-slate-400">
                             {roleLabels[role]}
                           </span>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 transition-colors" style={{ color: 'var(--color-text-secondary)' }} />
+                      <ChevronRight className="w-5 h-5 text-slate-400" />
                     </div>
                   </CardContent>
                 </Card>);
@@ -107,11 +106,11 @@ export default function CompanySelect() {
           })}
           </div> :
 
-        <Card className="mb-8" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <Card className="mb-8 bg-slate-800/50 border-slate-700">
             <CardContent className="p-10 text-center" style={{ backgroundColor: 'transparent' }}>
-              <Building2 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-secondary)' }} />
-              <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen organisaties</h3>
-              <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+              <Building2 className="w-12 h-12 mx-auto mb-4 text-slate-400" />
+              <h3 className="font-medium mb-2 text-white">Geen organisaties</h3>
+              <p className="text-sm mb-6 text-slate-300">
                 Je bent nog niet lid van een organisatie. Maak een nieuwe aan of vraag een uitnodiging.
               </p>
             </CardContent>
@@ -132,9 +131,7 @@ export default function CompanySelect() {
         <div className="text-center mt-6">
           <button
             onClick={() => base44.auth.logout()}
-            className="text-sm underline"
-            style={{ color: 'var(--color-text-secondary)' }}>
-
+            className="text-sm underline text-slate-400 hover:text-slate-300">
             Uitloggen
           </button>
         </div>
@@ -143,21 +140,21 @@ export default function CompanySelect() {
         <div className="grid grid-cols-3 gap-4 mt-12">
           <div className="text-center">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
-              <Calendar className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+              <Calendar className="w-5 h-5 text-blue-400" />
             </div>
-            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Slimme roostering</p>
+            <p className="text-xs text-slate-400">Slimme roostering</p>
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
-              <Sparkles className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+              <Sparkles className="w-5 h-5 text-blue-400" />
             </div>
-            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>AI-ondersteuning</p>
+            <p className="text-xs text-slate-400">AI-ondersteuning</p>
           </div>
           <div className="text-center">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: 'rgba(124, 58, 237, 0.1)' }}>
-              <Users className="w-5 h-5" style={{ color: 'var(--color-accent)' }} />
+              <Users className="w-5 h-5 text-blue-400" />
             </div>
-            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Team management</p>
+            <p className="text-xs text-slate-400">Team management</p>
           </div>
         </div>
       </div>
