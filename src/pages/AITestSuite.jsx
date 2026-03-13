@@ -159,6 +159,7 @@ const testCases = [
 export default function AITestSuite() {
   const { currentCompany, canUseAI } = useCompany();
   const companyId = currentCompany?.id;
+  const navigate = useNavigate();
 
   const [testResults, setTestResults] = useState({});
   const [currentTest, setCurrentTest] = useState(null);
@@ -183,6 +184,18 @@ export default function AITestSuite() {
     enabled: !!companyId
   });
 
+  const { data: shifts = [] } = useQuery({
+    queryKey: ['shifts', companyId],
+    queryFn: () => base44.entities.Shift.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  const { data: functions = [] } = useQuery({
+    queryKey: ['functions', companyId],
+    queryFn: () => base44.entities.Function.filter({ companyId }),
+    enabled: !!companyId
+  });
+
   const runTest = async (testCase) => {
     if (!canUseAI()) {
       alert('AI limiet bereikt');
@@ -193,49 +206,161 @@ export default function AITestSuite() {
     setIsRunning(true);
 
     try {
-      // Replace placeholders in prompt
+      // Build context with REAL data
+      const contextData = {
+        bedrijf: currentCompany?.name,
+        medewerkers: employees.map(e => ({
+          id: e.id,
+          naam: `${e.first_name} ${e.last_name}`,
+          contracturen: e.contract_hours,
+          contracttype: e.contract_type,
+          afdelingen: e.departmentIds || [],
+          functie: e.functionId,
+          voorkeuren: e.preferences
+        })),
+        afdelingen: departments.map(d => ({
+          id: d.id,
+          naam: d.name,
+          code: d.code
+        })),
+        functies: functions.map(f => ({
+          id: f.id,
+          naam: f.name,
+          code: f.code
+        })),
+        roosters: schedules.filter(s => s.status !== 'archived').map(s => ({
+          id: s.id,
+          naam: s.name,
+          startdatum: s.start_date,
+          einddatum: s.end_date
+        }))
+      };
+
       let finalPrompt = testInput || testCase.prompt;
-      finalPrompt = finalPrompt.replace('{{schedule}}', schedules[0]?.name || 'het rooster');
-      finalPrompt = finalPrompt.replace('{{employee}}', employees[0]?.first_name || 'de medewerker');
+      const targetSchedule = schedules[0];
+      const targetEmployee = employees[0];
+      const targetDate = new Date().toISOString().split('T')[0];
+
+      // Replace placeholders with REAL data
+      finalPrompt = finalPrompt.replace('{{schedule}}', targetSchedule?.name || 'het rooster');
+      finalPrompt = finalPrompt.replace('{{employee}}', targetEmployee?.first_name || 'de medewerker');
       finalPrompt = finalPrompt.replace('{{employee1}}', employees[0]?.first_name || 'medewerker 1');
       finalPrompt = finalPrompt.replace('{{employee2}}', employees[1]?.first_name || 'medewerker 2');
       finalPrompt = finalPrompt.replace('{{department}}', departments[0]?.name || 'de afdeling');
-      finalPrompt = finalPrompt.replace('{{date}}', new Date().toISOString().split('T')[0]);
-      finalPrompt = finalPrompt.replace('{{startDate}}', new Date().toISOString().split('T')[0]);
+      finalPrompt = finalPrompt.replace('{{date}}', targetDate);
+      finalPrompt = finalPrompt.replace('{{startDate}}', targetDate);
       finalPrompt = finalPrompt.replace('{{endDate}}', new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]);
-      finalPrompt = finalPrompt.replace('{{skills}}', 'BHV, EHBO');
-      finalPrompt = finalPrompt.replace('{{function}}', 'Verpleegkundige');
 
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
-        
-Context:
-- Aantal medewerkers: ${employees.length}
-- Aantal afdelingen: ${departments.length}
-- Actieve roosters: ${schedules.filter(s => s.status !== 'archived').length}
+      let systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
-Test vraag: ${finalPrompt}
+KRITIEK: Gebruik ALLEEN de echte data hieronder. Verzin GEEN afdelingen, functies of medewerkers.
 
-Geef een gedetailleerd antwoord met concrete informatie.`,
-        response_json_schema: {
+BESCHIKBARE DATA:
+${JSON.stringify(contextData, null, 2)}
+
+Vraag: ${finalPrompt}`;
+
+      let responseSchema = {
+        type: "object",
+        properties: {
+          answer: { type: "string", description: "Het antwoord" },
+          success: { type: "boolean", description: "Of de test geslaagd is" },
+          details: { type: "string", description: "Extra details" }
+        }
+      };
+
+      // Special handling for Test 1: Generate actual schedule
+      if (testCase.id === 1 && targetSchedule) {
+        systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
+
+OPDRACHT: Genereer een COMPLEET rooster voor volgende week met ECHTE medewerkers uit de database.
+
+BESCHIKBARE DATA:
+${JSON.stringify(contextData, null, 2)}
+
+Maak een rooster voor ${targetSchedule.name} van ${targetSchedule.start_date} tot ${targetSchedule.end_date}.
+
+BELANGRIJK:
+- Gebruik ALLEEN medewerker IDs uit de lijst hierboven
+- Gebruik ALLEEN afdeling IDs uit de lijst hierboven  
+- Gebruik ALLEEN functie IDs uit de lijst hierboven
+- Respecteer contracturen van medewerkers
+- Zorg voor minimaal 11 uur rust tussen diensten
+- Verdeel de diensten eerlijk`;
+
+        responseSchema = {
           type: "object",
           properties: {
-            answer: { type: "string", description: "Het antwoord op de vraag" },
-            success: { type: "boolean", description: "Of de test geslaagd is" },
-            details: { type: "string", description: "Extra details of toelichting" }
+            shifts: {
+              type: "array",
+              description: "Array van shifts om aan te maken",
+              items: {
+                type: "object",
+                properties: {
+                  employeeId: { type: "string", description: "ID van medewerker uit de lijst" },
+                  departmentId: { type: "string", description: "ID van afdeling uit de lijst" },
+                  functionId: { type: "string", description: "ID van functie uit de lijst" },
+                  date: { type: "string", description: "Datum YYYY-MM-DD" },
+                  start_time: { type: "string", description: "Starttijd HH:mm" },
+                  end_time: { type: "string", description: "Eindtijd HH:mm" }
+                },
+                required: ["employeeId", "date", "start_time", "end_time"]
+              }
+            },
+            summary: { type: "string", description: "Samenvatting" }
           }
-        }
+        };
+      }
+
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: systemPrompt,
+        response_json_schema: responseSchema
       });
 
-      setTestResults({
-        ...testResults,
-        [testCase.id]: {
-          status: response.success ? 'passed' : 'failed',
-          response: response.answer,
-          details: response.details,
-          timestamp: new Date().toISOString()
+      // Test 1: Create actual shifts
+      if (testCase.id === 1 && response.shifts && targetSchedule) {
+        const createdShifts = [];
+        for (const shift of response.shifts) {
+          try {
+            const created = await base44.entities.Shift.create({
+              companyId,
+              scheduleId: targetSchedule.id,
+              employeeId: shift.employeeId,
+              departmentId: shift.departmentId,
+              functionId: shift.functionId,
+              date: shift.date,
+              start_time: shift.start_time,
+              end_time: shift.end_time,
+              status: 'scheduled'
+            });
+            createdShifts.push(created);
+          } catch (err) {
+            console.error('Shift creation error:', err);
+          }
         }
-      });
+
+        setTestResults({
+          ...testResults,
+          [testCase.id]: {
+            status: createdShifts.length > 0 ? 'passed' : 'failed',
+            response: `✅ ${createdShifts.length} diensten aangemaakt\n\n${response.summary || ''}`,
+            details: `Bekijk het rooster: /ScheduleEditor?id=${targetSchedule.id}`,
+            scheduleId: targetSchedule.id,
+            shiftsCreated: createdShifts.length,
+            timestamp: new Date().toISOString()
+          }
+        });
+      } else {
+        setTestResults({
+          ...testResults,
+          [testCase.id]: {
+            status: response.success ? 'passed' : 'failed',
+            response: response.answer || response.summary || JSON.stringify(response, null, 2),
+            details: response.details,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
     } catch (error) {
       setTestResults({
         ...testResults,
@@ -365,7 +490,7 @@ Geef een gedetailleerd antwoord met concrete informatie.`,
                               </p>
                             )}
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <Button 
                               size="sm"
                               variant="outline"
@@ -377,6 +502,16 @@ Geef een gedetailleerd antwoord met concrete informatie.`,
                             >
                               Opnieuw testen
                             </Button>
+                            {result.scheduleId && (
+                              <Button
+                                size="sm"
+                                onClick={() => navigate(`/ScheduleEditor?id=${result.scheduleId}`)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
+                              >
+                                <ChevronRight className="w-4 h-4 mr-1" />
+                                Bekijk Rooster ({result.shiftsCreated} diensten)
+                              </Button>
+                            )}
                             <Badge 
                               className={
                                 result.status === 'passed' 
