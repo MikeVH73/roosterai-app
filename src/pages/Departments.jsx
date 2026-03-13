@@ -190,7 +190,7 @@ export default function Departments() {
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Afdelingen" 
         subtitle={`${departments.length} afdelingen`}
@@ -217,11 +217,11 @@ export default function Departments() {
             ))}
           </div>
         ) : departments.length === 0 ? (
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)' }}>
             <CardContent className="p-12 text-center">
-              <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">Nog geen afdelingen</h3>
-              <p className="text-slate-500 text-sm mb-6">
+              <Building2 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+              <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Nog geen afdelingen</h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                 Maak afdelingen aan om medewerkers te organiseren.
               </p>
               {hasPermission('manage_schedules') && (
@@ -235,8 +235,8 @@ export default function Departments() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {departments.map((department) => (
-              <Card key={department.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
+              <Card key={department.id} className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div 
@@ -246,9 +246,9 @@ export default function Departments() {
                         <Building2 className="w-5 h-5" style={{ color: department.color }} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900">{department.name}</h3>
+                        <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{department.name}</h3>
                         {department.code && (
-                          <p className="text-sm text-slate-500">{department.code}</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{department.code}</p>
                         )}
                       </div>
                     </div>
@@ -278,22 +278,26 @@ export default function Departments() {
                   </div>
 
                   {department.description && (
-                    <p className="text-sm text-slate-600 mb-4">{department.description}</p>
+                    <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>{department.description}</p>
                   )}
 
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                      <Users className="w-4 h-4 text-slate-400" />
+                    <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <Users className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
                       <span>{getEmployeeCount(department.id)} medewerkers</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm text-slate-600">
-                      <Clock className="w-4 h-4 text-slate-400" />
+                    <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <Clock className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
                       <span>{getDaypartCount(department.id)} dagdelen</span>
                     </div>
                   </div>
                   
                   <Link to={createPageUrl('DepartmentDetails') + `?id=${department.id}`}>
-                    <Button variant="outline" size="sm" className="w-full mt-2">
+                    <Button variant="outline" size="sm" className="w-full mt-2" style={{ 
+                      color: 'var(--color-text-primary)',
+                      borderColor: 'var(--color-border)',
+                      backgroundColor: 'var(--color-surface-light)'
+                    }}>
                       <Settings className="w-4 h-4 mr-2" />
                       Dagdelen & Bezetting
                     </Button>
@@ -317,9 +321,13 @@ export default function Departments() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent>
+        <DialogContent style={{ 
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
+          color: 'var(--color-text-primary)'
+        }}>
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle style={{ color: 'var(--color-text-primary)' }}>
               {selectedDepartment ? 'Afdeling bewerken' : 'Nieuwe afdeling'}
             </DialogTitle>
           </DialogHeader>
@@ -327,7 +335,7 @@ export default function Departments() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Naam *</Label>
+                <Label htmlFor="name" style={{ color: 'var(--color-text-primary)' }}>Naam *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -336,7 +344,7 @@ export default function Departments() {
                 />
               </div>
               <div>
-                <Label htmlFor="code">Code</Label>
+                <Label htmlFor="code" style={{ color: 'var(--color-text-primary)' }}>Code</Label>
                 <Input
                   id="code"
                   value={formData.code}
@@ -347,7 +355,7 @@ export default function Departments() {
             </div>
 
             <div>
-              <Label htmlFor="description">Beschrijving</Label>
+              <Label htmlFor="description" style={{ color: 'var(--color-text-primary)' }}>Beschrijving</Label>
               <Input
                 id="description"
                 value={formData.description}
@@ -356,7 +364,7 @@ export default function Departments() {
             </div>
 
             <div>
-              <Label>Kleur</Label>
+              <Label style={{ color: 'var(--color-text-primary)' }}>Kleur</Label>
               <div className="flex gap-2 mt-2">
                 {colorOptions.map((color) => (
                   <button
@@ -374,7 +382,7 @@ export default function Departments() {
 
             {locations.length > 0 && (
               <div>
-                <Label>Locaties</Label>
+                <Label style={{ color: 'var(--color-text-primary)' }}>Locaties</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {locations.map((loc) => (
                     <div key={loc.id} className="flex items-center space-x-2">
@@ -383,7 +391,7 @@ export default function Departments() {
                         checked={formData.locationIds.includes(loc.id)}
                         onCheckedChange={() => toggleLocation(loc.id)}
                       />
-                      <Label htmlFor={`loc-${loc.id}`} className="text-sm font-normal cursor-pointer">
+                      <Label htmlFor={`loc-${loc.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
                         {loc.name}
                       </Label>
                     </div>
@@ -393,7 +401,11 @@ export default function Departments() {
             )}
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={handleCloseDialog}>
+              <Button type="button" variant="outline" onClick={handleCloseDialog} style={{ 
+                color: 'var(--color-text-primary)',
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-surface)'
+              }}>
                 Annuleren
               </Button>
               <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
