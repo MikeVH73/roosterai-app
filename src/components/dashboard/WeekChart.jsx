@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from 'lucide-react';
 
@@ -55,6 +55,12 @@ export default function WeekChart({ shifts, weekStart }) {
                 <stop offset="100%" stopColor="var(--color-border)" stopOpacity="0.1" />
               </linearGradient>
             </defs>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke="var(--color-border)" 
+              strokeOpacity={0.3}
+              vertical={false}
+            />
             <XAxis 
               dataKey="day" 
               tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }} 
