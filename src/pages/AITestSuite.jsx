@@ -543,6 +543,8 @@ Vraag: ${finalPrompt}`;
 
 OPDRACHT: Genereer een weekrooster. Volg de EXACTE SHIFT-OPDRACHTEN hieronder letterlijk.
 
+⚠️ CRUCIAAL: Gebruik ALTIJD de exacte DATABASE ID's (lange strings zoals "6988f603a9b2a527703a78ec") voor employeeId, departmentId, locationId en daypartId. NOOIT namen gebruiken als ID! Kopieer de ID's LETTERLIJK uit de data hieronder.
+
 === EXACTE SHIFT-OPDRACHTEN ===
 ${shiftInstructionsText}
 
