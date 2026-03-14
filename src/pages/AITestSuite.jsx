@@ -204,6 +204,12 @@ export default function AITestSuite() {
     enabled: !!companyId
   });
 
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations', companyId],
+    queryFn: () => base44.entities.Location.filter({ companyId }),
+    enabled: !!companyId
+  });
+
   const runTest = async (testCase) => {
     if (!canUseAI()) {
       alert('AI limiet bereikt');
