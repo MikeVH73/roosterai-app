@@ -553,13 +553,49 @@ ${JSON.stringify(contextData.afdelingen, null, 2)}
             [testCase.id]: {
               status: 'failed',
               response: `❌ GEEN shifts aangemaakt!\n\nAI genereerde ${response.shifts.length} shifts, maar ze konden niet worden opgeslagen.\n\nFouten:\n${errors.join('\n')}`,
-              details: 'Alle shift creaties zijn mislukt - check de console voor details',
+              details: 'Alle shift creaties zijn mislukt',
               timestamp: new Date().toISOString()
             }
           });
           setIsRunning(false);
           setCurrentTest(null);
           return;
+        }
+
+        // === VALIDATIE: Controleer of geplande uren overeenkomen met bezettingsnormen ===
+        const calcShiftHours = (s) => {
+          const [sh2, sm2] = s.start_time.split(':').map(Number);
+          const [eh2, em2] = s.end_time.split(':').map(Number);
+          let diff2 = (eh2 * 60 + em2) - (sh2 * 60 + sm2);
+          if (diff2 <= 0) diff2 += 24 * 60;
+          return diff2 / 60;
+        };
+
+        const validationLines = [];
+        let allMatch = true;
+        
+        for (const dp of scheduleDayparts) {
+          const dept = departments.find(d => d.id === dp.departmentId);
+          const deptName = dept?.name || 'Onbekend';
+          const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
+          
+          for (const r of dpReqs) {
+            if (!r.doeluren || r.doeluren <= 0) continue;
+            const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
+            
+            // Find created shifts matching this daypart + day
+            const matchingShifts = createdShifts.filter(s => {
+              const shiftDay = new Date(s.date).getDay();
+              return s.daypartId === dp.id && shiftDay === r.dag_van_week;
+            });
+            
+            const plannedHours = matchingShifts.reduce((sum, s) => sum + calcShiftHours(s), 0);
+            const diff = Math.abs(plannedHours - r.doeluren);
+            const icon = diff < 0.5 ? '✅' : diff <= 2 ? '⚠️' : '❌';
+            if (diff >= 0.5) allMatch = false;
+            
+            validationLines.push(`${icon} ${deptName} > ${dp.name} ${dayName}: ${plannedHours}u gepland / ${r.doeluren}u norm${diff >= 0.5 ? ` (afwijking: ${diff > 0 ? '+' : ''}${(plannedHours - r.doeluren).toFixed(1)}u)` : ''}`);
+          }
         }
 
         // Get date range and details of created shifts
@@ -578,26 +614,23 @@ ${JSON.stringify(contextData.afdelingen, null, 2)}
           .map(([date, count]) => `  ${date}: ${count} diensten`)
           .join('\n');
         
-        const statusMsg = createdShifts.length > 0 
-          ? `✅ ${createdShifts.length} van ${response.shifts.length} diensten aangemaakt`
-          : `❌ Geen diensten aangemaakt`;
-        
-        const rosterMsg = `\nRooster: ${targetSchedule.name}`;
-        
-        const dateRangeMsg = createdShifts.length > 0
-          ? `\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}`
+        // Unresolved issues from AI
+        const unresolvedMsg = (response.unresolved_issues && response.unresolved_issues.length > 0)
+          ? `\n\n⚠️ ONOPGELOSTE PROBLEMEN (actie vereist van planner):\n${response.unresolved_issues.map(i => `  - ${i.daypart_name} op ${i.date}: ${i.planned_hours || 0}u / ${i.target_hours}u — ${i.reason}`).join('\n')}`
           : '';
-        
+
+        const statusMsg = `${allMatch ? '✅' : '⚠️'} ${createdShifts.length} diensten aangemaakt`;
+        const validationMsg = `\n\n📊 VALIDATIE (gepland vs bezettingsnorm):\n${validationLines.join('\n')}`;
         const errorMsg = errors.length > 0 
-          ? `\n\nFouten (${errors.length} totaal):\n${errors.slice(0, 3).join('\n')}` 
+          ? `\n\n❌ Fouten bij aanmaken (${errors.length}):\n${errors.slice(0, 5).join('\n')}` 
           : '';
 
         setTestResults({
           ...testResults,
           [testCase.id]: {
-            status: createdShifts.length > 0 ? 'passed' : 'failed',
-            response: `${statusMsg}${rosterMsg}${dateRangeMsg}${errorMsg}`,
-            details: createdShifts.length > 0 ? `Bekijk week van ${firstDate} in rooster "${targetSchedule.name}"` : 'Geen shifts aangemaakt - check console voor details',
+            status: allMatch ? 'passed' : 'failed',
+            response: `${statusMsg}\nRooster: ${targetSchedule.name}\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}${validationMsg}${unresolvedMsg}${errorMsg}`,
+            details: `Bekijk week van ${firstDate} in rooster "${targetSchedule.name}"`,
             scheduleId: targetSchedule.id,
             scheduleName: targetSchedule.name,
             weekDate: firstDate,
