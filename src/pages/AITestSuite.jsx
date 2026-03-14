@@ -549,6 +549,7 @@ Vraag: ${finalPrompt}`;
           })(),
           alreadyPlannedHours,
           nameToIdMap,
+          staffingReqs: summaryReqs,
         });
         
         // Log all issues
