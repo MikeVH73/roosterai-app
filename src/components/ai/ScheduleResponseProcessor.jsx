@@ -74,7 +74,8 @@ export function processAIShifts({
     }
   }
   
-  // Stage 2: Preference validation (warn but don't block — AI was instructed to prefer)
+  // Stage 2: Preference validation — STRICT enforcement
+  // First pass: mark each shift as preferred, backup, or rejected
   for (const shift of resolvedShifts) {
     const emp = relevantEmployees.find(e => e.id === shift.employeeId);
     if (!emp) continue;
@@ -84,21 +85,85 @@ export function processAIShifts({
     const hasLabels = (emp.preferred_departmentIds?.length > 0 || emp.backup_departmentIds?.length > 0);
     
     if (hasLabels && !isPreferred && !isBackup) {
-      // Employee has NO relationship to this department — this should NOT happen
       const dept = scheduleDepts.find(d => d.id === shift.departmentId);
       issues.preferenceWarnings.push(
         `🔴 ${emp.first_name} ${emp.last_name} → ${dept?.name || shift.departmentId}: NIET in voorkeur OF backup — shift verwijderd`
       );
       shift._rejected = true;
     } else if (hasLabels && isBackup && !isPreferred) {
-      const dept = scheduleDepts.find(d => d.id === shift.departmentId);
-      issues.preferenceWarnings.push(
-        `🟡 ${emp.first_name} ${emp.last_name} → ${dept?.name || shift.departmentId} op ${shift.date} (BACK-UP afdeling)`
-      );
+      shift._isBackup = true;
     }
   }
   
-  // Remove rejected shifts from preference check
+  // Second pass: reject backup shifts if there are unused preferred employees for that slot
+  // Group shifts by daypartId + date to check per slot
+  const slotShifts = {};
+  for (const shift of resolvedShifts) {
+    if (shift._rejected) continue;
+    const key = `${shift.daypartId}_${shift.date}_${shift.departmentId}`;
+    if (!slotShifts[key]) slotShifts[key] = [];
+    slotShifts[key].push(shift);
+  }
+  
+  for (const [key, shifts] of Object.entries(slotShifts)) {
+    const preferredInSlot = shifts.filter(s => !s._isBackup);
+    const backupInSlot = shifts.filter(s => s._isBackup);
+    
+    if (backupInSlot.length > 0 && preferredInSlot.length > 0) {
+      // There are preferred employees already assigned — check if backup is truly needed
+      // Count how many staff are required for this slot
+      const sampleShift = shifts[0];
+      const dayOfWeek = new Date(sampleShift.date).getDay();
+      const reqMatch = staffingReqs?.find(r => 
+        r.daypartId === sampleShift.daypartId && 
+        r.departmentId === sampleShift.departmentId && 
+        r.day_of_week === dayOfWeek
+      );
+      const neededStaff = reqMatch?.min_staff || 1;
+      
+      if (preferredInSlot.length >= neededStaff) {
+        // Enough preferred staff — reject ALL backup shifts for this slot
+        for (const bs of backupInSlot) {
+          const emp = relevantEmployees.find(e => e.id === bs.employeeId);
+          const dept = scheduleDepts.find(d => d.id === bs.departmentId);
+          issues.preferenceWarnings.push(
+            `🔴 ${emp?.first_name} ${emp?.last_name} → ${dept?.name || bs.departmentId} op ${bs.date}: BACK-UP niet nodig (${preferredInSlot.length} voorkeur al beschikbaar) — shift verwijderd`
+          );
+          bs._rejected = true;
+        }
+      } else {
+        // Not enough preferred — allow only the needed number of backups
+        const backupsNeeded = neededStaff - preferredInSlot.length;
+        for (let i = 0; i < backupInSlot.length; i++) {
+          if (i < backupsNeeded) {
+            const emp = relevantEmployees.find(e => e.id === backupInSlot[i].employeeId);
+            const dept = scheduleDepts.find(d => d.id === backupInSlot[i].departmentId);
+            issues.preferenceWarnings.push(
+              `🟡 ${emp?.first_name} ${emp?.last_name} → ${dept?.name || backupInSlot[i].departmentId} op ${backupInSlot[i].date} (BACK-UP nodig: ${preferredInSlot.length}/${neededStaff} voorkeur)`
+            );
+          } else {
+            const emp = relevantEmployees.find(e => e.id === backupInSlot[i].employeeId);
+            const dept = scheduleDepts.find(d => d.id === backupInSlot[i].departmentId);
+            issues.preferenceWarnings.push(
+              `🔴 ${emp?.first_name} ${emp?.last_name} → ${dept?.name || backupInSlot[i].departmentId} op ${backupInSlot[i].date}: BACK-UP overbodig (al genoeg) — shift verwijderd`
+            );
+            backupInSlot[i]._rejected = true;
+          }
+        }
+      }
+    } else if (backupInSlot.length > 0 && preferredInSlot.length === 0) {
+      // Only backups in this slot — allow but warn
+      for (const bs of backupInSlot) {
+        const emp = relevantEmployees.find(e => e.id === bs.employeeId);
+        const dept = scheduleDepts.find(d => d.id === bs.departmentId);
+        issues.preferenceWarnings.push(
+          `🟡 ${emp?.first_name} ${emp?.last_name} → ${dept?.name || bs.departmentId} op ${bs.date} (BACK-UP, geen voorkeur-medewerkers beschikbaar)`
+        );
+      }
+    }
+  }
+  
+  // Remove rejected shifts
   const prefFilteredShifts = resolvedShifts.filter(s => !s._rejected);
   
   // Stage 3: Deduplication (no same employee + department + date)
