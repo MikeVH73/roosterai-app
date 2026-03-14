@@ -285,7 +285,7 @@ Vraag: ${finalPrompt}`;
 
       const daysOfWeekNames = { 0: 'zondag', 1: 'maandag', 2: 'dinsdag', 3: 'woensdag', 4: 'donderdag', 5: 'vrijdag', 6: 'zaterdag' };
 
-      // Shared variables for Test 1 (used in both prompt-building and validation)
+      // Shared variables for Test 1 (used in prompt-building AND post-creation validation)
       let scheduleDayparts = [];
       let summaryReqs = [];
       let scheduleLocationId = null;
