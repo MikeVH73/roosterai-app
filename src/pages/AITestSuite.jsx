@@ -959,6 +959,12 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           validationLines.push(...correctedTimes.slice(0, 5));
         }
         
+        // Report ID resolution
+        if (resolutionIssues.length > 0) {
+          validationLines.push('', `🔄 ID-RESOLUTIE (${resolutionIssues.length}x — AI gebruikte namen i.p.v. ID's):`);
+          validationLines.push(...resolutionIssues.slice(0, 10));
+        }
+        
         // Check 4: Contract hours utilization per employee (with monthly budget)
         const employeeHoursPlanned = {};
         createdShifts.forEach(s => {
