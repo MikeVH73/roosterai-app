@@ -365,6 +365,47 @@ Vraag: ${finalPrompt}`;
 
         // Determine which location this schedule is for
         scheduleLocationId = targetSchedule.locationIds?.[0] || null;
+        
+        // === FILTER MEDEWERKERS: Alleen medewerkers die bij afdelingen van DIT rooster horen ===
+        const scheduleDeptIds = targetSchedule.departmentIds || [];
+        const relevantEmployees = employees.filter(e => {
+          const empDepts = e.departmentIds || [];
+          return empDepts.some(dId => scheduleDeptIds.includes(dId));
+        });
+        
+        // Helper: calculate hours from time range
+        const calcHoursFromTime = (start, end) => {
+          const [sh, sm] = start.split(':').map(Number);
+          const [eh, em] = end.split(':').map(Number);
+          let diff = (eh * 60 + em) - (sh * 60 + sm);
+          if (diff <= 0) diff += 24 * 60;
+          return diff / 60;
+        };
+        
+        // Calculate per-daypart hours for planning
+        const daypartHoursMap = {};
+        scheduleDayparts.forEach(dp => {
+          const brutoUren = calcHoursFromTime(dp.startTime, dp.endTime);
+          const pauzeUren = (dp.break_duration || 0) / 60;
+          daypartHoursMap[dp.id] = brutoUren - pauzeUren;
+        });
+        
+        // Build enriched employee data with contract hours analysis
+        const scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
+        contextData.medewerkers = relevantEmployees.map(e => {
+          const func = functions.find(f => f.id === e.functionId);
+          const empScheduleDepts = scheduleDepts.filter(d => (e.departmentIds || []).includes(d.id));
+          return {
+            id: e.id,
+            naam: `${e.first_name} ${e.last_name}`,
+            contracturen: e.contract_hours,
+            contracttype: e.contract_type,
+            functieId: e.functionId,
+            functieNaam: func?.name || 'Onbekend',
+            afdelingen_in_dit_rooster: empScheduleDepts.map(d => ({ id: d.id, naam: d.name })),
+            voorkeuren: e.preferences
+          };
+        });
 
         // Helper: calculate hours from time range
         const calcHours = (start, end) => {
