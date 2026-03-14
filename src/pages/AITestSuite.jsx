@@ -917,7 +917,7 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           validationLines.push(...correctedTimes.slice(0, 5));
         }
         
-        // Check 4: Contract hours utilization per employee
+        // Check 4: Contract hours utilization per employee (with monthly budget)
         const employeeHoursPlanned = {};
         createdShifts.forEach(s => {
           const dp = daypartLookup[s.daypartId];
@@ -929,29 +929,35 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
         });
         
         const hourIssues = [];
-        const relevantEmpIds = relevantEmployees.map(e => e.id);
         relevantEmployees.forEach(e => {
-          const planned = employeeHoursPlanned[e.id] || 0;
-          const contract = e.contract_hours || 0;
-          const pct = contract > 0 ? Math.round((planned / contract) * 100) : 0;
+          const plannedThisWeek = employeeHoursPlanned[e.id] || 0;
+          const weeklyMax = e.contract_hours || 0;
+          const monthlyMax = Math.round((weeklyMax * 13) / 3);
+          const alreadyThisMonth = Math.round(alreadyPlannedHours[e.id] || 0);
+          const totalMonthAfter = alreadyThisMonth + plannedThisWeek;
+          const weekPct = weeklyMax > 0 ? Math.round((plannedThisWeek / weeklyMax) * 100) : 0;
           
-          if (contract > 0 && planned < contract * 0.5) {
-            hourIssues.push(`⚠️ ${e.first_name} ${e.last_name}: ${Math.round(planned)}u gepland van ${contract}u (${pct}%)`);
-          } else if (planned > contract * 1.1) {
-            hourIssues.push(`🔴 ${e.first_name} ${e.last_name}: ${Math.round(planned)}u gepland, CONTRACT=${contract}u OVERSCHREDEN`);
+          if (weeklyMax > 0 && plannedThisWeek < weeklyMax * 0.5 && plannedThisWeek > 0) {
+            hourIssues.push(`⚠️ ${e.first_name} ${e.last_name}: ${Math.round(plannedThisWeek)}u deze week van ${weeklyMax}u (${weekPct}%) — maand: ${Math.round(totalMonthAfter)}/${monthlyMax}u`);
+          } else if (weeklyMax > 0 && plannedThisWeek === 0) {
+            hourIssues.push(`❌ ${e.first_name} ${e.last_name}: NIET ingeroosterd (${weeklyMax}u beschikbaar)`);
+          } else if (plannedThisWeek > weeklyMax * 1.1) {
+            hourIssues.push(`🔴 ${e.first_name} ${e.last_name}: ${Math.round(plannedThisWeek)}u gepland, MAX=${weeklyMax}u OVERSCHREDEN`);
+          } else if (totalMonthAfter > monthlyMax * 1.05) {
+            hourIssues.push(`🔴 ${e.first_name} ${e.last_name}: Maandbudget overschreden: ${Math.round(totalMonthAfter)}/${monthlyMax}u`);
           }
         });
         
         if (hourIssues.length > 0) {
-          validationLines.push('', `📊 CONTRACTUREN ANALYSE (${hourIssues.length} aandachtspunten):`);
-          validationLines.push(...hourIssues.slice(0, 10));
+          validationLines.push('', `📊 UREN ANALYSE (${hourIssues.length} aandachtspunten):`);
+          validationLines.push(...hourIssues.slice(0, 15));
           allMatch = false;
         }
         
         // Summary of hours distribution
-        const totalPlanned = Object.values(employeeHoursPlanned).reduce((a, b) => a + b, 0);
-        const totalContract = relevantEmployees.reduce((sum, e) => sum + (e.contract_hours || 0), 0);
-        validationLines.push('', `📈 TOTAAL: ${Math.round(totalPlanned)}u gepland van ${totalContract}u beschikbaar (${Math.round(totalPlanned/totalContract*100)}%)`);
+        const totalPlannedWeek = Object.values(employeeHoursPlanned).reduce((a, b) => a + b, 0);
+        const totalMaxWeek = relevantEmployees.reduce((sum, e) => sum + (e.contract_hours || 0), 0);
+        validationLines.push('', `📈 WEEK TOTAAL: ${Math.round(totalPlannedWeek)}u gepland van ${totalMaxWeek}u beschikbaar (${Math.round(totalPlannedWeek/Math.max(totalMaxWeek,1)*100)}%)`);
 
         // Get date range and details of created shifts
         const shiftDates = createdShifts.map(s => s.date).sort();
