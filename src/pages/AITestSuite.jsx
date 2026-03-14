@@ -517,10 +517,20 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
         console.log(`AI genereerde ${response.shifts.length} shifts, gaan aanmaken...`);
         const createdShifts = [];
         const errors = [];
+        const skipped = [];
         
-        console.log('Creating shifts:', response.shifts);
+        // Track employee assignments per day+department to prevent duplicates
+        const assignmentTracker = {};
         
         for (const shift of response.shifts) {
+          // Pre-check: prevent same employee on same day in same department
+          const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
+          if (assignmentTracker[trackKey]) {
+            skipped.push(`${shift.date}: ${shift.employeeId} al ingeroosterd bij ${shift.departmentId}`);
+            continue;
+          }
+          assignmentTracker[trackKey] = true;
+          
           try {
             const created = await base44.entities.Shift.create({
               companyId,
@@ -540,6 +550,10 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
             console.error('Shift creation error:', err);
             errors.push(`${shift.date}: ${err.message}`);
           }
+        }
+        
+        if (skipped.length > 0) {
+          console.warn(`${skipped.length} shifts overgeslagen (dubbele toewijzing):`, skipped);
         }
 
         // Verify shifts are actually in database
