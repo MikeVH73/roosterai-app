@@ -517,16 +517,17 @@ Vraag: ${finalPrompt}`;
           return `  - ID="${e.id}" naam="${e.naam}" functie="${e.functieNaam}" max=${e.max_inzetbaar_deze_week}u/week (maand: ${e.al_ingeroosterd_deze_maand}/${e.contracturen_per_maand}u) VOORKEUR:[${voorkeurNames}] BACKUP:[${backupNames}]`;
         }).join('\n');
         
-        // Build name-to-ID lookup for fallback resolution
+        // Build name-to-ID lookup for fallback resolution (use ALL employees, not just relevant)
         nameToIdMap = {};
-        relevantEmployees.forEach(e => {
+        employees.forEach(e => {
           const fullName = `${e.first_name} ${e.last_name}`.toLowerCase().trim();
           nameToIdMap[fullName] = e.id;
-          // Also map first name only
           nameToIdMap[e.first_name.toLowerCase().trim()] = e.id;
-          // Also map last name only
           nameToIdMap[e.last_name.toLowerCase().trim()] = e.id;
         });
+        
+        // Build a set of ALL employee IDs (for distinguishing "wrong roster" vs "truly unknown")
+        const allEmployeeIds = new Set(employees.map(e => e.id));
         
         // Calculate total available hours vs needed hours
         const totalAvailableHours = contextData.medewerkers.reduce((sum, e) => sum + (e.max_inzetbaar_deze_week || 0), 0);
