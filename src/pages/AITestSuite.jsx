@@ -605,8 +605,14 @@ ${JSON.stringify(contextData.dayparts.map(dp => ({
   netto_uren_per_shift: daypartHoursMap[dp.id] || '?'
 })), null, 2)}
 
-=== AFDELINGEN IN DIT ROOSTER ===
-${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
+=== AFDELINGEN IN DIT ROOSTER (met toegestane functies) ===
+${JSON.stringify(scheduleDepts.map(d => {
+  const allowedFuncs = (d.allowedFunctionIds || []).map(fId => {
+    const f = functions.find(fn => fn.id === fId);
+    return f ? { id: f.id, naam: f.name } : null;
+  }).filter(Boolean);
+  return { id: d.id, naam: d.name, toegestane_functies: allowedFuncs };
+}), null, 2)}
 
 === ROOSTER INFO ===
 - Locatie ID: ${scheduleLocationId}
