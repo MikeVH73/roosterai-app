@@ -498,149 +498,61 @@ Vraag: ${finalPrompt}`;
           return;
         }
 
-        console.log(`AI genereerde ${response.shifts.length} shifts, gaan aanmaken...`);
+        console.log(`AI genereerde ${response.shifts.length} shifts, gaan verwerken...`);
         
-        // STAP 0: Verwijder bestaande shifts voor deze week in dit rooster
-        const existingWeekShifts = await base44.entities.Shift.filter({ 
-          scheduleId: targetSchedule.id 
-        });
-        const weekStartStr = weekStart.toISOString().split('T')[0];
-        const weekEndStr = weekEnd.toISOString().split('T')[0];
-        const shiftsToDelete = existingWeekShifts.filter(s => 
-          s.date >= weekStartStr && s.date <= weekEndStr
-        );
+        // STAP 0: Verwijder bestaande shifts voor deze week
+        const existingWeekShifts = await base44.entities.Shift.filter({ scheduleId: targetSchedule.id });
+        const weekStartStr2 = weekStart.toISOString().split('T')[0];
+        const weekEndStr2 = weekEnd.toISOString().split('T')[0];
+        const shiftsToDelete = existingWeekShifts.filter(s => s.date >= weekStartStr2 && s.date <= weekEndStr2);
         
-        // Helper: process items in batches with delay to avoid rate limits
         const processBatch = async (items, fn, batchSize = 5, delayMs = 500) => {
           const results = [];
           for (let i = 0; i < items.length; i += batchSize) {
             const batch = items.slice(i, i + batchSize);
             const batchResults = await Promise.all(batch.map(fn));
             results.push(...batchResults);
-            if (i + batchSize < items.length) {
-              await new Promise(r => setTimeout(r, delayMs));
-            }
+            if (i + batchSize < items.length) await new Promise(r => setTimeout(r, delayMs));
           }
           return results;
         };
         
         if (shiftsToDelete.length > 0) {
-          console.log(`Verwijder ${shiftsToDelete.length} bestaande shifts voor week ${weekStartStr} - ${weekEndStr}`);
+          console.log(`Verwijder ${shiftsToDelete.length} bestaande shifts`);
           await processBatch(shiftsToDelete, s => base44.entities.Shift.delete(s.id));
         }
         
-        const createdShifts = [];
-        const errors = [];
-        const skipped = [];
-        
-        // Track employee assignments per day+department to prevent duplicates
-        const assignmentTracker = {};
-        
-        // Build daypart lookup for server-side time correction
-        const daypartLookup = {};
-        scheduleDayparts.forEach(dp => { daypartLookup[dp.id] = dp; });
-        
-        // Build ID sets for validation
-        const validEmployeeIds = new Set(relevantEmployees.map(e => e.id));
-        const validDeptIds = new Set(scheduleDepts.map(d => d.id));
-        const validDaypartIds = new Set(scheduleDayparts.map(dp => dp.id));
-        
-        // Resolve AI responses: validate and fix employee IDs
-        const resolvedShifts = [];
-        const resolutionIssues = [];
-        for (const shift of response.shifts) {
-          if (!shift.employeeId) {
-            resolutionIssues.push(`⚠️ Shift zonder medewerker op ${shift.date} — overgeslagen`);
-            continue;
-          }
-          
-          // Case 1: Valid employee ID for this roster — OK
-          if (validEmployeeIds.has(shift.employeeId)) {
-            resolvedShifts.push(shift);
-            continue;
-          }
-          
-          // Case 2: Valid employee ID but NOT in this roster's departments
-          if (allEmployeeIds.has(shift.employeeId)) {
-            const wrongEmp = employees.find(e => e.id === shift.employeeId);
-            const empName = wrongEmp ? `${wrongEmp.first_name} ${wrongEmp.last_name}` : shift.employeeId;
-            resolutionIssues.push(`⚠️ ${empName} hoort niet bij de afdelingen van dit rooster — shift overgeslagen`);
-            continue;
-          }
-          
-          // Case 3: Not a valid ID at all — try name lookup
-          const resolvedId = nameToIdMap[shift.employeeId.toLowerCase().trim()];
-          if (resolvedId && validEmployeeIds.has(resolvedId)) {
-            resolutionIssues.push(`Naam→ID: "${shift.employeeId}" → ${resolvedId}`);
-            shift.employeeId = resolvedId;
-            resolvedShifts.push(shift);
-          } else if (resolvedId) {
-            const wrongEmp = employees.find(e => e.id === resolvedId);
-            const empName = wrongEmp ? `${wrongEmp.first_name} ${wrongEmp.last_name}` : shift.employeeId;
-            resolutionIssues.push(`⚠️ ${empName} (via naam gevonden) hoort niet bij dit rooster — shift overgeslagen`);
-          } else {
-            resolutionIssues.push(`❌ Onbekende medewerker: "${shift.employeeId}" — shift overgeslagen`);
-          }
-        }
-        
-        if (resolutionIssues.length > 0) {
-          console.warn('ID-resolutie:', resolutionIssues);
-        }
-        
-        // Build employee max-hours tracking for server-side budget enforcement
-        const employeeHoursBudget = {};
-        relevantEmployees.forEach(e => {
-          const weeklyMax = e.contract_hours || 0;
-          const monthlyMax = Math.round((weeklyMax * 13) / 3);
-          const alreadyThisMonth = alreadyPlannedHours[e.id] || 0;
-          const remainingThisMonth = Math.max(0, monthlyMax - alreadyThisMonth);
-          employeeHoursBudget[e.id] = {
-            maxThisWeek: Math.min(weeklyMax, remainingThisMonth),
-            planned: 0,
-            name: `${e.first_name} ${e.last_name}`
-          };
+        // === PROCESS AI RESPONSE through all validation stages ===
+        const { validShifts, issues, budgetTracker } = processAIShifts({
+          aiShifts: response.shifts,
+          relevantEmployees,
+          allEmployees: employees,
+          scheduleDepts,
+          scheduleDayparts,
+          daypartHoursMap: (() => {
+            const m = {};
+            scheduleDayparts.forEach(dp => {
+              m[dp.id] = calcHoursFromTime(dp.startTime, dp.endTime) - (dp.break_duration || 0) / 60;
+            });
+            return m;
+          })(),
+          alreadyPlannedHours,
+          nameToIdMap,
         });
         
-        // Filter, deduplicate, correct shifts, and enforce hour budgets
-        const validShifts = [];
-        const correctedTimes = [];
-        const budgetRejected = [];
-        for (const shift of resolvedShifts) {
-          const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
-          if (assignmentTracker[trackKey]) {
-            skipped.push(`${shift.date}: ${shift.employeeId} al ingeroosterd bij ${shift.departmentId}`);
-            continue;
-          }
-          assignmentTracker[trackKey] = true;
-          
-          // SERVER-SIDE CORRECTIE: Forceer dagdeel-tijden (AI kan fouten maken)
-          const dp = daypartLookup[shift.daypartId];
-          if (dp) {
-            if (shift.start_time !== dp.startTime || shift.end_time !== dp.endTime) {
-              correctedTimes.push(`${shift.date}: ${shift.start_time}-${shift.end_time} → ${dp.startTime}-${dp.endTime}`);
-              shift.start_time = dp.startTime;
-              shift.end_time = dp.endTime;
-            }
-            shift.break_duration = dp.break_duration || 0;
-          }
-          
-          // SERVER-SIDE BUDGET CHECK: weiger shift als medewerker over max uren gaat
-          if (shift.employeeId && employeeHoursBudget[shift.employeeId]) {
-            const budget = employeeHoursBudget[shift.employeeId];
-            const dpForHours = daypartLookup[shift.daypartId];
-            const shiftHours = dpForHours ? (calcHoursFromTime(dpForHours.startTime, dpForHours.endTime) - (dpForHours.break_duration || 0) / 60) : 4;
-            
-            // Gebruik 1.15 marge (15%) om afrondingsproblemen te voorkomen
-            // Bijv: 16u contract = max 18.4u deze week (met marge)
-            if (budget.maxThisWeek > 0 && budget.planned + shiftHours > budget.maxThisWeek * 1.15) {
-              budgetRejected.push(`🚫 ${budget.name}: ${shift.date} geweigerd (${Math.round(budget.planned)}u al gepland + ${shiftHours}u = ${Math.round(budget.planned + shiftHours)}u, max=${budget.maxThisWeek}u)`);
-              continue;
-            }
-            budget.planned += shiftHours;
-          }
-          
-          validShifts.push(shift);
-        }
+        // Log all issues
+        const allIssueLines = [];
+        if (issues.idResolution.length > 0) allIssueLines.push(...issues.idResolution);
+        if (issues.preferenceWarnings.length > 0) allIssueLines.push(...issues.preferenceWarnings);
+        if (issues.budgetRejected.length > 0) allIssueLines.push(...issues.budgetRejected);
+        if (issues.duplicateSkipped.length > 0) allIssueLines.push(...issues.duplicateSkipped);
+        if (allIssueLines.length > 0) console.warn('Verwerking issues:', allIssueLines);
+        
+        const createdShifts = [];
+        const errors = [];
+        const skipped = issues.duplicateSkipped;
+        const daypartLookup = {};
+        scheduleDayparts.forEach(dp => { daypartLookup[dp.id] = dp; });
         
         // Create shifts in batches
         await processBatch(validShifts, async (shift) => {
