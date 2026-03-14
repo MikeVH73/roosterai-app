@@ -453,25 +453,38 @@ ${JSON.stringify(contextData.afdelingen, null, 2)}
           properties: {
             shifts: {
               type: "array",
-              description: "Array van shifts - maak een shift voor ELKE bezettingsnorm-dag combinatie",
+              description: `Array van EXACT ${totalShiftsNeeded} shifts`,
               items: {
                 type: "object",
                 properties: {
-                  employeeId: { type: "string", description: "ID van medewerker uit de lijst" },
-                  departmentId: { type: "string", description: "ID van afdeling uit de lijst" },
-                  locationId: { type: "string", description: "ID van locatie uit het rooster" },
-                  functionId: { type: "string", description: "ID van functie uit de lijst" },
-                  daypartId: { type: "string", description: "ID van dagdeel uit de lijst" },
-                  date: { type: "string", description: "Datum YYYY-MM-DD tussen start en eind" },
-                  start_time: { type: "string", description: "Starttijd HH:mm (bijv 08:00)" },
-                  end_time: { type: "string", description: "Eindtijd HH:mm (bijv 16:00)" }
+                  employeeId: { type: "string", description: "ID van medewerker" },
+                  departmentId: { type: "string", description: "ID van afdeling" },
+                  locationId: { type: "string", description: "Locatie ID" },
+                  daypartId: { type: "string", description: "Dagdeel ID" },
+                  date: { type: "string", description: "Datum YYYY-MM-DD" },
+                  start_time: { type: "string", description: "Starttijd HH:mm = dagdeel startTijd" },
+                  end_time: { type: "string", description: "Eindtijd HH:mm = dagdeel eindTijd" }
                 },
-                required: ["employeeId", "departmentId", "locationId", "date", "start_time", "end_time"]
+                required: ["employeeId", "departmentId", "locationId", "daypartId", "date", "start_time", "end_time"]
               }
             },
-            summary: { type: "string", description: "Samenvatting met aantal shifts" }
+            unresolved_issues: {
+              type: "array",
+              description: "Bezettingsnormen die NIET volledig ingevuld konden worden",
+              items: {
+                type: "object",
+                properties: {
+                  daypart_name: { type: "string" },
+                  date: { type: "string" },
+                  target_hours: { type: "number" },
+                  planned_hours: { type: "number" },
+                  reason: { type: "string" }
+                }
+              }
+            },
+            summary: { type: "string", description: "Samenvatting" }
           },
-          required: ["shifts", "summary"]
+          required: ["shifts", "unresolved_issues", "summary"]
         };
       }
 
