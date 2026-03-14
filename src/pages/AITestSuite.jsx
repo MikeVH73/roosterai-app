@@ -564,8 +564,13 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
         // Track employee assignments per day+department to prevent duplicates
         const assignmentTracker = {};
         
-        // Filter and deduplicate shifts first
+        // Build daypart lookup for server-side time correction
+        const daypartLookup = {};
+        scheduleDayparts.forEach(dp => { daypartLookup[dp.id] = dp; });
+        
+        // Filter, deduplicate, and correct shifts
         const validShifts = [];
+        const correctedTimes = [];
         for (const shift of response.shifts) {
           const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
           if (assignmentTracker[trackKey]) {
@@ -573,6 +578,18 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
             continue;
           }
           assignmentTracker[trackKey] = true;
+          
+          // SERVER-SIDE CORRECTIE: Forceer dagdeel-tijden (AI kan fouten maken)
+          const dp = daypartLookup[shift.daypartId];
+          if (dp) {
+            if (shift.start_time !== dp.startTime || shift.end_time !== dp.endTime) {
+              correctedTimes.push(`${shift.date}: ${shift.start_time}-${shift.end_time} → ${dp.startTime}-${dp.endTime}`);
+              shift.start_time = dp.startTime;
+              shift.end_time = dp.endTime;
+            }
+            shift.break_duration = dp.break_duration || 0;
+          }
+          
           validShifts.push(shift);
         }
         
