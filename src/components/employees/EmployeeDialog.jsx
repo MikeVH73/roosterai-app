@@ -145,8 +145,26 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
       ...prev,
       departmentIds: prev.departmentIds.includes(deptId)
         ? prev.departmentIds.filter(id => id !== deptId)
-        : [...prev.departmentIds, deptId]
+        : [...prev.departmentIds, deptId],
+      // Remove from preferred/backup if unchecked from main list
+      preferred_departmentIds: prev.departmentIds.includes(deptId) 
+        ? (prev.preferred_departmentIds || []).filter(id => id !== deptId) 
+        : (prev.preferred_departmentIds || []),
+      backup_departmentIds: prev.departmentIds.includes(deptId)
+        ? (prev.backup_departmentIds || []).filter(id => id !== deptId)
+        : (prev.backup_departmentIds || [])
     }));
+  };
+
+  const setDeptPreference = (deptId, type) => {
+    // type: 'preferred', 'backup', or 'none'
+    setFormData(prev => {
+      const preferred = (prev.preferred_departmentIds || []).filter(id => id !== deptId);
+      const backup = (prev.backup_departmentIds || []).filter(id => id !== deptId);
+      if (type === 'preferred') preferred.push(deptId);
+      if (type === 'backup') backup.push(deptId);
+      return { ...prev, preferred_departmentIds: preferred, backup_departmentIds: backup };
+    });
   };
 
   const toggleDay = (day) => {
