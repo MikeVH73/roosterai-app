@@ -317,7 +317,7 @@ Vraag: ${finalPrompt}`;
         }
 
         // Get dayparts for context - MOET EERST
-        const scheduleDayparts = dayparts.filter(dp => 
+        scheduleDayparts = dayparts.filter(dp => 
           targetSchedule.departmentIds?.includes(dp.departmentId)
         );
 
@@ -358,7 +358,7 @@ Vraag: ${finalPrompt}`;
         }
 
         // Determine which location this schedule is for
-        const scheduleLocationId = targetSchedule.locationIds?.[0] || null;
+        scheduleLocationId = targetSchedule.locationIds?.[0] || null;
 
         // Helper: calculate hours from time range
         const calcHours = (start, end) => {
@@ -370,7 +370,7 @@ Vraag: ${finalPrompt}`;
         };
 
         // Build precise shift requirements per daypart per day
-        const summaryReqs = contextData.bezettingseisen || [];
+        summaryReqs = contextData.bezettingseisen || [];
         const shiftInstructions = [];
         let totalShiftsNeeded = 0;
         
