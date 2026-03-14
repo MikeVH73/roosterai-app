@@ -16,7 +16,6 @@ import {
   Settings
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -292,7 +291,7 @@ export default function Departments() {
                     </div>
                   </div>
                   
-                  <Link to={createPageUrl('DepartmentDetails') + `?id=${department.id}`}>
+                  <Link to={`/DepartmentDetails?id=${department.id}`}>
                     <Button variant="outline" size="sm" className="w-full mt-2" style={{ 
                       color: 'var(--color-text-primary)',
                       borderColor: 'var(--color-border)',

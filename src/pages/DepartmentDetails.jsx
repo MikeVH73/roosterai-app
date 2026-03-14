@@ -1,6 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,8 +31,8 @@ export default function DepartmentDetails() {
   const { data: department, isLoading: deptLoading } = useQuery({
     queryKey: ['department', departmentId],
     queryFn: async () => {
-      const depts = await base44.entities.Department.filter({ id: departmentId });
-      return depts[0];
+      const depts = await base44.entities.Department.filter({ companyId });
+      return depts.find(d => d.id === departmentId);
     },
     enabled: !!departmentId
   });
@@ -81,7 +80,7 @@ export default function DepartmentDetails() {
           <CardContent className="p-8 text-center">
             <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <h3 className="font-medium text-slate-900 mb-2">Afdeling niet gevonden</h3>
-            <Button onClick={() => navigate(createPageUrl('Departments'))}>
+            <Button onClick={() => navigate('/Departments')}>
               Terug naar afdelingen
             </Button>
           </CardContent>
@@ -96,7 +95,7 @@ export default function DepartmentDetails() {
         title={department.name}
         subtitle="Afdelingsinstellingen"
         actions={
-          <Button variant="ghost" onClick={() => navigate(createPageUrl('Departments'))}>
+          <Button variant="ghost" onClick={() => navigate('/Departments')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Terug
           </Button>
