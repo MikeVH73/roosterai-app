@@ -547,6 +547,7 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
               date: shift.date,
               start_time: shift.start_time,
               end_time: shift.end_time,
+              break_duration: shift.break_duration ?? 0,
               status: 'scheduled'
             });
             createdShifts.push(created);
