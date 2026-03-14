@@ -837,6 +837,42 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           validationLines.push('', `🔧 TIJDEN GECORRIGEERD (${correctedTimes.length}x):`);
           validationLines.push(...correctedTimes.slice(0, 5));
         }
+        
+        // Check 4: Contract hours utilization per employee
+        const employeeHoursPlanned = {};
+        createdShifts.forEach(s => {
+          const dp = daypartLookup[s.daypartId];
+          if (!dp) return;
+          const brutoUren = calcHoursFromTime(dp.startTime, dp.endTime);
+          const pauzeUren = (dp.break_duration || 0) / 60;
+          const nettoUren = brutoUren - pauzeUren;
+          employeeHoursPlanned[s.employeeId] = (employeeHoursPlanned[s.employeeId] || 0) + nettoUren;
+        });
+        
+        const hourIssues = [];
+        const relevantEmpIds = relevantEmployees.map(e => e.id);
+        relevantEmployees.forEach(e => {
+          const planned = employeeHoursPlanned[e.id] || 0;
+          const contract = e.contract_hours || 0;
+          const pct = contract > 0 ? Math.round((planned / contract) * 100) : 0;
+          
+          if (contract > 0 && planned < contract * 0.5) {
+            hourIssues.push(`⚠️ ${e.first_name} ${e.last_name}: ${Math.round(planned)}u gepland van ${contract}u (${pct}%)`);
+          } else if (planned > contract * 1.1) {
+            hourIssues.push(`🔴 ${e.first_name} ${e.last_name}: ${Math.round(planned)}u gepland, CONTRACT=${contract}u OVERSCHREDEN`);
+          }
+        });
+        
+        if (hourIssues.length > 0) {
+          validationLines.push('', `📊 CONTRACTUREN ANALYSE (${hourIssues.length} aandachtspunten):`);
+          validationLines.push(...hourIssues.slice(0, 10));
+          allMatch = false;
+        }
+        
+        // Summary of hours distribution
+        const totalPlanned = Object.values(employeeHoursPlanned).reduce((a, b) => a + b, 0);
+        const totalContract = relevantEmployees.reduce((sum, e) => sum + (e.contract_hours || 0), 0);
+        validationLines.push('', `📈 TOTAAL: ${Math.round(totalPlanned)}u gepland van ${totalContract}u beschikbaar (${Math.round(totalPlanned/totalContract*100)}%)`);
 
         // Get date range and details of created shifts
         const shiftDates = createdShifts.map(s => s.date).sort();
