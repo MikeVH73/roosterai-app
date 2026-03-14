@@ -311,75 +311,26 @@ Vraag: ${finalPrompt}`;
         
         // Find next Monday from today
         weekStart = new Date(today);
-        const currentDayOfWeek = weekStart.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const currentDayOfWeek = weekStart.getDay();
         const daysUntilMonday = currentDayOfWeek === 0 ? 1 : (8 - currentDayOfWeek);
         weekStart.setDate(weekStart.getDate() + daysUntilMonday);
-        
-        // If next Monday is before schedule start, use schedule start
-        if (weekStart < scheduleStart) {
-          weekStart = new Date(scheduleStart);
-        }
-        
-        // Week ends 6 days later (Monday to Sunday = 7 days, but Monday counts as day 0)
+        if (weekStart < scheduleStart) weekStart = new Date(scheduleStart);
         weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
-        
-        // Ensure week doesn't exceed schedule end
-        if (weekEnd > scheduleEnd) {
-          weekEnd = new Date(scheduleEnd);
-        }
+        if (weekEnd > scheduleEnd) weekEnd = new Date(scheduleEnd);
 
-        // Get dayparts for context - MOET EERST
-        scheduleDayparts = dayparts.filter(dp => 
-          targetSchedule.departmentIds?.includes(dp.departmentId)
-        );
-
-        // Update context data with dayparts
-        contextData.dayparts = scheduleDayparts.map(dp => ({
-          id: dp.id,
-          naam: dp.name,
-          afdelingId: dp.departmentId,
-          startTijd: dp.startTime,
-          eindTijd: dp.endTime
-        }));
-
-        // Add location-department mapping
+        scheduleDayparts = dayparts.filter(dp => targetSchedule.departmentIds?.includes(dp.departmentId));
         const scheduleLocations = locations.filter(l => targetSchedule.locationIds?.includes(l.id));
-        contextData.locaties = scheduleLocations.map(loc => ({
-          id: loc.id,
-          naam: loc.name,
-          afdelingen: departments.filter(d => d.locationIds?.includes(loc.id)).map(d => ({
-            id: d.id,
-            naam: d.name
-          }))
-        }));
-
-        // Add staffing requirements if available
-        const allRequirements = await base44.entities.StaffingRequirement.filter({ companyId });
-        if (allRequirements.length > 0) {
-          contextData.bezettingseisen = allRequirements
-            .filter(r => targetSchedule.departmentIds?.includes(r.departmentId))
-            .map(r => ({
-              afdelingId: r.departmentId,
-              dagdeelId: r.daypartId,
-              locatieId: r.locationId,
-              dag_van_week: r.day_of_week,
-              doeluren: r.targetHours,
-              min_bezetting: r.min_staff,
-              optimaal: r.optimal_staff
-            }));
-        }
-
-        // Determine which location this schedule is for
         scheduleLocationId = targetSchedule.locationIds?.[0] || null;
-        
-        // === FILTER MEDEWERKERS: Alleen medewerkers die bij afdelingen van DIT rooster horen ===
         const scheduleDeptIds = targetSchedule.departmentIds || [];
+        scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
+        
+        // Filter employees for this roster
         relevantEmployees = employees.filter(e => {
           const empDepts = e.departmentIds || [];
           return empDepts.some(dId => scheduleDeptIds.includes(dId));
         });
         
-        // Calculate per-daypart hours for planning
+        // Calculate per-daypart hours
         const daypartHoursMap = {};
         scheduleDayparts.forEach(dp => {
           const brutoUren = calcHoursFromTime(dp.startTime, dp.endTime);
@@ -387,24 +338,22 @@ Vraag: ${finalPrompt}`;
           daypartHoursMap[dp.id] = brutoUren - pauzeUren;
         });
         
-        // === MAANDELIJKSE UREN BEREKENING ===
-        // Bepaal de maand van deze week
+        // Monthly hours calculation
         const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
         const monthEnd = new Date(weekStart.getFullYear(), weekStart.getMonth() + 1, 0);
         const monthStartStr = monthStart.toISOString().split('T')[0];
         const monthEndStr = monthEnd.toISOString().split('T')[0];
         
-        // Haal alle bestaande shifts voor deze maand op
         const allMonthShifts = await base44.entities.Shift.filter({ companyId });
+        const weekStartStr = weekStart.toISOString().split('T')[0];
+        const weekEndStr = weekEnd.toISOString().split('T')[0];
         const monthShifts = allMonthShifts.filter(s => 
-          s.date >= monthStartStr && s.date <= monthEndStr
+          s.date >= monthStartStr && s.date <= monthEndStr &&
+          !(s.date >= weekStartStr && s.date <= weekEndStr)
         );
         
-        // Bereken al ingeroosterde uren per medewerker deze maand
         alreadyPlannedHours = {};
         monthShifts.forEach(s => {
-          // Skip shifts in de huidige week (die worden vervangen)
-          if (s.date >= weekStart.toISOString().split('T')[0] && s.date <= weekEnd.toISOString().split('T')[0]) return;
           const dp = dayparts.find(d => d.id === s.daypartId);
           if (!dp) return;
           const bruto = calcHoursFromTime(dp.startTime, dp.endTime);
@@ -412,103 +361,47 @@ Vraag: ${finalPrompt}`;
           alreadyPlannedHours[s.employeeId] = (alreadyPlannedHours[s.employeeId] || 0) + (bruto - pauze);
         });
         
-        // Build enriched employee data with contract hours analysis
-        scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
-        contextData.medewerkers = relevantEmployees.map(e => {
-          const func = functions.find(f => f.id === e.functionId);
-          const empScheduleDepts = scheduleDepts.filter(d => (e.departmentIds || []).includes(d.id));
-          
-          // Voorkeur vs Back-up afdelingen (binnen dit rooster)
-          const preferredInSchedule = empScheduleDepts.filter(d => 
-            (e.preferred_departmentIds || []).includes(d.id)
-          );
-          const backupInSchedule = empScheduleDepts.filter(d => 
-            (e.backup_departmentIds || []).includes(d.id)
-          );
-          // Afdelingen zonder voorkeur/backup label = behandel als voorkeur
-          const unlabeledInSchedule = empScheduleDepts.filter(d => 
-            !(e.preferred_departmentIds || []).includes(d.id) &&
-            !(e.backup_departmentIds || []).includes(d.id)
-          );
-          
-          // Maandelijkse uren berekening
+        // Enrich employees with budget info (used by PromptBuilder)
+        relevantEmployees.forEach(e => {
           const weeklyHours = e.contract_hours || 0;
-          const monthlyHours = Math.round((weeklyHours * 13) / 3); // 13 weken per kwartaal / 3 maanden
+          const monthlyMax = Math.round((weeklyHours * 13) / 3);
           const alreadyPlanned = Math.round(alreadyPlannedHours[e.id] || 0);
-          const remainingThisMonth = Math.max(0, monthlyHours - alreadyPlanned);
-          // Max inzetbaar deze week = min(weekelijkse uren, resterend deze maand)
-          const maxThisWeek = Math.min(weeklyHours, remainingThisMonth);
-          
-          return {
-            id: e.id,
-            naam: `${e.first_name} ${e.last_name}`,
-            contracturen_per_week: weeklyHours,
-            contracturen_per_maand: monthlyHours,
-            al_ingeroosterd_deze_maand: alreadyPlanned,
-            resterend_deze_maand: remainingThisMonth,
-            max_inzetbaar_deze_week: maxThisWeek,
-            contracttype: e.contract_type,
-            functieId: e.functionId,
-            functieNaam: func?.name || 'Onbekend',
-            voorkeur_afdelingen: [...preferredInSchedule, ...unlabeledInSchedule].map(d => ({ id: d.id, naam: d.name })),
-            backup_afdelingen: backupInSchedule.map(d => ({ id: d.id, naam: d.name })),
-            voorkeuren: e.preferences
-          };
+          const remainingThisMonth = Math.max(0, monthlyMax - alreadyPlanned);
+          e._maxThisWeek = Math.min(weeklyHours, remainingThisMonth);
+          e._alreadyPlanned = alreadyPlanned;
+          e._monthlyMax = monthlyMax;
         });
-
-        // Build precise shift requirements per daypart per day
-        summaryReqs = contextData.bezettingseisen || [];
-        const shiftInstructions = [];
-        let totalShiftsNeeded = 0;
         
-        // Build a map of all dates in the week range
+        // Staffing requirements
+        const allRequirements = await base44.entities.StaffingRequirement.filter({ companyId });
+        summaryReqs = allRequirements
+          .filter(r => scheduleDeptIds.includes(r.departmentId))
+          .map(r => ({
+            departmentId: r.departmentId,
+            daypartId: r.daypartId,
+            day_of_week: r.day_of_week,
+            targetHours: r.targetHours,
+            min_staff: r.min_staff || 1,
+          }));
+        
+        // Build week dates map
         const weekDates = {};
         for (let d = new Date(weekStart); d <= weekEnd; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
           weekDates[d.getDay()] = d.toISOString().split('T')[0];
         }
         
+        // Calculate totals
+        const totalAvailableHours = relevantEmployees.reduce((sum, e) => sum + (e._maxThisWeek || 0), 0);
+        let totalNeededHours = 0;
         for (const dp of scheduleDayparts) {
-          const dept = departments.find(d => d.id === dp.departmentId);
-          const deptName = dept?.name || 'Onbekend';
-          const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
-          
+          const dpReqs = summaryReqs.filter(r => r.daypartId === dp.id);
           for (const r of dpReqs) {
-            if (!r.doeluren || r.doeluren <= 0) continue;
-            const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
-            const shiftsNeeded = r.min_bezetting || 1;
-            totalShiftsNeeded += shiftsNeeded;
-            
-            const dateForDay = weekDates[r.dag_van_week] || null;
-            const dpBreak = dp.break_duration || 0;
-            const nettoUren = daypartHoursMap[dp.id] || '?';
-            const brutoUren = calcHoursFromTime(dp.startTime, dp.endTime);
-            
-            shiftInstructions.push(
-              `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${dateForDay ? ` (${dateForDay})` : ''}:
-  - Dagdeel ID: "${dp.id}"
-  - Afdeling ID: "${dp.departmentId}"
-  - TIJDEN: start_time="${dp.startTime}" end_time="${dp.endTime}" (${brutoUren}u bruto, ${nettoUren}u netto)
-  - Pauze: break_duration=${dpBreak} ${dpBreak > 0 ? `(${dpBreak} min)` : '(geen pauze)'}
-  - Doeluren bezettingsnorm: ${r.doeluren}u (dit is een ${r.doeluren >= 7 ? 'LANGE DAGDIENST' : 'KORTE DIENST'})
-  - Benodigde medewerkers: ${shiftsNeeded}
-  - Datum: ${dateForDay || 'ONBEKEND'}
-  - ⚠️ ELKE shift telt als ${nettoUren}u voor het urenbudget van de medewerker`
-            );
+            if (!r.targetHours || r.targetHours <= 0) continue;
+            totalNeededHours += (r.min_staff || 1) * (daypartHoursMap[dp.id] || 4);
           }
         }
         
-        const shiftInstructionsText = shiftInstructions.length > 0 
-          ? shiftInstructions.join('\n\n') 
-          : 'Geen bezettingsnormen gevonden.';
-
-        // Build employee hours budget summary for the prompt — ID is PROMINENT
-        const employeeBudgetLines = contextData.medewerkers.map(e => {
-          const voorkeurNames = e.voorkeur_afdelingen.map(d => d.naam).join(', ') || 'geen';
-          const backupNames = e.backup_afdelingen.map(d => d.naam).join(', ') || 'geen';
-          return `  - ID="${e.id}" naam="${e.naam}" functie="${e.functieNaam}" max=${e.max_inzetbaar_deze_week}u/week (maand: ${e.al_ingeroosterd_deze_maand}/${e.contracturen_per_maand}u) VOORKEUR:[${voorkeurNames}] BACKUP:[${backupNames}]`;
-        }).join('\n');
-        
-        // Build name-to-ID lookup for fallback resolution (use ALL employees, not just relevant)
+        // Build name-to-ID lookup
         nameToIdMap = {};
         employees.forEach(e => {
           const fullName = `${e.first_name} ${e.last_name}`.toLowerCase().trim();
@@ -516,136 +409,53 @@ Vraag: ${finalPrompt}`;
           nameToIdMap[e.first_name.toLowerCase().trim()] = e.id;
           nameToIdMap[e.last_name.toLowerCase().trim()] = e.id;
         });
-        
-        // Build a set of ALL employee IDs (for distinguishing "wrong roster" vs "truly unknown")
-        const allEmployeeIds = new Set(employees.map(e => e.id));
-        
-        // Calculate total available hours vs needed hours
-        const totalAvailableHours = contextData.medewerkers.reduce((sum, e) => sum + (e.max_inzetbaar_deze_week || 0), 0);
-        let totalNeededHours = 0;
-        for (const dp of scheduleDayparts) {
-          const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
-          for (const r of dpReqs) {
-            if (!r.doeluren || r.doeluren <= 0) continue;
-            const shiftsNeeded = r.min_bezetting || 1;
-            const hoursPerShift = daypartHoursMap[dp.id] || 4;
-            totalNeededHours += shiftsNeeded * hoursPerShift;
-          }
-        }
 
-        systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
+        // === BUILD STRUCTURED PROMPT ===
+        const { prompt: structuredPrompt, totalShiftsNeeded } = buildSchedulePrompt({
+          companyName: currentCompany?.name,
+          scheduleLocationId,
+          locationName: scheduleLocations[0]?.name || 'Onbekend',
+          weekStartStr,
+          weekEndStr,
+          monthStartStr,
+          monthEndStr,
+          scheduleDepts,
+          scheduleDayparts,
+          relevantEmployees,
+          staffingReqs: summaryReqs,
+          weekDates,
+          daypartHoursMap,
+          functions,
+          totalAvailableHours,
+          totalNeededHours,
+        });
 
-OPDRACHT: Genereer een weekrooster. Volg de EXACTE SHIFT-OPDRACHTEN hieronder letterlijk.
-
-⚠️ CRUCIAAL - ID REGELS:
-1. Gebruik ALTIJD de exacte DATABASE ID's (lange hex strings) — NOOIT namen als ID.
-2. Je mag ALLEEN medewerker-ID's gebruiken uit de MEDEWERKERS BUDGET sectie hieronder.
-3. Gebruik GEEN ID's die niet in de data staan — ook niet als je ze "logisch" vindt.
-4. Kopieer ID's LETTERLIJK — één karakter verschil = ongeldige shift.
-
-=== EXACTE SHIFT-OPDRACHTEN ===
-${shiftInstructionsText}
-
-TOTAAL: Maak EXACT ${totalShiftsNeeded} shifts.
-
-=== CAPACITEITSOVERZICHT ===
-Beschikbare uren deze week (rekening houdend met maandbudget): ${totalAvailableHours}u
-Benodigde uren (alle shifts): ~${Math.round(totalNeededHours)}u
-Maand: ${monthStartStr} t/m ${monthEndStr}
-${totalAvailableHours > totalNeededHours * 1.3 
-  ? `⚠️ Er zijn MEER uren beschikbaar dan nodig. Verdeel de shifts eerlijk zodat iedereen werkt maar niemand meer dan hun max_inzetbaar_deze_week.`
-  : totalAvailableHours < totalNeededHours 
-    ? `⚠️ Er zijn MINDER uren beschikbaar dan nodig. Sommige shifts kunnen niet gevuld worden. Meld dit in unresolved_issues.`
-    : `Capaciteit past goed bij de behoefte.`}
-
-=== MEDEWERKERS BUDGET ===
-${employeeBudgetLines}
-
-=== STRIKTE REGELS (OVERTREDING = FOUT) ===
-
-REGEL 1 - TIJDEN EN DAGDEEL-ID: ELKE shift moet het JUISTE dagdeel-ID gebruiken met bijbehorende start_time en end_time.
-  LET OP: Er zijn KORTE diensten (4u, bijv. ochtend 07:00-11:00) en LANGE diensten (8u, bijv. dagdienst 07:00-15:30).
-  Gebruik het EXACTE dagdeel-ID uit de OPDRACHT — NIET een ander dagdeel met andere tijden!
-  Een bezettingsnorm van 8u doeluren kan NIET vervuld worden met een 4u dagdeel.
-
-REGEL 2 - MAX 1 PER AFDELING PER DAG: Nooit 2x dezelfde medewerker op dezelfde dag in dezelfde afdeling.
-
-REGEL 3 - MAX 2 SHIFTS PER DAG: Bijv. 1 ochtend + 1 middag. Aansluitende shifts (08:00-12:00 + 12:00-16:00) zijn TOEGESTAAN.
-
-REGEL 4 - VOORKEUR vs BACK-UP AFDELINGEN (ZEER BELANGRIJK!):
-  Elke medewerker heeft "voorkeur_afdelingen" en "backup_afdelingen".
-  STAP 1: Vul EERST alle shifts met medewerkers die de afdeling als VOORKEUR hebben.
-  STAP 2: Alleen als er onvoldoende voorkeur-medewerkers zijn, zet dan iemand in die de afdeling als BACK-UP heeft.
-  STAP 3: Meld in unresolved_issues als je een back-up medewerker hebt moeten inzetten (en waarom).
-  Een medewerker mag NOOIT ingepland worden op een afdeling die NIET in voorkeur OF backup staat.
-
-REGEL 5 - FUNCTIE MATCH (OP BASIS VAN ID's, NIET NAMEN):
-  Elke afdeling heeft een lijst "toegestane_functies" (zie AFDELINGEN sectie hieronder).
-  Een medewerker mag ALLEEN ingepland worden op een afdeling als de functie-ID van de medewerker voorkomt in de toegestane functies van die afdeling.
-  Als een afdeling GEEN toegestane functies heeft ingesteld, is elke functie toegestaan.
-  Functie-mismatch + back-up afdeling = allerlaatste optie. Meld altijd in unresolved_issues.
-
-REGEL 6 - MAANDELIJKS URENBUDGET (ALLERBELANGRIJKSTE REGEL!):
-  Elke medewerker heeft "max_inzetbaar_deze_week" — dit is het ABSOLUTE MAXIMUM aantal uren dat je deze week mag inplannen.
-  OVERSCHRIJDING IS VERBODEN. Bijvoorbeeld: als max=16u, mag je NOOIT meer dan 16u plannen, zelfs als er gaten zijn.
-  Bereken VOORAF hoeveel shifts elke medewerker kan doen: max_uren / uren_per_shift. Plan NOOIT meer shifts dan dit getal.
-  Als er niet genoeg medewerkers zijn om alle shifts te vullen, laat de shift dan LEEG en meld het in unresolved_issues.
-  Verdeel shifts GELIJKMATIG over de week. Niet alles op 1 dag.
-  Als max_inzetbaar_deze_week = 0, mag deze medewerker ABSOLUUT NIET ingepland worden.
-
-REGEL 7 - RUSTTIJD: Minimaal 11 uur rust tussen twee diensten.
-
-REGEL 8 - NIET GENOEG PERSONEEL: Als er niet genoeg medewerkers zijn:
-  - Meld welke shifts niet gevuld konden worden in unresolved_issues
-  - Meld of er medewerkers met restcapaciteit zijn die wellicht overgeplaatst kunnen worden van andere afdelingen/locaties
-
-=== DAGDELEN (met tijden en netto uren per shift) ===
-${JSON.stringify(contextData.dayparts.map(dp => ({
-  ...dp, 
-  netto_uren_per_shift: daypartHoursMap[dp.id] || '?'
-})), null, 2)}
-
-=== AFDELINGEN IN DIT ROOSTER (met toegestane functies) ===
-${JSON.stringify(scheduleDepts.map(d => {
-  const allowedFuncs = (d.allowedFunctionIds || []).map(fId => {
-    const f = functions.find(fn => fn.id === fId);
-    return f ? { id: f.id, naam: f.name } : null;
-  }).filter(Boolean);
-  return { id: d.id, naam: d.name, toegestane_functies: allowedFuncs };
-}), null, 2)}
-
-=== ROOSTER INFO ===
-- Locatie ID: ${scheduleLocationId}
-- Locatie naam: ${scheduleLocations[0]?.name || 'Onbekend'}
-- Periode: ${weekStart.toISOString().split('T')[0]} t/m ${weekEnd.toISOString().split('T')[0]}
-
-=== VOORBEELD SHIFT (let op: gebruik ECHTE ID's, geen namen!) ===
-{ "employeeId": "${contextData.medewerkers[0]?.id || 'ECHTE_ID'}", "departmentId": "${scheduleDepts[0]?.id || 'ECHTE_ID'}", "locationId": "${scheduleLocationId}", "daypartId": "${scheduleDayparts[0]?.id || 'ECHTE_ID'}", "date": "2026-03-16", "start_time": "${scheduleDayparts[0]?.startTime || '07:00'}", "end_time": "${scheduleDayparts[0]?.endTime || '11:00'}", "break_duration": ${scheduleDayparts[0]?.break_duration || 0} }`;
+        systemPrompt = structuredPrompt;
 
         responseSchema = {
           type: "object",
           properties: {
             shifts: {
               type: "array",
-              description: `Array van EXACT ${totalShiftsNeeded} shifts`,
+              description: `Array van EXACT ${totalShiftsNeeded} shifts. Eén object per shift.`,
               items: {
                 type: "object",
                 properties: {
-                  employeeId: { type: "string", description: "Database ID van medewerker (lange hex string, NIET de naam)" },
-                  departmentId: { type: "string", description: "Database ID van afdeling (lange hex string)" },
-                  locationId: { type: "string", description: "Database ID van locatie (lange hex string)" },
-                  daypartId: { type: "string", description: "Database ID van dagdeel (lange hex string)" },
+                  employeeId: { type: "string", description: "Exact database ID (hex string) van medewerker" },
+                  departmentId: { type: "string", description: "Exact database ID van afdeling" },
+                  locationId: { type: "string", description: "Database ID van locatie" },
+                  daypartId: { type: "string", description: "Exact database ID van dagdeel" },
                   date: { type: "string", description: "Datum YYYY-MM-DD" },
-                  start_time: { type: "string", description: "Starttijd HH:mm = dagdeel startTijd" },
-                  end_time: { type: "string", description: "Eindtijd HH:mm = dagdeel eindTijd" },
-                  break_duration: { type: "number", description: "Pauze minuten van dagdeel (0=geen pauze)" }
+                  start_time: { type: "string", description: "Starttijd HH:mm uit shift-opdracht" },
+                  end_time: { type: "string", description: "Eindtijd HH:mm uit shift-opdracht" },
+                  break_duration: { type: "number", description: "Pauze minuten (0=geen pauze)" }
                 },
                 required: ["employeeId", "departmentId", "locationId", "daypartId", "date", "start_time", "end_time"]
               }
             },
             unresolved_issues: {
               type: "array",
-              description: "Bezettingsnormen die NIET volledig ingevuld konden worden, OF medewerkers met verkeerde functie ingezet",
+              description: "Shift-opdrachten die NIET gevuld konden worden",
               items: {
                 type: "object",
                 properties: {
@@ -657,20 +467,7 @@ ${JSON.stringify(scheduleDepts.map(d => {
                 }
               }
             },
-            employee_hours_summary: {
-              type: "array",
-              description: "Overzicht uren per medewerker",
-              items: {
-                type: "object",
-                properties: {
-                  naam: { type: "string" },
-                  contract_hours: { type: "number" },
-                  planned_hours: { type: "number" },
-                  shifts_count: { type: "number" }
-                }
-              }
-            },
-            summary: { type: "string", description: "Samenvatting met capaciteitsanalyse" }
+            summary: { type: "string", description: "Korte samenvatting" }
           },
           required: ["shifts", "unresolved_issues", "summary"]
         };
