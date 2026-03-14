@@ -473,9 +473,13 @@ Vraag: ${finalPrompt}`;
         };
       }
 
+      // Use a stronger model for schedule generation (Test 1) to handle 30+ shifts
+      const modelToUse = testCase.id === 1 ? 'claude_sonnet_4_6' : undefined;
+      
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: systemPrompt,
-        response_json_schema: responseSchema
+        response_json_schema: responseSchema,
+        ...(modelToUse ? { model: modelToUse } : {})
       });
 
       console.log('AI Response:', response);
