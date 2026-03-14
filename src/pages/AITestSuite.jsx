@@ -482,26 +482,24 @@ Vraag: ${finalPrompt}`;
           for (const r of dpReqs) {
             if (!r.doeluren || r.doeluren <= 0) continue;
             const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
-            // Each staffing requirement = exactly 1 shift per person needed
-            // The shift covers the FULL daypart time range
-            // The targetHours is the NETTO working time (doeluren)
             const shiftsNeeded = r.min_bezetting || 1;
             totalShiftsNeeded += shiftsNeeded;
             
             const dateForDay = weekDates[r.dag_van_week] || null;
-            
             const dpBreak = dp.break_duration || 0;
-            const breakInfo = dpBreak > 0 ? `Ja (${dpBreak} min)` : 'Nee (break_duration=0)';
+            const nettoUren = daypartHoursMap[dp.id] || '?';
+            const brutoUren = calcHoursFromTime(dp.startTime, dp.endTime);
             
             shiftInstructions.push(
               `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${dateForDay ? ` (${dateForDay})` : ''}:
-  - Dagdeel ID: ${dp.id}
-  - Afdeling ID: ${dp.departmentId}
-  - Start: ${dp.startTime}, Eind: ${dp.endTime}
-  - Pauze: ${breakInfo}
+  - Dagdeel ID: "${dp.id}"
+  - Afdeling ID: "${dp.departmentId}"
+  - TIJDEN: start_time="${dp.startTime}" end_time="${dp.endTime}" (${brutoUren}u bruto, ${nettoUren}u netto)
+  - Pauze: break_duration=${dpBreak} ${dpBreak > 0 ? `(${dpBreak} min)` : '(geen pauze)'}
+  - Doeluren bezettingsnorm: ${r.doeluren}u (dit is een ${r.doeluren >= 7 ? 'LANGE DAGDIENST' : 'KORTE DIENST'})
   - Benodigde medewerkers: ${shiftsNeeded}
-  - Maak EXACT ${shiftsNeeded} shift(s) met start_time="${dp.startTime}" en end_time="${dp.endTime}" en break_duration=${dpBreak}
-  - Datum: ${dateForDay || 'ONBEKEND'}`
+  - Datum: ${dateForDay || 'ONBEKEND'}
+  - ⚠️ ELKE shift telt als ${nettoUren}u voor het urenbudget van de medewerker`
             );
           }
         }
