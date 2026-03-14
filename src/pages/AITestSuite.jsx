@@ -570,7 +570,10 @@ ${employeeBudgetLines}
 
 === STRIKTE REGELS (OVERTREDING = FOUT) ===
 
-REGEL 1 - TIJDEN: ELKE shift heeft EXACT de start_time en end_time van het dagdeel. KOPIEER LETTERLIJK.
+REGEL 1 - TIJDEN EN DAGDEEL-ID: ELKE shift moet het JUISTE dagdeel-ID gebruiken met bijbehorende start_time en end_time.
+  LET OP: Er zijn KORTE diensten (4u, bijv. ochtend 07:00-11:00) en LANGE diensten (8u, bijv. dagdienst 07:00-15:30).
+  Gebruik het EXACTE dagdeel-ID uit de OPDRACHT — NIET een ander dagdeel met andere tijden!
+  Een bezettingsnorm van 8u doeluren kan NIET vervuld worden met een 4u dagdeel.
 
 REGEL 2 - MAX 1 PER AFDELING PER DAG: Nooit 2x dezelfde medewerker op dezelfde dag in dezelfde afdeling.
 
