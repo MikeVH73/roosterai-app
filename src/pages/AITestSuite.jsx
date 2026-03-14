@@ -407,15 +407,6 @@ Vraag: ${finalPrompt}`;
           };
         });
 
-        // Helper: calculate hours from time range
-        const calcHours = (start, end) => {
-          const [sh, sm] = start.split(':').map(Number);
-          const [eh, em] = end.split(':').map(Number);
-          let diff = (eh * 60 + em) - (sh * 60 + sm);
-          if (diff <= 0) diff += 24 * 60; // overnight
-          return diff / 60;
-        };
-
         // Build precise shift requirements per daypart per day
         summaryReqs = contextData.bezettingseisen || [];
         const shiftInstructions = [];
