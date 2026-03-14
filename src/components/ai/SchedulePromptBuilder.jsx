@@ -205,16 +205,18 @@ STAP 3: Houd het weekbudget bij: elke shift kost X netto uren. STOP als een mede
 STAP 4: Als een shift niet gevuld kan worden, meld het in unresolved_issues.
 
 ════════════════════════════════
-HARDE REGELS
+HARDE REGELS (KRITIEK - VOLG EXACT)
 ════════════════════════════════
 
 1. GEBRUIK ALLEEN ID's uit deze prompt. Kopieer letterlijk.
 2. MAX 1 SHIFT PER MEDEWERKER PER DAGDEEL PER DAG. Twee verschillende dagdelen op dezelfde dag MAG.
-3. VOORKEUR EERST: Gebruik ALTIJD ✅-medewerkers voordat je 🔶-medewerkers inzet.
-4. FUNCTIE-MISMATCH: Medewerkers met ⚠️FUNCTIE-MISMATCH alleen als laatste optie.
-5. URENBUDGET: NOOIT meer plannen dan max uren/week. Bij twijfel → minder plannen.
-6. TIJDEN: Kopieer start_time, end_time en break_duration EXACT uit de shift-opdracht.
-7. ELKE shift-opdracht MOET gevuld worden, tenzij er echt niemand beschikbaar is.
+3. EXACT AANTAL SHIFTS: Maak PRECIES het aantal shifts dat in elke shift-opdracht staat (het "medewerker(s) nodig" getal). NOOIT MEER. Als er staat "1 medewerker(s) nodig", maak dan EXACT 1 shift voor dat dagdeel op die dag.
+4. VOORKEUR IS VERPLICHT: Gebruik ALLEEN ✅-medewerkers. Gebruik 🔶 back-up medewerkers UITSLUITEND als er voor een specifieke shift-opdracht GEEN ENKELE ✅-medewerker meer beschikbaar is (alle op max uren of al ingepland op dat dagdeel).
+5. FUNCTIE-MISMATCH: Medewerkers met ⚠️FUNCTIE-MISMATCH alleen als allerlaatste optie.
+6. URENBUDGET: NOOIT meer plannen dan max uren/week. Bij twijfel → minder plannen.
+7. TIJDEN: Kopieer start_time, end_time en break_duration EXACT uit de shift-opdracht.
+8. ELKE shift-opdracht MOET gevuld worden met PRECIES het gevraagde aantal, tenzij er echt niemand beschikbaar is.
+9. GEEN EXTRA SHIFTS: Het totaal aantal shifts in je antwoord moet EXACT gelijk zijn aan het totaal hieronder. Niet meer, niet minder.
 
 ════════════════════════════════
 AFDELINGEN & OPDRACHTEN
