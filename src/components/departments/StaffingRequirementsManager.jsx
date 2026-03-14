@@ -153,7 +153,15 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
 
   const handleDelete = async (req) => {
     if (window.confirm('Weet je zeker dat je deze bezettingsnorm wilt verwijderen?')) {
-      await deleteMutation.mutateAsync(req.id);
+      closeDialog();
+      try {
+        await deleteMutation.mutateAsync(req.id);
+      } catch (err) {
+        // Record was already deleted (stale reference) — just refresh
+        queryClient.invalidateQueries(['staffing-requirements', companyId, departmentId]);
+        onUpdate?.();
+        toast.success('Bezettingsnorm verwijderd');
+      }
     }
   };
 
