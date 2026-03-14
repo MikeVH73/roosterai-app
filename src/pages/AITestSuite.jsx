@@ -520,6 +520,23 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
         }
 
         console.log(`AI genereerde ${response.shifts.length} shifts, gaan aanmaken...`);
+        
+        // STAP 0: Verwijder bestaande shifts voor deze week in dit rooster
+        const existingWeekShifts = await base44.entities.Shift.filter({ 
+          scheduleId: targetSchedule.id 
+        });
+        const weekStartStr = weekStart.toISOString().split('T')[0];
+        const weekEndStr = weekEnd.toISOString().split('T')[0];
+        const shiftsToDelete = existingWeekShifts.filter(s => 
+          s.date >= weekStartStr && s.date <= weekEndStr
+        );
+        if (shiftsToDelete.length > 0) {
+          console.log(`Verwijder ${shiftsToDelete.length} bestaande shifts voor week ${weekStartStr} - ${weekEndStr}`);
+          for (const s of shiftsToDelete) {
+            await base44.entities.Shift.delete(s.id);
+          }
+        }
+        
         const createdShifts = [];
         const errors = [];
         const skipped = [];
