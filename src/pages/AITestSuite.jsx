@@ -585,12 +585,13 @@ REGEL 5 - FUNCTIE MATCH:
   Een "Huisbezoeker" op "Huisbezoeken" is ook ideaal.
   Functie-mismatch + back-up afdeling = allerlaatste optie. Meld altijd in unresolved_issues.
 
-REGEL 6 - MAANDELIJKS URENBUDGET (BELANGRIJK!):
-  Elke medewerker heeft "max_inzetbaar_deze_week" — dit is het MAXIMUM aantal uren dat je deze week mag inplannen.
-  Dit houdt al rekening met contracturen per maand (contracturen_per_week × 13/3) en hoeveel al ingeroosterd is.
-  Plan medewerkers in voor zoveel mogelijk van hun max_inzetbaar_deze_week.
+REGEL 6 - MAANDELIJKS URENBUDGET (ALLERBELANGRIJKSTE REGEL!):
+  Elke medewerker heeft "max_inzetbaar_deze_week" — dit is het ABSOLUTE MAXIMUM aantal uren dat je deze week mag inplannen.
+  OVERSCHRIJDING IS VERBODEN. Bijvoorbeeld: als max=16u, mag je NOOIT meer dan 16u plannen, zelfs als er gaten zijn.
+  Bereken VOORAF hoeveel shifts elke medewerker kan doen: max_uren / uren_per_shift. Plan NOOIT meer shifts dan dit getal.
+  Als er niet genoeg medewerkers zijn om alle shifts te vullen, laat de shift dan LEEG en meld het in unresolved_issues.
   Verdeel shifts GELIJKMATIG over de week. Niet alles op 1 dag.
-  Als max_inzetbaar_deze_week = 0, mag deze medewerker NIET ingepland worden.
+  Als max_inzetbaar_deze_week = 0, mag deze medewerker ABSOLUUT NIET ingepland worden.
 
 REGEL 7 - RUSTTIJD: Minimaal 11 uur rust tussen twee diensten.
 
