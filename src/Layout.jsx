@@ -84,77 +84,109 @@ export default function Layout({ children, currentPageName }) {
           color: var(--color-text-primary);
         }
 
-        /* Button styling */
-        .btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
-          background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%) !important;
-          color: white !important;
-          border: none !important;
-        }
+        /* ===== THEME-AWARE OVERRIDES ===== */
 
-        .btn-primary:hover, button[class*="bg-primary"]:hover, button[class*="bg-blue"]:hover {
-          background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%) !important;
-        }
-
-        /* Card backgrounds */
-        [class*="bg-white"]:not(.avatar-fallback) {
+        /* Backgrounds */
+        [class*="bg-white"]:not(.avatar-fallback):not([class*="bg-white/"]) {
           background-color: var(--color-surface) !important;
         }
-
-        [class*="bg-slate-50"], [class*="bg-gray-50"], [class*="bg-blue-50"] {
+        [class*="bg-slate-50"], [class*="bg-gray-50"], [class*="bg-blue-50"],
+        [class*="bg-slate-100"], [class*="bg-gray-100"] {
           background-color: var(--color-surface-light) !important;
         }
 
-        /* Text colors - be more specific */
+        /* Text — primary (darkest readable) */
+        .text-slate-900, .text-gray-900, .text-slate-800, .text-gray-800,
+        .text-black {
+          color: var(--color-text-primary) !important;
+        }
+        /* Text — secondary */
+        .text-slate-700, .text-gray-700, .text-slate-600, .text-gray-600 {
+          color: var(--color-text-secondary) !important;
+        }
+        /* Text — muted */
+        .text-slate-500, .text-gray-500, .text-slate-400, .text-gray-400,
+        .text-slate-300 {
+          color: var(--color-text-muted) !important;
+        }
+
+        /* Headings always primary */
         h1, h2, h3, h4, h5, h6 {
           color: var(--color-text-primary) !important;
         }
 
-        p, span, div {
+        /* Paragraphs, spans, divs inherit */
+        p, span, div, label, li, td, th {
           color: inherit;
         }
 
-        .text-slate-900, .text-gray-900 {
-          color: var(--color-text-primary) !important;
-        }
-
-        .text-slate-700, .text-gray-700 {
-          color: var(--color-text-secondary) !important;
-        }
-
-        .text-slate-600, .text-slate-500, .text-gray-600, .text-gray-500, .text-slate-400 {
-          color: var(--color-text-muted) !important;
-        }
-
         /* Borders */
-        [class*="border-slate"], [class*="border-gray"] {
+        [class*="border-slate"], [class*="border-gray"],
+        [class*="divide-slate"], [class*="divide-gray"] {
           border-color: var(--color-border) !important;
         }
 
-        /* Inputs */
+        /* Inputs & form elements */
         input, textarea, select {
           background-color: var(--color-surface-light) !important;
           color: var(--color-text-primary) !important;
           border-color: var(--color-border) !important;
         }
-
         input::placeholder, textarea::placeholder {
           color: var(--color-text-muted) !important;
         }
 
-        /* Dropdown menus */
-        [role="menu"], [role="menuitem"] {
+        /* Dropdowns & popovers */
+        [role="menu"], [role="menuitem"], [role="listbox"], [role="option"],
+        [data-radix-popper-content-wrapper] [role="listbox"],
+        [data-radix-popper-content-wrapper] div {
           background-color: var(--color-surface);
           color: var(--color-text-primary);
         }
 
-        /* Button text always visible */
+        /* Dialogs */
+        [role="dialog"] {
+          background-color: var(--color-surface) !important;
+          color: var(--color-text-primary) !important;
+          border-color: var(--color-border) !important;
+        }
+
+        /* Tables */
+        table, thead, tbody, tr, th, td {
+          border-color: var(--color-border) !important;
+        }
+        th {
+          color: var(--color-text-secondary) !important;
+          background-color: var(--color-surface-light) !important;
+        }
+        td {
+          color: var(--color-text-primary) !important;
+        }
+
+        /* Cards — ensure text inside cards is readable */
+        .rounded-xl, .rounded-lg, .rounded-md {
+          color: var(--color-text-primary);
+        }
+
+        /* Buttons */
+        .btn-primary, button[class*="bg-primary"], button[class*="bg-blue"] {
+          background: linear-gradient(135deg, #38bdf8 0%, #60a5fa 100%) !important;
+          color: white !important;
+          border: none !important;
+        }
+        .btn-primary:hover, button[class*="bg-primary"]:hover, button[class*="bg-blue"]:hover {
+          background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%) !important;
+        }
         button {
           color: inherit;
         }
-
         button[class*="outline"], button[variant="outline"] {
           color: var(--color-text-primary) !important;
           background-color: var(--color-surface) !important;
+          border-color: var(--color-border) !important;
+        }
+        button[class*="ghost"] {
+          color: var(--color-text-primary) !important;
         }
 
         /* Badges */
@@ -162,9 +194,42 @@ export default function Layout({ children, currentPageName }) {
           border-color: var(--color-border) !important;
         }
 
-        /* Icons should inherit color */
+        /* Tabs */
+        [role="tablist"] {
+          background-color: var(--color-surface-light) !important;
+          border-color: var(--color-border) !important;
+        }
+        [role="tab"] {
+          color: var(--color-text-muted) !important;
+        }
+        [role="tab"][data-state="active"], [role="tab"][aria-selected="true"] {
+          color: var(--color-text-primary) !important;
+          background-color: var(--color-surface) !important;
+        }
+
+        /* Tooltips */
+        [role="tooltip"] {
+          background-color: var(--color-surface) !important;
+          color: var(--color-text-primary) !important;
+          border-color: var(--color-border) !important;
+        }
+
+        /* Icons inherit from parent */
         svg {
           color: inherit;
+        }
+
+        /* Scrollbar for dark mode */
+        [data-theme="dark"] ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+          background: var(--color-background);
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+          background: var(--color-border);
+          border-radius: 4px;
         }
         `}</style>
         <LayoutContent currentPageName={currentPageName}>
