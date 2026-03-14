@@ -556,25 +556,30 @@ REGEL 2 - MAX 1 PER AFDELING PER DAG: Nooit 2x dezelfde medewerker op dezelfde d
 
 REGEL 3 - MAX 2 SHIFTS PER DAG: Bijv. 1 ochtend + 1 middag. Aansluitende shifts (08:00-12:00 + 12:00-16:00) zijn TOEGESTAAN.
 
-REGEL 4 - AFDELING MATCH: De medewerker MOET de afdeling in "afdelingen_in_dit_rooster" hebben.
+REGEL 4 - VOORKEUR vs BACK-UP AFDELINGEN (ZEER BELANGRIJK!):
+  Elke medewerker heeft "voorkeur_afdelingen" en "backup_afdelingen".
+  STAP 1: Vul EERST alle shifts met medewerkers die de afdeling als VOORKEUR hebben.
+  STAP 2: Alleen als er onvoldoende voorkeur-medewerkers zijn, zet dan iemand in die de afdeling als BACK-UP heeft.
+  STAP 3: Meld in unresolved_issues als je een back-up medewerker hebt moeten inzetten (en waarom).
+  Een medewerker mag NOOIT ingepland worden op een afdeling die NIET in voorkeur OF backup staat.
 
-REGEL 5 - FUNCTIE MATCH (BELANGRIJK!):
-  Medewerkers moeten worden ingepland op afdelingen die passen bij hun FUNCTIE:
-  - Functie "Bloedprikker" → plan in op afdelingen met "Bloedprikpoli" in de naam
-  - Functie "Huisbezoeker" → plan in op afdelingen met "Huisbezoeken" in de naam
-  - Functie "Baliemedewerker" → plan in op afdelingen met "Balie" in de naam
-  Alleen als er ONVOLDOENDE medewerkers met de juiste functie zijn, mag je iemand anders inzetten. Meld dit in unresolved_issues.
+REGEL 5 - FUNCTIE MATCH:
+  Combineer met regel 4: een medewerker met functie "Bloedprikker" en voorkeur "Bloedprikpoli" is de IDEALE match.
+  Een "Huisbezoeker" op "Huisbezoeken" is ook ideaal.
+  Functie-mismatch + back-up afdeling = allerlaatste optie. Meld altijd in unresolved_issues.
 
-REGEL 6 - CONTRACTUREN VOLLEDIG BENUTTEN:
-  Plan elke medewerker in voor zoveel mogelijk van hun contracturen. 
-  Voorbeeld: medewerker met 24u contract → plan ~24u aan shifts in (bijv. 6 shifts van 4u).
-  Voorbeeld: medewerker met 40u contract → plan ~40u aan shifts in.
-  NIET slechts 4-8 uur plannen als iemand 24-40u contract heeft!
-  Verdeel shifts GELIJKMATIG over de week (bijv. 4-5 dagen voor 24u contract, niet alles op 1 dag).
+REGEL 6 - MAANDELIJKS URENBUDGET (BELANGRIJK!):
+  Elke medewerker heeft "max_inzetbaar_deze_week" — dit is het MAXIMUM aantal uren dat je deze week mag inplannen.
+  Dit houdt al rekening met contracturen per maand (contracturen_per_week × 13/3) en hoeveel al ingeroosterd is.
+  Plan medewerkers in voor zoveel mogelijk van hun max_inzetbaar_deze_week.
+  Verdeel shifts GELIJKMATIG over de week. Niet alles op 1 dag.
+  Als max_inzetbaar_deze_week = 0, mag deze medewerker NIET ingepland worden.
 
 REGEL 7 - RUSTTIJD: Minimaal 11 uur rust tussen twee diensten.
 
-REGEL 8 - NIET GENOEG PERSONEEL: Als er niet genoeg medewerkers zijn, laat shift WEG en meld in unresolved_issues.
+REGEL 8 - NIET GENOEG PERSONEEL: Als er niet genoeg medewerkers zijn:
+  - Meld welke shifts niet gevuld konden worden in unresolved_issues
+  - Meld of er medewerkers met restcapaciteit zijn die wellicht overgeplaatst kunnen worden van andere afdelingen/locaties
 
 === DAGDELEN (met tijden en netto uren per shift) ===
 ${JSON.stringify(contextData.dayparts.map(dp => ({
