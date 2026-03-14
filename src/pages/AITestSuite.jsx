@@ -532,11 +532,24 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
         const shiftsToDelete = existingWeekShifts.filter(s => 
           s.date >= weekStartStr && s.date <= weekEndStr
         );
+        
+        // Helper: process items in batches with delay to avoid rate limits
+        const processBatch = async (items, fn, batchSize = 5, delayMs = 500) => {
+          const results = [];
+          for (let i = 0; i < items.length; i += batchSize) {
+            const batch = items.slice(i, i + batchSize);
+            const batchResults = await Promise.all(batch.map(fn));
+            results.push(...batchResults);
+            if (i + batchSize < items.length) {
+              await new Promise(r => setTimeout(r, delayMs));
+            }
+          }
+          return results;
+        };
+        
         if (shiftsToDelete.length > 0) {
           console.log(`Verwijder ${shiftsToDelete.length} bestaande shifts voor week ${weekStartStr} - ${weekEndStr}`);
-          for (const s of shiftsToDelete) {
-            await base44.entities.Shift.delete(s.id);
-          }
+          await processBatch(shiftsToDelete, s => base44.entities.Shift.delete(s.id));
         }
         
         const createdShifts = [];
@@ -546,15 +559,20 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
         // Track employee assignments per day+department to prevent duplicates
         const assignmentTracker = {};
         
+        // Filter and deduplicate shifts first
+        const validShifts = [];
         for (const shift of response.shifts) {
-          // Pre-check: prevent same employee on same day in same department
           const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
           if (assignmentTracker[trackKey]) {
             skipped.push(`${shift.date}: ${shift.employeeId} al ingeroosterd bij ${shift.departmentId}`);
             continue;
           }
           assignmentTracker[trackKey] = true;
-          
+          validShifts.push(shift);
+        }
+        
+        // Create shifts in batches
+        await processBatch(validShifts, async (shift) => {
           try {
             const created = await base44.entities.Shift.create({
               companyId,
@@ -575,7 +593,7 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
             console.error('Shift creation error:', err);
             errors.push(`${shift.date}: ${err.message}`);
           }
-        }
+        });
         
         if (skipped.length > 0) {
           console.warn(`${skipped.length} shifts overgeslagen (dubbele toewijzing):`, skipped);
