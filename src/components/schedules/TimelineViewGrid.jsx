@@ -477,7 +477,7 @@ export default function TimelineViewGrid({
                                            e.stopPropagation();
                                            onShiftClick?.(shiftForThisRow);
                                          }}
-                                         title={`${employee?.first_name} ${employee?.last_name} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
+                                         title={`${employee ? `${employee.first_name} ${employee.last_name}` : 'Onbekend'} | ${shiftForThisRow.start_time} - ${shiftForThisRow.end_time} | ${duration}u`}
                                        >
                                          <div
                                            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity z-30"
@@ -498,7 +498,7 @@ export default function TimelineViewGrid({
                                            onClick={(e) => e.stopPropagation()}
                                          />
                                          <span className="truncate">
-                                           {employee?.first_name} {duration}u
+                                           {employee ? `${employee.first_name} ${duration}u` : `${duration}u`}
                                          </span>
                                        </div>
                                      );

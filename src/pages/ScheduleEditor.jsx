@@ -475,8 +475,8 @@ export default function ScheduleEditor() {
                  schedule={schedule}
                  shifts={shifts}
                  locations={locations}
-                 departments={departments}
-                 employees={relevantEmployees}
+                 departments={relevantDepartments}
+                 employees={employees}
                  functions={functions}
                  dayparts={dayparts}
                  currentWeekStart={currentWeekStart}
