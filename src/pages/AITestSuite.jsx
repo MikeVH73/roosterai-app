@@ -836,13 +836,15 @@ Vraag: ${finalPrompt}`;
           }
         });
       } else if (testCase.id === 1) {
-        // No shifts generated
+        // Test 1 but no targetSchedule found
         setTestResults({
           ...testResults,
           [testCase.id]: {
             status: 'failed',
-            response: '❌ AI heeft geen shifts gegenereerd',
-            details: JSON.stringify(response, null, 2),
+            response: '❌ Geen rooster gevonden om shifts in te plannen. Maak eerst een rooster aan met afdelingen en locaties.',
+            details: schedules.length === 0 
+              ? 'Er zijn geen roosters in het systeem' 
+              : `Er zijn ${schedules.length} roosters maar geen kon worden geselecteerd`,
             timestamp: new Date().toISOString()
           }
         });
