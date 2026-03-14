@@ -764,9 +764,24 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           console.warn('ID-resolutie:', resolutionIssues);
         }
         
-        // Filter, deduplicate, and correct shifts
+        // Build employee max-hours tracking for server-side budget enforcement
+        const employeeHoursBudget = {};
+        relevantEmployees.forEach(e => {
+          const weeklyMax = e.contract_hours || 0;
+          const monthlyMax = Math.round((weeklyMax * 13) / 3);
+          const alreadyThisMonth = alreadyPlannedHours[e.id] || 0;
+          const remainingThisMonth = Math.max(0, monthlyMax - alreadyThisMonth);
+          employeeHoursBudget[e.id] = {
+            maxThisWeek: Math.min(weeklyMax, remainingThisMonth),
+            planned: 0,
+            name: `${e.first_name} ${e.last_name}`
+          };
+        });
+        
+        // Filter, deduplicate, correct shifts, and enforce hour budgets
         const validShifts = [];
         const correctedTimes = [];
+        const budgetRejected = [];
         for (const shift of resolvedShifts) {
           const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
           if (assignmentTracker[trackKey]) {
@@ -784,6 +799,19 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
               shift.end_time = dp.endTime;
             }
             shift.break_duration = dp.break_duration || 0;
+          }
+          
+          // SERVER-SIDE BUDGET CHECK: weiger shift als medewerker over max uren gaat
+          if (shift.employeeId && employeeHoursBudget[shift.employeeId]) {
+            const budget = employeeHoursBudget[shift.employeeId];
+            const dpForHours = daypartLookup[shift.daypartId];
+            const shiftHours = dpForHours ? (calcHoursFromTime(dpForHours.startTime, dpForHours.endTime) - (dpForHours.break_duration || 0) / 60) : 4;
+            
+            if (budget.planned + shiftHours > budget.maxThisWeek * 1.1) {
+              budgetRejected.push(`🚫 ${budget.name}: ${shift.date} geweigerd (${Math.round(budget.planned)}u al gepland, max=${budget.maxThisWeek}u)`);
+              continue; // Skip this shift entirely
+            }
+            budget.planned += shiftHours;
           }
           
           validShifts.push(shift);
