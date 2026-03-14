@@ -291,16 +291,7 @@ Vraag: ${finalPrompt}`;
 
       const daysOfWeekNames = { 0: 'zondag', 1: 'maandag', 2: 'dinsdag', 3: 'woensdag', 4: 'donderdag', 5: 'vrijdag', 6: 'zaterdag' };
 
-      // Helper: calculate hours from time range (needed in multiple places)
-      const calcHoursFromTime = (start, end) => {
-        const [sh, sm] = start.split(':').map(Number);
-        const [eh, em] = end.split(':').map(Number);
-        let diff = (eh * 60 + em) - (sh * 60 + sm);
-        if (diff <= 0) diff += 24 * 60;
-        return diff / 60;
-      };
-
-      // Shared variables for Test 1 (used in prompt-building AND post-creation validation)
+      // Shared variables for Test 1
       let scheduleDayparts = [];
       let summaryReqs = [];
       let scheduleLocationId = null;
