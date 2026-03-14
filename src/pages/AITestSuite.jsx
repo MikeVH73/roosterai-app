@@ -396,13 +396,17 @@ Vraag: ${finalPrompt}`;
             
             const dateForDay = weekDates[r.dag_van_week] || null;
             
+            const dpBreak = dp.break_duration || 0;
+            const breakInfo = dpBreak > 0 ? `Ja (${dpBreak} min)` : 'Nee (break_duration=0)';
+            
             shiftInstructions.push(
               `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${dateForDay ? ` (${dateForDay})` : ''}:
   - Dagdeel ID: ${dp.id}
   - Afdeling ID: ${dp.departmentId}
   - Start: ${dp.startTime}, Eind: ${dp.endTime}
+  - Pauze: ${breakInfo}
   - Benodigde medewerkers: ${shiftsNeeded}
-  - Maak EXACT ${shiftsNeeded} shift(s) met start_time="${dp.startTime}" en end_time="${dp.endTime}"
+  - Maak EXACT ${shiftsNeeded} shift(s) met start_time="${dp.startTime}" en end_time="${dp.endTime}" en break_duration=${dpBreak}
   - Datum: ${dateForDay || 'ONBEKEND'}`
             );
           }
@@ -446,8 +450,8 @@ ${JSON.stringify(contextData.afdelingen, null, 2)}
 - Periode: ${weekStart.toISOString().split('T')[0]} t/m ${weekEnd.toISOString().split('T')[0]}
 
 === VOORBEELD SHIFT ===
-{ "employeeId": "abc123", "departmentId": "dept1", "locationId": "${scheduleLocationId}", "daypartId": "dp1", "date": "2026-03-16", "start_time": "07:00", "end_time": "11:30" }
-Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doeluren.`;
+{ "employeeId": "abc123", "departmentId": "dept1", "locationId": "${scheduleLocationId}", "daypartId": "dp1", "date": "2026-03-16", "start_time": "07:00", "end_time": "11:00", "break_duration": 0 }
+Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt ook van het dagdeel (0 = geen pauze).`;
 
         responseSchema = {
           type: "object",
