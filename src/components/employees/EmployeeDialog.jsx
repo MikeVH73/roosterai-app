@@ -36,6 +36,8 @@ const defaultFormData = {
   start_date: '',
   functionId: '',
   departmentIds: [],
+  preferred_departmentIds: [],
+  backup_departmentIds: [],
   whatsapp_opt_in: false,
   preferences: {
     preferred_days: [],
