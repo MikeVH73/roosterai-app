@@ -610,8 +610,8 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
 - Locatie naam: ${scheduleLocations[0]?.name || 'Onbekend'}
 - Periode: ${weekStart.toISOString().split('T')[0]} t/m ${weekEnd.toISOString().split('T')[0]}
 
-=== VOORBEELD SHIFT ===
-{ "employeeId": "abc123", "departmentId": "dept1", "locationId": "${scheduleLocationId}", "daypartId": "dp1", "date": "2026-03-16", "start_time": "07:00", "end_time": "11:00", "break_duration": 0 }`;
+=== VOORBEELD SHIFT (let op: gebruik ECHTE ID's, geen namen!) ===
+{ "employeeId": "${contextData.medewerkers[0]?.id || 'ECHTE_ID'}", "departmentId": "${scheduleDepts[0]?.id || 'ECHTE_ID'}", "locationId": "${scheduleLocationId}", "daypartId": "${scheduleDayparts[0]?.id || 'ECHTE_ID'}", "date": "2026-03-16", "start_time": "${scheduleDayparts[0]?.startTime || '07:00'}", "end_time": "${scheduleDayparts[0]?.endTime || '11:00'}", "break_duration": ${scheduleDayparts[0]?.break_duration || 0} }`;
 
         responseSchema = {
           type: "object",
