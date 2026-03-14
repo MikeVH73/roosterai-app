@@ -648,10 +648,10 @@ VERPLICHT:
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  const url = result.weekDate 
-                                    ? `/ScheduleEditor?id=${result.scheduleId}&date=${result.weekDate}`
-                                    : `/ScheduleEditor?id=${result.scheduleId}`;
-                                  window.open(url, '_blank');
+                                  const targetUrl = result.weekDate 
+                                    ? createPageUrl('ScheduleEditor') + `?id=${result.scheduleId}&date=${result.weekDate}`
+                                    : createPageUrl('ScheduleEditor') + `?id=${result.scheduleId}`;
+                                  navigate(targetUrl);
                                 }}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                               >
