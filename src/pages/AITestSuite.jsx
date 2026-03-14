@@ -562,7 +562,7 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
             },
             unresolved_issues: {
               type: "array",
-              description: "Bezettingsnormen die NIET volledig ingevuld konden worden",
+              description: "Bezettingsnormen die NIET volledig ingevuld konden worden, OF medewerkers met verkeerde functie ingezet",
               items: {
                 type: "object",
                 properties: {
@@ -574,7 +574,20 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
                 }
               }
             },
-            summary: { type: "string", description: "Samenvatting" }
+            employee_hours_summary: {
+              type: "array",
+              description: "Overzicht uren per medewerker",
+              items: {
+                type: "object",
+                properties: {
+                  naam: { type: "string" },
+                  contract_hours: { type: "number" },
+                  planned_hours: { type: "number" },
+                  shifts_count: { type: "number" }
+                }
+              }
+            },
+            summary: { type: "string", description: "Samenvatting met capaciteitsanalyse" }
           },
           required: ["shifts", "unresolved_issues", "summary"]
         };
