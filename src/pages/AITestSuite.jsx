@@ -617,16 +617,16 @@ Vraag: ${finalPrompt}`;
           const deptName = dept?.name || 'Onbekend';
           if (!deptValidation[deptName]) deptValidation[deptName] = { ok: 0, fail: 0, issues: [] };
           
-          const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
+          const dpReqs = summaryReqs.filter(r => r.daypartId === dp.id);
           
           for (const r of dpReqs) {
-            if (!r.doeluren || r.doeluren <= 0) continue;
-            const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
-            const neededStaff = r.min_bezetting || 1;
+            if (!r.targetHours || r.targetHours <= 0) continue;
+            const dayName = daysOfWeekNames[r.day_of_week] || `dag ${r.day_of_week}`;
+            const neededStaff = r.min_staff || 1;
             
             const matchingShifts = createdShifts.filter(s => {
               const shiftDay = new Date(s.date).getDay();
-              return s.daypartId === dp.id && shiftDay === r.dag_van_week;
+              return s.daypartId === dp.id && shiftDay === r.day_of_week;
             });
             
             if (matchingShifts.length >= neededStaff) {
