@@ -840,9 +840,11 @@ ${JSON.stringify(scheduleDepts.map(d => {
             const dpForHours = daypartLookup[shift.daypartId];
             const shiftHours = dpForHours ? (calcHoursFromTime(dpForHours.startTime, dpForHours.endTime) - (dpForHours.break_duration || 0) / 60) : 4;
             
-            if (budget.planned + shiftHours > budget.maxThisWeek * 1.1) {
-              budgetRejected.push(`🚫 ${budget.name}: ${shift.date} geweigerd (${Math.round(budget.planned)}u al gepland, max=${budget.maxThisWeek}u)`);
-              continue; // Skip this shift entirely
+            // Gebruik 1.15 marge (15%) om afrondingsproblemen te voorkomen
+            // Bijv: 16u contract = max 18.4u deze week (met marge)
+            if (budget.maxThisWeek > 0 && budget.planned + shiftHours > budget.maxThisWeek * 1.15) {
+              budgetRejected.push(`🚫 ${budget.name}: ${shift.date} geweigerd (${Math.round(budget.planned)}u al gepland + ${shiftHours}u = ${Math.round(budget.planned + shiftHours)}u, max=${budget.maxThisWeek}u)`);
+              continue;
             }
             budget.planned += shiftHours;
           }
