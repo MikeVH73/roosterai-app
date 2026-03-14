@@ -289,6 +289,8 @@ Vraag: ${finalPrompt}`;
       let scheduleDayparts = [];
       let summaryReqs = [];
       let scheduleLocationId = null;
+      let weekStart = null;
+      let weekEnd = null;
 
       // Special handling for Test 1: Generate actual schedule
       if (testCase.id === 1 && targetSchedule) {
@@ -298,9 +300,9 @@ Vraag: ${finalPrompt}`;
         const today = new Date();
         
         // Find next Monday from today
-        let weekStart = new Date(today);
+        weekStart = new Date(today);
         const currentDayOfWeek = weekStart.getDay(); // 0 = Sunday, 1 = Monday, etc.
-        const daysUntilMonday = currentDayOfWeek === 0 ? 1 : (8 - currentDayOfWeek); // If Sunday, next day is Monday. Otherwise calculate days until next Monday
+        const daysUntilMonday = currentDayOfWeek === 0 ? 1 : (8 - currentDayOfWeek);
         weekStart.setDate(weekStart.getDate() + daysUntilMonday);
         
         // If next Monday is before schedule start, use schedule start
@@ -309,7 +311,7 @@ Vraag: ${finalPrompt}`;
         }
         
         // Week ends 6 days later (Monday to Sunday = 7 days, but Monday counts as day 0)
-        let weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+        weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
         
         // Ensure week doesn't exceed schedule end
         if (weekEnd > scheduleEnd) {
