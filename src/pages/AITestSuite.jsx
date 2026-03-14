@@ -716,21 +716,33 @@ Vraag: ${finalPrompt}`;
         }
         
         // Report corrected times
-        if (correctedTimes.length > 0) {
-          validationLines.push('', `🔧 TIJDEN GECORRIGEERD (${correctedTimes.length}x):`);
-          validationLines.push(...correctedTimes.slice(0, 5));
+        if (issues.timeCorrected.length > 0) {
+          validationLines.push('', `🔧 TIJDEN GECORRIGEERD (${issues.timeCorrected.length}x):`);
+          validationLines.push(...issues.timeCorrected.slice(0, 5));
         }
         
         // Report ID resolution
-        if (resolutionIssues.length > 0) {
-          validationLines.push('', `🔄 ID-RESOLUTIE (${resolutionIssues.length}x — AI gebruikte namen i.p.v. ID's):`);
-          validationLines.push(...resolutionIssues.slice(0, 10));
+        if (issues.idResolution.length > 0) {
+          validationLines.push('', `🔄 ID-RESOLUTIE (${issues.idResolution.length}x):`);
+          validationLines.push(...issues.idResolution.slice(0, 10));
         }
         
-        // Report budget rejections (server-side hour enforcement)
-        if (budgetRejected.length > 0) {
-          validationLines.push('', `🚫 SHIFTS GEWEIGERD door uren-overschrijding (${budgetRejected.length}x):`);
-          validationLines.push(...budgetRejected.slice(0, 15));
+        // Report preference violations
+        if (issues.preferenceWarnings.length > 0) {
+          validationLines.push('', `🟡 VOORKEUR/BACKUP WAARSCHUWINGEN (${issues.preferenceWarnings.length}x):`);
+          validationLines.push(...issues.preferenceWarnings.slice(0, 10));
+        }
+        
+        // Report budget rejections
+        if (issues.budgetRejected.length > 0) {
+          validationLines.push('', `🚫 SHIFTS GEWEIGERD door uren-overschrijding (${issues.budgetRejected.length}x):`);
+          validationLines.push(...issues.budgetRejected.slice(0, 15));
+        }
+        
+        // Report invalid shifts
+        if (issues.invalid.length > 0) {
+          validationLines.push('', `❌ ONGELDIGE SHIFTS (${issues.invalid.length}x):`);
+          validationLines.push(...issues.invalid.slice(0, 10));
         }
         
         // Check 4: Contract hours utilization per employee (with monthly budget)
