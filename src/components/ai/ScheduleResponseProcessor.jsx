@@ -183,7 +183,7 @@ export function processAIShifts({
   });
   
   const validShifts = [];
-  for (const shift of dedupShifts) {
+  for (const shift of cappedShifts) {
     if (!shift.employeeId || !budgetTracker[shift.employeeId]) {
       validShifts.push(shift);
       continue;
