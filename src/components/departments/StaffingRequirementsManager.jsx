@@ -164,11 +164,11 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
 
   if (dayparts.length === 0) {
     return (
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
         <CardContent className="p-8 text-center">
-          <Target className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="font-medium text-slate-900 mb-2">Eerst dagdelen instellen</h3>
-          <p className="text-sm text-slate-500">
+          <Target className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--color-text-muted)' }} />
+          <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Eerst dagdelen instellen</h3>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
             Definieer eerst dagdelen voordat je bezettingsnormen kunt instellen.
           </p>
         </CardContent>
@@ -177,10 +177,10 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
   }
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <CardTitle className="text-base font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Target className="w-4 h-4" />
             Bezettingsnormen (uren per dagdeel)
           </CardTitle>
@@ -235,7 +235,8 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                               }));
                               setDialogOpen(true);
                             }}
-                            className="px-2 py-1 rounded text-slate-400 text-sm hover:bg-slate-100 transition-colors"
+                            className="px-2 py-1 rounded text-sm transition-colors"
+                            style={{ color: 'var(--color-text-muted)' }}
                           >
                             —
                           </button>
@@ -249,8 +250,8 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
           </Table>
         </div>
 
-        <div className="mt-4 p-3 bg-slate-50 rounded-lg">
-          <p className="text-xs text-slate-500">
+        <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
             <strong>Tip:</strong> Klik op een cel om de doeluren voor dat dagdeel en die dag in te stellen. 
             In het rooster zie je direct of je op schema ligt (groen), bijna (oranje) of eronder/boven zit (rood).
           </p>
@@ -313,7 +314,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                 placeholder="bijv. 8"
                 required
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
                 Totaal aantal te plannen uren voor dit dagdeel op deze dag
               </p>
             </div>

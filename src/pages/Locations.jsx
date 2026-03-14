@@ -163,7 +163,7 @@ export default function Locations() {
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Locaties" 
         subtitle={`${locations.length} locaties`}
@@ -181,20 +181,20 @@ export default function Locations() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(3)].map((_, i) => (
-              <Card key={i} className="border-0 shadow-sm animate-pulse">
+              <Card key={i} className="border-0 shadow-sm animate-pulse" style={{ backgroundColor: 'var(--color-surface)' }}>
                 <CardContent className="p-6">
-                  <div className="h-6 bg-slate-200 rounded w-3/4 mb-4" />
-                  <div className="h-4 bg-slate-200 rounded w-1/2" />
+                  <div className="h-6 rounded w-3/4 mb-4" style={{ backgroundColor: 'var(--color-surface-light)' }} />
+                  <div className="h-4 rounded w-1/2" style={{ backgroundColor: 'var(--color-surface-light)' }} />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : locations.length === 0 ? (
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
             <CardContent className="p-12 text-center">
-              <MapPin className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">Nog geen locaties</h3>
-              <p className="text-slate-500 text-sm mb-6">
+              <MapPin className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+              <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Nog geen locaties</h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                 Voeg locaties toe waar je medewerkers werken.
               </p>
               {hasPermission('manage_schedules') && (
@@ -208,7 +208,7 @@ export default function Locations() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {locations.map((location) => (
-              <Card key={location.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={location.id} className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
@@ -219,21 +219,21 @@ export default function Locations() {
                         <MapPin className="w-5 h-5" style={{ color: getTypeColor(location.locationTypeId) }} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-900">{location.name}</h3>
+                        <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{location.name}</h3>
                         {location.code && (
-                          <p className="text-sm text-slate-500">{location.code}</p>
+                          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{location.code}</p>
                         )}
                       </div>
                     </div>
                     {hasPermission('manage_schedules') && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-slate-400">
+                          <Button variant="ghost" size="icon" style={{ color: 'var(--color-text-muted)' }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleOpenDialog(location)}>
+                        <DropdownMenuContent align="end" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+                          <DropdownMenuItem onClick={() => handleOpenDialog(location)} style={{ color: 'var(--color-text-primary)' }}>
                             <Edit className="w-4 h-4 mr-2" />
                             Bewerken
                           </DropdownMenuItem>
@@ -261,7 +261,7 @@ export default function Locations() {
                     {getTypeName(location.locationTypeId)}
                   </Badge>
 
-                  <div className="space-y-2 text-sm text-slate-600">
+                  <div className="space-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     {(location.address || location.city) && (
                       <p>
                         {location.address}
@@ -272,13 +272,13 @@ export default function Locations() {
                     )}
                     {location.phone && (
                       <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-slate-400" />
+                        <Phone className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
                         <span>{location.phone}</span>
                       </div>
                     )}
                     {location.capacity && (
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-slate-400" />
+                        <Users className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
                         <span>Max {location.capacity} medewerkers</span>
                       </div>
                     )}

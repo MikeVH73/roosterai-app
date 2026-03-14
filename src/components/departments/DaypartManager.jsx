@@ -129,10 +129,10 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <CardTitle className="text-base font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Clock className="w-4 h-4" />
             Dagdelen
           </CardTitle>
@@ -144,7 +144,7 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
       </CardHeader>
       <CardContent>
         {sortedDayparts.length === 0 ? (
-          <div className="text-center py-6 text-slate-500 text-sm">
+          <div className="text-center py-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
             <p>Nog geen dagdelen gedefinieerd.</p>
             <p className="mt-1">Dagdelen helpen bij het structureren van het rooster.</p>
           </div>
@@ -153,13 +153,13 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
             {sortedDayparts.map((daypart) => (
               <div 
                 key={daypart.id}
-                className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
-                style={{ backgroundColor: daypart.color || '#F8FAFC' }}
+                className="flex items-center gap-3 p-3 rounded-lg border transition-colors"
+                style={{ backgroundColor: daypart.color || 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}
               >
-                <GripVertical className="w-4 h-4 text-slate-400 cursor-grab" />
+                <GripVertical className="w-4 h-4 cursor-grab" style={{ color: 'var(--color-text-muted)' }} />
                 <div className="flex-1">
-                  <p className="font-medium text-slate-900">{daypart.name}</p>
-                  <p className="text-sm text-slate-600">
+                  <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{daypart.name}</p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                     {daypart.startTime} - {daypart.endTime}
                   </p>
                 </div>

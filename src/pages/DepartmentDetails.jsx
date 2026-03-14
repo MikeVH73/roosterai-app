@@ -67,7 +67,7 @@ export default function DepartmentDetails() {
 
   if (deptLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)' }}>
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
       </div>
     );
@@ -75,11 +75,11 @@ export default function DepartmentDetails() {
 
   if (!department) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="border-0 shadow-sm">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)' }}>
+        <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
           <CardContent className="p-8 text-center">
-            <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="font-medium text-slate-900 mb-2">Afdeling niet gevonden</h3>
+            <Building2 className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+            <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Afdeling niet gevonden</h3>
             <Button onClick={() => navigate('/Departments')}>
               Terug naar afdelingen
             </Button>
@@ -90,7 +90,7 @@ export default function DepartmentDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title={department.name}
         subtitle="Afdelingsinstellingen"
@@ -104,7 +104,7 @@ export default function DepartmentDetails() {
 
       <div className="p-6 max-w-5xl mx-auto">
         {/* Overview Card */}
-        <Card className="border-0 shadow-sm mb-6">
+        <Card className="border-0 shadow-sm mb-6" style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)' }}>
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div 
@@ -114,25 +114,25 @@ export default function DepartmentDetails() {
                 <Building2 className="w-7 h-7" style={{ color: department.color }} />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-semibold text-slate-900">{department.name}</h2>
+                <h2 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>{department.name}</h2>
                 {department.description && (
-                  <p className="text-slate-500">{department.description}</p>
+                  <p style={{ color: 'var(--color-text-muted)' }}>{department.description}</p>
                 )}
               </div>
               <div className="flex items-center gap-6">
                 <div className="text-center">
-                  <div className="flex items-center gap-1 text-slate-500">
+                  <div className="flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
                     <Users className="w-4 h-4" />
                     <span className="text-sm">Medewerkers</span>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{employeeCount}</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{employeeCount}</p>
                 </div>
                 <div className="text-center">
-                  <div className="flex items-center gap-1 text-slate-500">
+                  <div className="flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
                     <Clock className="w-4 h-4" />
                     <span className="text-sm">Dagdelen</span>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900">{dayparts.length}</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{dayparts.length}</p>
                 </div>
               </div>
             </div>
