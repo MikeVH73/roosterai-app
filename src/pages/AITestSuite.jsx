@@ -283,6 +283,8 @@ Vraag: ${finalPrompt}`;
         }
       };
 
+      const daysOfWeekNames = { 0: 'zondag', 1: 'maandag', 2: 'dinsdag', 3: 'woensdag', 4: 'donderdag', 5: 'vrijdag', 6: 'zaterdag' };
+
       // Special handling for Test 1: Generate actual schedule
       if (testCase.id === 1 && targetSchedule) {
         // Calculate dates within the schedule range
@@ -337,14 +339,17 @@ Vraag: ${finalPrompt}`;
         // Add staffing requirements if available
         const allRequirements = await base44.entities.StaffingRequirement.filter({ companyId });
         if (allRequirements.length > 0) {
-          contextData.bezettingseisen = allRequirements.map(r => ({
-            afdelingId: r.departmentId,
-            dagdeelId: r.daypartId,
-            locatieId: r.locationId,
-            doeluren: r.targetHours,
-            min_bezetting: r.min_staff,
-            optimaal: r.optimal_staff
-          }));
+          contextData.bezettingseisen = allRequirements
+            .filter(r => targetSchedule.departmentIds?.includes(r.departmentId))
+            .map(r => ({
+              afdelingId: r.departmentId,
+              dagdeelId: r.daypartId,
+              locatieId: r.locationId,
+              dag_van_week: r.day_of_week,
+              doeluren: r.targetHours,
+              min_bezetting: r.min_staff,
+              optimaal: r.optimal_staff
+            }));
         }
 
         // Determine which location this schedule is for
