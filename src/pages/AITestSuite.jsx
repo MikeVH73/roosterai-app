@@ -379,19 +379,10 @@ Vraag: ${finalPrompt}`;
         
         // === FILTER MEDEWERKERS: Alleen medewerkers die bij afdelingen van DIT rooster horen ===
         const scheduleDeptIds = targetSchedule.departmentIds || [];
-        const relevantEmployees = employees.filter(e => {
+        relevantEmployees = employees.filter(e => {
           const empDepts = e.departmentIds || [];
           return empDepts.some(dId => scheduleDeptIds.includes(dId));
         });
-        
-        // Helper: calculate hours from time range
-        const calcHoursFromTime = (start, end) => {
-          const [sh, sm] = start.split(':').map(Number);
-          const [eh, em] = end.split(':').map(Number);
-          let diff = (eh * 60 + em) - (sh * 60 + sm);
-          if (diff <= 0) diff += 24 * 60;
-          return diff / 60;
-        };
         
         // Calculate per-daypart hours for planning
         const daypartHoursMap = {};
