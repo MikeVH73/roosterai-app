@@ -374,37 +374,36 @@ Vraag: ${finalPrompt}`;
         const shiftInstructions = [];
         let totalShiftsNeeded = 0;
         
+        // Build a map of all dates in the week range
+        const weekDates = {};
+        for (let d = new Date(weekStart); d <= weekEnd; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
+          weekDates[d.getDay()] = d.toISOString().split('T')[0];
+        }
+        
         for (const dp of scheduleDayparts) {
           const dept = departments.find(d => d.id === dp.departmentId);
           const deptName = dept?.name || 'Onbekend';
-          const dpHours = calcHours(dp.startTime, dp.endTime);
           const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
           
           for (const r of dpReqs) {
             if (!r.doeluren || r.doeluren <= 0) continue;
             const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
-            // Calculate how many shifts needed: targetHours / daypart duration, rounded up
-            const shiftsNeeded = Math.ceil(r.doeluren / dpHours);
+            // Each staffing requirement = exactly 1 shift per person needed
+            // The shift covers the FULL daypart time range
+            // The targetHours is the NETTO working time (doeluren)
+            const shiftsNeeded = r.min_bezetting || 1;
             totalShiftsNeeded += shiftsNeeded;
             
-            // Calculate the actual date for this day_of_week within the week range
-            const targetDayNum = r.dag_van_week;
-            let targetDate = null;
-            for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
-              if (d.getDay() === targetDayNum) {
-                targetDate = d.toISOString().split('T')[0];
-                break;
-              }
-            }
-            // Reset loop date
+            const dateForDay = weekDates[r.dag_van_week] || null;
             
             shiftInstructions.push(
-              `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${targetDate ? ` (${targetDate})` : ''}:
+              `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${dateForDay ? ` (${dateForDay})` : ''}:
   - Dagdeel ID: ${dp.id}
   - Afdeling ID: ${dp.departmentId}
-  - Start: ${dp.startTime}, Eind: ${dp.endTime} (=${dpHours}u per shift)
-  - Doeluren: ${r.doeluren}u → maak EXACT ${shiftsNeeded} shift(s) van ${dp.startTime}-${dp.endTime}
-  - Totaal geplande uren: ${shiftsNeeded} × ${dpHours} = ${shiftsNeeded * dpHours}u`
+  - Start: ${dp.startTime}, Eind: ${dp.endTime}
+  - Benodigde medewerkers: ${shiftsNeeded}
+  - Maak EXACT ${shiftsNeeded} shift(s) met start_time="${dp.startTime}" en end_time="${dp.endTime}"
+  - Datum: ${dateForDay || 'ONBEKEND'}`
             );
           }
         }
