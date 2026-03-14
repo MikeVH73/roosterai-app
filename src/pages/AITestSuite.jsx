@@ -420,7 +420,7 @@ Vraag: ${finalPrompt}`;
         });
         
         // Build enriched employee data with contract hours analysis
-        const scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
+        scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
         contextData.medewerkers = relevantEmployees.map(e => {
           const func = functions.find(f => f.id === e.functionId);
           const empScheduleDepts = scheduleDepts.filter(d => (e.departmentIds || []).includes(d.id));
