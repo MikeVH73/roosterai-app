@@ -188,8 +188,11 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
     e.preventDefault();
     setBulkSaving(true);
     
+    // Fetch fresh requirements to avoid stale ID references
+    const freshRequirements = await base44.entities.StaffingRequirement.filter({ companyId, departmentId });
+    
     for (const dayValue of bulkData.selectedDays) {
-      const existing = requirements.find(r => r.daypartId === bulkData.daypartId && r.day_of_week === dayValue);
+      const existing = freshRequirements.find(r => r.daypartId === bulkData.daypartId && r.day_of_week === dayValue);
       const data = {
         companyId,
         departmentId,
