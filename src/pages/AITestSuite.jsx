@@ -406,7 +406,7 @@ Vraag: ${finalPrompt}`;
         );
         
         // Bereken al ingeroosterde uren per medewerker deze maand
-        const alreadyPlannedHours = {};
+        alreadyPlannedHours = {};
         monthShifts.forEach(s => {
           // Skip shifts in de huidige week (die worden vervangen)
           if (s.date >= weekStart.toISOString().split('T')[0] && s.date <= weekEnd.toISOString().split('T')[0]) return;
