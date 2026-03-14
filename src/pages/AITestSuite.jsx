@@ -580,9 +580,10 @@ REGEL 4 - VOORKEUR vs BACK-UP AFDELINGEN (ZEER BELANGRIJK!):
   STAP 3: Meld in unresolved_issues als je een back-up medewerker hebt moeten inzetten (en waarom).
   Een medewerker mag NOOIT ingepland worden op een afdeling die NIET in voorkeur OF backup staat.
 
-REGEL 5 - FUNCTIE MATCH:
-  Combineer met regel 4: een medewerker met functie "Bloedprikker" en voorkeur "Bloedprikpoli" is de IDEALE match.
-  Een "Huisbezoeker" op "Huisbezoeken" is ook ideaal.
+REGEL 5 - FUNCTIE MATCH (OP BASIS VAN ID's, NIET NAMEN):
+  Elke afdeling heeft een lijst "toegestane_functies" (zie AFDELINGEN sectie hieronder).
+  Een medewerker mag ALLEEN ingepland worden op een afdeling als de functie-ID van de medewerker voorkomt in de toegestane functies van die afdeling.
+  Als een afdeling GEEN toegestane functies heeft ingesteld, is elke functie toegestaan.
   Functie-mismatch + back-up afdeling = allerlaatste optie. Meld altijd in unresolved_issues.
 
 REGEL 6 - MAANDELIJKS URENBUDGET (ALLERBELANGRIJKSTE REGEL!):
