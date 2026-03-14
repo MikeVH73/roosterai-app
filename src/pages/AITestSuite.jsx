@@ -432,14 +432,15 @@ ${shiftInstructionsText}
 TOTAAL: Maak EXACT ${totalShiftsNeeded} shifts.
 
 === STRIKTE REGELS (OVERTREDING = FOUT) ===
-1. ELKE shift heeft EXACT de start_time en end_time van het dagdeel (NIET aanpassen!)
+1. ELKE shift heeft EXACT de start_time en end_time van het dagdeel. KOPIEER LETTERLIJK de startTijd en eindTijd van het dagdeel. NOOIT een ander tijdstip gebruiken! Als het dagdeel 07:00-11:00 is, dan is de shift 07:00-11:00. GEEN 08:00, GEEN andere tijd.
 2. Elke medewerker mag MAXIMAAL 1 shift PER DAG PER AFDELING. NOOIT 2x dezelfde medewerker op dezelfde dag in dezelfde afdeling.
-3. Elke medewerker mag MAXIMAAL 2 shifts per dag TOTAAL (bijv. 1 ochtend + 1 middag in VERSCHILLENDE afdelingen).
+3. Elke medewerker mag MAXIMAAL 2 shifts per dag TOTAAL (bijv. 1 ochtend + 1 middag in VERSCHILLENDE afdelingen). Twee shifts die op elkaar aansluiten (bijv. 08:00-12:00 en 12:00-16:00) zijn TOEGESTAAN en tellen als 2 aparte shifts, NIET als dubbel.
 4. De medewerker MOET de afdeling in zijn/haar "afdelingen" array hebben.
-5. Overschrijd NOOIT contract_hours per week per medewerker.
-6. Minimaal 11 uur rust tussen twee diensten van dezelfde medewerker.
-7. SPREIDING: Verdeel shifts over VERSCHILLENDE medewerkers. Niet steeds dezelfde persoon.
-8. Als er niet genoeg medewerkers zijn, laat de shift WEG en meld in unresolved_issues.
+5. FUNCTIE-MATCHING: Plan medewerkers bij voorkeur in op afdelingen die passen bij hun functie. Bijv. een "Huisbezoeker" hoort op "Huisbezoeken", een "Bloedprikker" hoort op "Bloedprikpoli". Alleen als er ONVOLDOENDE medewerkers zijn met de juiste functie mag je iemand met een andere functie inzetten — meld dit dan in unresolved_issues.
+6. Overschrijd NOOIT contract_hours per week per medewerker.
+7. Minimaal 11 uur rust tussen twee diensten van dezelfde medewerker.
+8. SPREIDING: Verdeel shifts over ALLE beschikbare medewerkers. Elke medewerker moet zoveel mogelijk dagen werken tot aan contract_hours. Niet 1 dag vol plannen en de rest leeg.
+9. Als er niet genoeg medewerkers zijn, laat de shift WEG en meld in unresolved_issues.
 
 === BESCHIKBARE MEDEWERKERS ===
 ${JSON.stringify(contextData.medewerkers, null, 2)}
