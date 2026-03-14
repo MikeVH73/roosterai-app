@@ -700,7 +700,8 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
           ? `\n\n⚠️ ONOPGELOSTE PROBLEMEN (actie vereist van planner):\n${response.unresolved_issues.map(i => `  - ${i.daypart_name} op ${i.date}: ${i.planned_hours || 0}u / ${i.target_hours}u — ${i.reason}`).join('\n')}`
           : '';
 
-        const statusMsg = `${allMatch ? '✅' : '⚠️'} ${createdShifts.length} diensten aangemaakt`;
+        const deletedMsg = shiftsToDelete.length > 0 ? ` (${shiftsToDelete.length} oude verwijderd)` : '';
+        const statusMsg = `${allMatch ? '✅' : '⚠️'} ${createdShifts.length} diensten aangemaakt${deletedMsg}`;
         const validationMsg = `\n\n📊 VALIDATIE (gepland vs bezettingsnorm):\n${validationLines.join('\n')}`;
         const errorMsg = errors.length > 0 
           ? `\n\n❌ Fouten bij aanmaken (${errors.length}):\n${errors.slice(0, 5).join('\n')}` 
