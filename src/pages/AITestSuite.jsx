@@ -424,7 +424,7 @@ ${JSON.stringify(contextData, null, 2)}
           properties: {
             shifts: {
               type: "array",
-              description: "Array van shifts om aan te maken - minimaal 20 shifts",
+              description: "Array van shifts - maak een shift voor ELKE bezettingsnorm-dag combinatie",
               items: {
                 type: "object",
                 properties: {
