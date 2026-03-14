@@ -750,22 +750,42 @@ ${JSON.stringify(scheduleDepts.map(d => {
         const validDeptIds = new Set(scheduleDepts.map(d => d.id));
         const validDaypartIds = new Set(scheduleDayparts.map(dp => dp.id));
         
-        // Resolve AI responses: if AI used names instead of IDs, map them back
+        // Resolve AI responses: validate and fix employee IDs
         const resolvedShifts = [];
         const resolutionIssues = [];
         for (const shift of response.shifts) {
-          // Fix employeeId if it's a name instead of an ID
-          if (shift.employeeId && !validEmployeeIds.has(shift.employeeId)) {
-            const resolvedId = nameToIdMap[shift.employeeId.toLowerCase().trim()];
-            if (resolvedId) {
-              resolutionIssues.push(`Naam→ID: "${shift.employeeId}" → ${resolvedId}`);
-              shift.employeeId = resolvedId;
-            } else {
-              resolutionIssues.push(`⚠️ Onbekende medewerker: "${shift.employeeId}" — shift overgeslagen`);
-              continue;
-            }
+          if (!shift.employeeId) {
+            resolutionIssues.push(`⚠️ Shift zonder medewerker op ${shift.date} — overgeslagen`);
+            continue;
           }
-          resolvedShifts.push(shift);
+          
+          // Case 1: Valid employee ID for this roster — OK
+          if (validEmployeeIds.has(shift.employeeId)) {
+            resolvedShifts.push(shift);
+            continue;
+          }
+          
+          // Case 2: Valid employee ID but NOT in this roster's departments
+          if (allEmployeeIds.has(shift.employeeId)) {
+            const wrongEmp = employees.find(e => e.id === shift.employeeId);
+            const empName = wrongEmp ? `${wrongEmp.first_name} ${wrongEmp.last_name}` : shift.employeeId;
+            resolutionIssues.push(`⚠️ ${empName} hoort niet bij de afdelingen van dit rooster — shift overgeslagen`);
+            continue;
+          }
+          
+          // Case 3: Not a valid ID at all — try name lookup
+          const resolvedId = nameToIdMap[shift.employeeId.toLowerCase().trim()];
+          if (resolvedId && validEmployeeIds.has(resolvedId)) {
+            resolutionIssues.push(`Naam→ID: "${shift.employeeId}" → ${resolvedId}`);
+            shift.employeeId = resolvedId;
+            resolvedShifts.push(shift);
+          } else if (resolvedId) {
+            const wrongEmp = employees.find(e => e.id === resolvedId);
+            const empName = wrongEmp ? `${wrongEmp.first_name} ${wrongEmp.last_name}` : shift.employeeId;
+            resolutionIssues.push(`⚠️ ${empName} (via naam gevonden) hoort niet bij dit rooster — shift overgeslagen`);
+          } else {
+            resolutionIssues.push(`❌ Onbekende medewerker: "${shift.employeeId}" — shift overgeslagen`);
+          }
         }
         
         if (resolutionIssues.length > 0) {
