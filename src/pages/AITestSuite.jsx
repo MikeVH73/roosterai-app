@@ -661,6 +661,9 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
         const errorMsg = errors.length > 0 
           ? `\n\n❌ Fouten bij aanmaken (${errors.length}):\n${errors.slice(0, 5).join('\n')}` 
           : '';
+        const skippedMsg = skipped.length > 0
+          ? `\n\n⛔ ${skipped.length} shifts overgeslagen (dubbele medewerker/dag/afdeling):\n${skipped.slice(0, 5).join('\n')}`
+          : '';
 
         setTestResults({
           ...testResults,
