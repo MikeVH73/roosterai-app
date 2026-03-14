@@ -356,13 +356,13 @@ Vraag: ${finalPrompt}`;
         const scheduleLocationId = targetSchedule.locationIds?.[0] || null;
 
         // Build a human-readable staffing requirements summary per day
-        const allRequirements = contextData.bezettingseisen || [];
+        const summaryReqs = contextData.bezettingseisen || [];
         const reqSummaryLines = [];
         
         for (const dp of scheduleDayparts) {
           const dept = departments.find(d => d.id === dp.departmentId);
           const deptName = dept?.name || 'Onbekend';
-          const dpReqs = allRequirements.filter(r => r.dagdeelId === dp.id);
+          const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
           
           if (dpReqs.length > 0) {
             for (const r of dpReqs) {
