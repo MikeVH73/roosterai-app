@@ -158,6 +158,7 @@ const testCases = [
 ];
 
 export default function AITestSuite() {
+  const navigate = useNavigate();
   const { currentCompany, canUseAI } = useCompany();
   const companyId = currentCompany?.id;
   const navigate = useNavigate();
