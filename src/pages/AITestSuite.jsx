@@ -859,9 +859,9 @@ Vraag: ${finalPrompt}`;
         setTestResults({
           ...testResults,
           [testCase.id]: {
-            status: response.success ? 'passed' : 'failed',
-            response: response.answer || response.summary || JSON.stringify(response, null, 2),
-            details: response.details,
+            status: aiResult.success ? 'passed' : 'failed',
+            response: aiResult.answer || aiResult.summary || JSON.stringify(aiResult, null, 2),
+            details: aiResult.details,
             timestamp: new Date().toISOString()
           }
         });
