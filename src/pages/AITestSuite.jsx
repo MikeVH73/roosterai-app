@@ -317,6 +317,33 @@ Vraag: ${finalPrompt}`;
           eindTijd: dp.endTime
         }));
 
+        // Add location-department mapping
+        const scheduleLocations = locations.filter(l => targetSchedule.locationIds?.includes(l.id));
+        contextData.locaties = scheduleLocations.map(loc => ({
+          id: loc.id,
+          naam: loc.name,
+          afdelingen: departments.filter(d => d.locationIds?.includes(loc.id)).map(d => ({
+            id: d.id,
+            naam: d.name
+          }))
+        }));
+
+        // Add staffing requirements if available
+        const allRequirements = await base44.entities.StaffingRequirement.filter({ companyId });
+        if (allRequirements.length > 0) {
+          contextData.bezettingseisen = allRequirements.map(r => ({
+            afdelingId: r.departmentId,
+            dagdeelId: r.daypartId,
+            locatieId: r.locationId,
+            doeluren: r.targetHours,
+            min_bezetting: r.min_staff,
+            optimaal: r.optimal_staff
+          }));
+        }
+
+        // Determine which location this schedule is for
+        const scheduleLocationId = targetSchedule.locationIds?.[0] || null;
+
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
 OPDRACHT: Genereer een COMPLEET rooster met ECHTE medewerkers uit de database.
@@ -326,19 +353,23 @@ ${JSON.stringify(contextData, null, 2)}
 
 ROOSTER DETAILS:
 - Naam: ${targetSchedule.name}
+- Locatie ID: ${scheduleLocationId}
+- Afdelingen in rooster: ${targetSchedule.departmentIds?.join(', ')}
 - Start datum: ${weekStart.toISOString().split('T')[0]}
 - Eind datum: ${weekEnd.toISOString().split('T')[0]}
 
-VERPLICHT:
-- Gebruik ALLEEN medewerker IDs uit de lijst hierboven (geen nieuwe verzinnen!)
-- Gebruik ALLEEN afdeling IDs uit de lijst hierboven
-- Gebruik ALLEEN functie IDs uit de lijst hierboven
-- Gebruik ALLEEN dagdeel IDs uit de lijst hierboven (BELANGRIJK voor zichtbaarheid!)
-- Maak shifts voor ELKE DAG in de periode
-- Elke medewerker moet meerdere diensten krijgen
-- Koppel shifts aan het juiste dagdeel op basis van de tijden
-- Respecteer contracturen
-- Minimaal 11 uur rust tussen diensten`;
+REGELS (STRIKT):
+1. Gebruik ALLEEN medewerker IDs uit de data hierboven (geen nieuwe verzinnen!)
+2. Gebruik ALLEEN afdeling IDs uit departmentIds van dit rooster: ${targetSchedule.departmentIds?.join(', ')}
+3. Een medewerker mag ALLEEN op een afdeling werken als die afdeling in zijn/haar departmentIds staat
+4. Gebruik ALLEEN functie IDs uit de lijst hierboven
+5. Gebruik ALLEEN dagdeel IDs uit de lijst hierboven
+6. locationId MOET altijd "${scheduleLocationId}" zijn
+7. Maak shifts voor ELKE werkdag in de periode (ma-za)
+8. Respecteer contracturen: een medewerker met bijv. 20u/week mag MAXIMAAL 20 uur per week werken
+9. Minimaal 11 uur rust tussen diensten
+10. Koppel shifts aan het juiste dagdeel op basis van de start/eindtijden
+11. Verdeel medewerkers eerlijk over de week op basis van hun contracturen`;
 
         responseSchema = {
           type: "object",
@@ -351,13 +382,14 @@ VERPLICHT:
                 properties: {
                   employeeId: { type: "string", description: "ID van medewerker uit de lijst" },
                   departmentId: { type: "string", description: "ID van afdeling uit de lijst" },
+                  locationId: { type: "string", description: "ID van locatie uit het rooster" },
                   functionId: { type: "string", description: "ID van functie uit de lijst" },
-                  daypartId: { type: "string", description: "ID van dagdeel uit de lijst (optioneel maar aanbevolen)" },
+                  daypartId: { type: "string", description: "ID van dagdeel uit de lijst" },
                   date: { type: "string", description: "Datum YYYY-MM-DD tussen start en eind" },
                   start_time: { type: "string", description: "Starttijd HH:mm (bijv 08:00)" },
                   end_time: { type: "string", description: "Eindtijd HH:mm (bijv 16:00)" }
                 },
-                required: ["employeeId", "date", "start_time", "end_time"]
+                required: ["employeeId", "departmentId", "locationId", "date", "start_time", "end_time"]
               }
             },
             summary: { type: "string", description: "Samenvatting met aantal shifts" }
@@ -404,6 +436,7 @@ VERPLICHT:
               scheduleId: targetSchedule.id,
               employeeId: shift.employeeId,
               departmentId: shift.departmentId || null,
+              locationId: shift.locationId || scheduleLocationId || null,
               daypartId: shift.daypartId || null,
               functionId: shift.functionId || null,
               date: shift.date,
