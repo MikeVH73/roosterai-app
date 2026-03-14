@@ -961,25 +961,11 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
             prefIssues.push(`🟡 ${emp.first_name} ${emp.last_name} → ${dept.name} op ${s.date} (BACK-UP afdeling)`);
           }
           
-          // Function mismatch check — improved: check if function name and department name share a meaningful word
-          if (emp.functionId) {
+          // Function mismatch check — ID-based: check if employee's function is in department's allowedFunctionIds
+          if (emp.functionId && dept.allowedFunctionIds?.length > 0) {
             const func = functions.find(f => f.id === emp.functionId);
-            const funcName = func?.name?.toLowerCase() || '';
-            const deptName = dept.name?.toLowerCase() || '';
-            
-            if (funcName && deptName) {
-              // Split both into words (min 3 chars) and check for overlap
-              const funcWords = funcName.split(/[\s\-\/()]+/).filter(w => w.length >= 3);
-              const deptWords = deptName.split(/[\s\-\/()]+/).filter(w => w.length >= 3);
-              
-              // Check if ANY word from function matches the START of ANY dept word or vice versa
-              const hasMatch = funcWords.some(fw => 
-                deptWords.some(dw => dw.startsWith(fw) || fw.startsWith(dw))
-              );
-              
-              if (!hasMatch) {
-                funcMismatches.push(`⚠️ ${emp.first_name} ${emp.last_name} (${func?.name}) → ${dept.name} op ${s.date}`);
-              }
+            if (!dept.allowedFunctionIds.includes(emp.functionId)) {
+              funcMismatches.push(`⚠️ ${emp.first_name} ${emp.last_name} (${func?.name || 'Onbekend'}) → ${dept.name} op ${s.date}`);
             }
           }
         });
