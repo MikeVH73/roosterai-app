@@ -536,12 +536,13 @@ ${shiftInstructionsText}
 TOTAAL: Maak EXACT ${totalShiftsNeeded} shifts.
 
 === CAPACITEITSOVERZICHT ===
-Totaal beschikbare uren (contracturen alle medewerkers): ${totalAvailableHours}u/week
-Totaal benodigde uren (alle shifts): ~${Math.round(totalNeededHours)}u/week
+Beschikbare uren deze week (rekening houdend met maandbudget): ${totalAvailableHours}u
+Benodigde uren (alle shifts): ~${Math.round(totalNeededHours)}u
+Maand: ${monthStartStr} t/m ${monthEndStr}
 ${totalAvailableHours > totalNeededHours * 1.3 
-  ? `⚠️ Er zijn MEER uren beschikbaar dan nodig. Verdeel de shifts eerlijk zodat iedereen werkt maar niemand meer dan contract_hours.`
+  ? `⚠️ Er zijn MEER uren beschikbaar dan nodig. Verdeel de shifts eerlijk zodat iedereen werkt maar niemand meer dan hun max_inzetbaar_deze_week.`
   : totalAvailableHours < totalNeededHours 
-    ? `⚠️ Er zijn MINDER uren beschikbaar dan nodig. Sommige shifts kunnen niet gevuld worden.`
+    ? `⚠️ Er zijn MINDER uren beschikbaar dan nodig. Sommige shifts kunnen niet gevuld worden. Meld dit in unresolved_issues.`
     : `Capaciteit past goed bij de behoefte.`}
 
 === MEDEWERKERS BUDGET ===
