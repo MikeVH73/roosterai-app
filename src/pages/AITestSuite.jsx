@@ -223,15 +223,19 @@ export default function AITestSuite() {
       // Build context with REAL data
       const contextData = {
         bedrijf: currentCompany?.name,
-        medewerkers: employees.map(e => ({
-          id: e.id,
-          naam: `${e.first_name} ${e.last_name}`,
-          contracturen: e.contract_hours,
-          contracttype: e.contract_type,
-          afdelingen: e.departmentIds || [],
-          functie: e.functionId,
-          voorkeuren: e.preferences
-        })),
+        medewerkers: employees.map(e => {
+          const func = functions.find(f => f.id === e.functionId);
+          return {
+            id: e.id,
+            naam: `${e.first_name} ${e.last_name}`,
+            contracturen: e.contract_hours,
+            contracttype: e.contract_type,
+            afdelingen: e.departmentIds || [],
+            functieId: e.functionId,
+            functieNaam: func?.name || 'Onbekend',
+            voorkeuren: e.preferences
+          };
+        }),
         afdelingen: departments.map(d => ({
           id: d.id,
           naam: d.name,
