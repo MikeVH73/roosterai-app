@@ -326,6 +326,21 @@ export default function Departments() {
                     </Button>
                   </Link>
 
+                  {department.allowedFunctionIds?.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap mt-3">
+                      <Briefcase className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
+                      {getFunctionNames(department.allowedFunctionIds).map((name, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs" style={{ 
+                          backgroundColor: 'var(--color-surface-light)', 
+                          color: 'var(--color-text-secondary)',
+                          borderColor: 'var(--color-border)'
+                        }}>
+                          {name}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
                   {department.locationIds?.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap mt-3">
                       <MapPin className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
@@ -406,6 +421,29 @@ export default function Departments() {
                 ))}
               </div>
             </div>
+
+            {functions.length > 0 && (
+              <div>
+                <Label style={{ color: 'var(--color-text-primary)' }}>Toegestane functies</Label>
+                <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>
+                  Welke functies mogen op deze afdeling werken?
+                </p>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  {functions.map((func) => (
+                    <div key={func.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`func-${func.id}`}
+                        checked={formData.allowedFunctionIds.includes(func.id)}
+                        onCheckedChange={() => toggleFunction(func.id)}
+                      />
+                      <Label htmlFor={`func-${func.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-primary)' }}>
+                        {func.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {locations.length > 0 && (
               <div>
