@@ -414,43 +414,40 @@ Vraag: ${finalPrompt}`;
 
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
-OPDRACHT: Genereer een weekrooster met EXACT het juiste aantal diensten per bezettingsnorm.
+OPDRACHT: Genereer een weekrooster. Volg de EXACTE SHIFT-OPDRACHTEN hieronder letterlijk.
 
-=== EXACTE SHIFT-OPDRACHTEN (VOLG DIT LETTERLIJK) ===
-Hieronder staat voor elk dagdeel op elke dag PRECIES hoeveel shifts je moet aanmaken.
-Elke shift heeft VASTE start- en eindtijden (= de tijden van het dagdeel).
-
+=== EXACTE SHIFT-OPDRACHTEN ===
 ${shiftInstructionsText}
 
-TOTAAL: Je moet EXACT ${totalShiftsNeeded} shifts aanmaken.
+TOTAAL: Maak EXACT ${totalShiftsNeeded} shifts.
 
-=== TOEWIJZINGSREGELS ===
-Wijs voor elke shift een medewerker toe uit de lijst hieronder. Let op:
-- De medewerker MOET de afdeling in zijn/haar departmentIds hebben
-- Tel per medewerker het totaal geplande uren op en overschrijd NIET hun contract_hours per week
-- Minimaal 11 uur rust tussen twee diensten van dezelfde medewerker
-- Eén medewerker mag MAXIMAAL 1 shift per dagdeel per dag hebben
-- Als je niet genoeg medewerkers hebt voor alle shifts, laat dan de shift WEG en meld dit in unresolved_issues
+=== STRIKTE REGELS (OVERTREDING = FOUT) ===
+1. ELKE shift heeft EXACT de start_time en end_time van het dagdeel (NIET aanpassen!)
+2. Elke medewerker mag MAXIMAAL 1 shift PER DAG PER AFDELING. NOOIT 2x dezelfde medewerker op dezelfde dag in dezelfde afdeling.
+3. Elke medewerker mag MAXIMAAL 2 shifts per dag TOTAAL (bijv. 1 ochtend + 1 middag in VERSCHILLENDE afdelingen).
+4. De medewerker MOET de afdeling in zijn/haar "afdelingen" array hebben.
+5. Overschrijd NOOIT contract_hours per week per medewerker.
+6. Minimaal 11 uur rust tussen twee diensten van dezelfde medewerker.
+7. SPREIDING: Verdeel shifts over VERSCHILLENDE medewerkers. Niet steeds dezelfde persoon.
+8. Als er niet genoeg medewerkers zijn, laat de shift WEG en meld in unresolved_issues.
 
 === BESCHIKBARE MEDEWERKERS ===
 ${JSON.stringify(contextData.medewerkers, null, 2)}
 
-=== DAGDELEN ===
+=== DAGDELEN (met tijden) ===
 ${JSON.stringify(contextData.dayparts, null, 2)}
 
 === AFDELINGEN ===
 ${JSON.stringify(contextData.afdelingen, null, 2)}
 
-=== ROOSTER DETAILS ===
+=== ROOSTER INFO ===
 - Locatie ID: ${scheduleLocationId}
-- Afdelingen in rooster: ${targetSchedule.departmentIds?.join(', ')}
+- Afdelingen: ${targetSchedule.departmentIds?.join(', ')}
 - Periode: ${weekStart.toISOString().split('T')[0]} t/m ${weekEnd.toISOString().split('T')[0]}
 
-=== BELANGRIJK ===
-- start_time en end_time van elke shift MOETEN EXACT gelijk zijn aan de startTijd en eindTijd van het dagdeel
-- Gebruik voor ELKE shift de exacte IDs (daypartId, departmentId, locationId) zoals aangegeven
-- locationId is ALTIJD "${scheduleLocationId}"
-- Als een bezettingsnorm NIET volledig kan worden ingevuld (te weinig beschikbare medewerkers), meld dit in unresolved_issues`;
+=== VOORBEELD SHIFT ===
+{ "employeeId": "abc123", "departmentId": "dept1", "locationId": "${scheduleLocationId}", "daypartId": "dp1", "date": "2026-03-16", "start_time": "07:00", "end_time": "11:30" }
+Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doeluren.`;
 
         responseSchema = {
           type: "object",
