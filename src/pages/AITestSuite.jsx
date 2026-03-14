@@ -622,10 +622,10 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
               items: {
                 type: "object",
                 properties: {
-                  employeeId: { type: "string", description: "ID van medewerker" },
-                  departmentId: { type: "string", description: "ID van afdeling" },
-                  locationId: { type: "string", description: "Locatie ID" },
-                  daypartId: { type: "string", description: "Dagdeel ID" },
+                  employeeId: { type: "string", description: "Database ID van medewerker (lange hex string, NIET de naam)" },
+                  departmentId: { type: "string", description: "Database ID van afdeling (lange hex string)" },
+                  locationId: { type: "string", description: "Database ID van locatie (lange hex string)" },
+                  daypartId: { type: "string", description: "Database ID van dagdeel (lange hex string)" },
                   date: { type: "string", description: "Datum YYYY-MM-DD" },
                   start_time: { type: "string", description: "Starttijd HH:mm = dagdeel startTijd" },
                   end_time: { type: "string", description: "Eindtijd HH:mm = dagdeel eindTijd" },
