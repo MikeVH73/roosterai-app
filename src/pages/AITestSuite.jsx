@@ -815,8 +815,8 @@ Vraag: ${finalPrompt}`;
           .join('\n');
         
         // Unresolved issues from AI
-        const unresolvedMsg = (response.unresolved_issues && response.unresolved_issues.length > 0)
-          ? `\n\n⚠️ ONOPGELOSTE PROBLEMEN (actie vereist van planner):\n${response.unresolved_issues.map(i => `  - ${i.daypart_name} op ${i.date}: ${i.planned_hours || 0}u / ${i.target_hours}u — ${i.reason}`).join('\n')}`
+        const unresolvedMsg = (aiResult.unresolved_issues && aiResult.unresolved_issues.length > 0)
+          ? `\n\n⚠️ ONOPGELOSTE PROBLEMEN (actie vereist van planner):\n${aiResult.unresolved_issues.map(i => `  - ${i.daypart_name} op ${i.date}: ${i.planned_hours || 0}u / ${i.target_hours}u — ${i.reason}`).join('\n')}`
           : '';
 
         const deletedMsg = shiftsToDelete.length > 0 ? ` (${shiftsToDelete.length} oude verwijderd)` : '';
