@@ -468,7 +468,8 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
                   daypartId: { type: "string", description: "Dagdeel ID" },
                   date: { type: "string", description: "Datum YYYY-MM-DD" },
                   start_time: { type: "string", description: "Starttijd HH:mm = dagdeel startTijd" },
-                  end_time: { type: "string", description: "Eindtijd HH:mm = dagdeel eindTijd" }
+                  end_time: { type: "string", description: "Eindtijd HH:mm = dagdeel eindTijd" },
+                  break_duration: { type: "number", description: "Pauze minuten van dagdeel (0=geen pauze)" }
                 },
                 required: ["employeeId", "departmentId", "locationId", "daypartId", "date", "start_time", "end_time"]
               }
