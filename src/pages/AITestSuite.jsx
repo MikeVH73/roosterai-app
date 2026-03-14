@@ -1004,6 +1004,12 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           validationLines.push(...resolutionIssues.slice(0, 10));
         }
         
+        // Report budget rejections (server-side hour enforcement)
+        if (budgetRejected.length > 0) {
+          validationLines.push('', `🚫 SHIFTS GEWEIGERD door uren-overschrijding (${budgetRejected.length}x):`);
+          validationLines.push(...budgetRejected.slice(0, 15));
+        }
+        
         // Check 4: Contract hours utilization per employee (with monthly budget)
         const employeeHoursPlanned = {};
         createdShifts.forEach(s => {
