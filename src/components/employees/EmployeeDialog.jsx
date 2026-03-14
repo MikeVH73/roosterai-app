@@ -315,20 +315,56 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
                 </div>
 
                 <div>
-                  <Label style={{ color: 'var(--color-text-primary)' }}>Afdelingen</Label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    {departments.map((dept) => (
-                      <div key={dept.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`dept-${dept.id}`}
-                          checked={formData.departmentIds.includes(dept.id)}
-                          onCheckedChange={() => toggleDepartment(dept.id)}
-                        />
-                        <Label htmlFor={`dept-${dept.id}`} className="text-sm font-normal cursor-pointer" style={{ color: 'var(--color-text-secondary)' }}>
-                          {dept.name}
-                        </Label>
-                      </div>
-                    ))}
+                  <Label style={{ color: 'var(--color-text-primary)' }}>Afdelingen & Locatievoorkeuren</Label>
+                  <p className="text-xs mt-1 mb-2" style={{ color: 'var(--color-text-muted)' }}>
+                    Vink afdelingen aan en geef per afdeling aan of het een voorkeur of back-up locatie is.
+                  </p>
+                  <div className="space-y-2 mt-2">
+                    {departments.map((dept) => {
+                      const isChecked = formData.departmentIds.includes(dept.id);
+                      const isPreferred = (formData.preferred_departmentIds || []).includes(dept.id);
+                      const isBackup = (formData.backup_departmentIds || []).includes(dept.id);
+                      return (
+                        <div key={dept.id} className="flex items-center gap-3 p-2 rounded-lg" style={{ backgroundColor: isChecked ? 'var(--color-surface-light)' : 'transparent' }}>
+                          <Checkbox
+                            id={`dept-${dept.id}`}
+                            checked={isChecked}
+                            onCheckedChange={() => toggleDepartment(dept.id)}
+                          />
+                          <Label htmlFor={`dept-${dept.id}`} className="text-sm font-normal cursor-pointer flex-1" style={{ color: 'var(--color-text-secondary)' }}>
+                            {dept.name}
+                          </Label>
+                          {isChecked && (
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setDeptPreference(dept.id, isPreferred ? 'none' : 'preferred')}
+                                className="px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                                style={{ 
+                                  backgroundColor: isPreferred ? '#22c55e' : 'var(--color-surface)',
+                                  color: isPreferred ? 'white' : 'var(--color-text-muted)',
+                                  border: `1px solid ${isPreferred ? '#22c55e' : 'var(--color-border)'}`
+                                }}
+                              >
+                                Voorkeur
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeptPreference(dept.id, isBackup ? 'none' : 'backup')}
+                                className="px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                                style={{ 
+                                  backgroundColor: isBackup ? '#f59e0b' : 'var(--color-surface)',
+                                  color: isBackup ? 'white' : 'var(--color-text-muted)',
+                                  border: `1px solid ${isBackup ? '#f59e0b' : 'var(--color-border)'}`
+                                }}
+                              >
+                                Back-up
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
