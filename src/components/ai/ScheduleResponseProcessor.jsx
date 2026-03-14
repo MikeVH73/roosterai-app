@@ -117,8 +117,44 @@ export function processAIShifts({
     dedupShifts.push(shift);
   }
   
+  // Stage 3.5: Cap shifts per daypart+day to staffing requirement (max_staff or min_staff)
+  const cappedShifts = [];
+  if (staffingReqs && staffingReqs.length > 0) {
+    const slotTracker = {}; // key: daypartId_dayOfWeek → count
+    
+    // Build a lookup: daypartId_dayOfWeek → max allowed shifts
+    const maxPerSlot = {};
+    for (const r of staffingReqs) {
+      if (!r.targetHours || r.targetHours <= 0) continue;
+      const key = `${r.daypartId}_${r.day_of_week}`;
+      maxPerSlot[key] = r.min_staff || 1;
+    }
+    
+    for (const shift of dedupShifts) {
+      const shiftDayOfWeek = new Date(shift.date).getDay();
+      const key = `${shift.daypartId}_${shiftDayOfWeek}`;
+      const maxAllowed = maxPerSlot[key];
+      
+      if (maxAllowed !== undefined) {
+        const currentCount = slotTracker[key] || 0;
+        if (currentCount >= maxAllowed) {
+          const emp = relevantEmployees.find(e => e.id === shift.employeeId);
+          const dp = daypartLookup[shift.daypartId];
+          issues.invalid.push(
+            `🚫 Overcapaciteit: ${emp?.first_name || shift.employeeId} op ${shift.date} ${dp?.name || ''} — al ${currentCount}/${maxAllowed} medewerkers ingepland, shift verwijderd`
+          );
+          continue;
+        }
+        slotTracker[key] = currentCount + 1;
+      }
+      cappedShifts.push(shift);
+    }
+  } else {
+    cappedShifts.push(...dedupShifts);
+  }
+  
   // Stage 4: Time correction (force daypart times)
-  for (const shift of dedupShifts) {
+  for (const shift of cappedShifts) {
     const dp = daypartLookup[shift.daypartId];
     if (dp) {
       if (shift.start_time !== dp.startTime || shift.end_time !== dp.endTime) {
