@@ -872,16 +872,28 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
           validationLines.push(...duplicateIssues);
         }
         
-        // Check 3: Function mismatch warnings
+        // Check 3: Preference and function mismatch warnings
+        const prefIssues = [];
         const funcMismatches = [];
         createdShifts.forEach(s => {
           const emp = employees.find(e => e.id === s.employeeId);
           const dept = departments.find(d => d.id === s.departmentId);
-          if (emp && dept && emp.functionId) {
+          if (!emp || !dept) return;
+          
+          // Check voorkeur vs back-up
+          const isPreferred = (emp.preferred_departmentIds || []).includes(s.departmentId);
+          const isBackup = (emp.backup_departmentIds || []).includes(s.departmentId);
+          const isUnlabeled = !isPreferred && !isBackup; // no label = treat as fine
+          
+          if (isBackup) {
+            prefIssues.push(`🟡 ${emp.first_name} ${emp.last_name} → ${dept.name} op ${s.date} (BACK-UP afdeling)`);
+          }
+          
+          // Function mismatch check
+          if (emp.functionId) {
             const func = functions.find(f => f.id === emp.functionId);
             const funcName = func?.name?.toLowerCase() || '';
             const deptName = dept.name?.toLowerCase() || '';
-            // Simple heuristic: if function name doesn't appear in dept name and vice versa
             const isLikelyMismatch = funcName && deptName && 
               !deptName.includes(funcName.split(' ')[0]) && 
               !funcName.includes(deptName.split(' ')[0]);
@@ -890,6 +902,10 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
             }
           }
         });
+        if (prefIssues.length > 0) {
+          validationLines.push('', `🟡 BACK-UP INZET (${prefIssues.length}x):`);
+          validationLines.push(...prefIssues.slice(0, 10));
+        }
         if (funcMismatches.length > 0) {
           validationLines.push('', `🔶 FUNCTIE-MISMATCH (${funcMismatches.length}x):`);
           validationLines.push(...funcMismatches.slice(0, 10));
