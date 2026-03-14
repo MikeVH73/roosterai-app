@@ -306,6 +306,8 @@ Vraag: ${finalPrompt}`;
       let weekEnd = null;
       let alreadyPlannedHours = {};
       let relevantEmployees = [];
+      let scheduleDepts = [];
+      let nameToIdMap = {};
 
       // Special handling for Test 1: Generate actual schedule
       if (testCase.id === 1 && targetSchedule) {
