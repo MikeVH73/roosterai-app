@@ -604,7 +604,7 @@ Vraag: ${finalPrompt}`;
             ...testResults,
             [testCase.id]: {
               status: 'failed',
-              response: `❌ GEEN shifts aangemaakt!\n\nAI genereerde ${response.shifts.length} shifts, maar ze konden niet worden opgeslagen.\n\nFouten:\n${errors.join('\n')}`,
+              response: `❌ GEEN shifts aangemaakt!\n\nAI genereerde ${aiResult.shifts.length} shifts, maar ze konden niet worden opgeslagen.\n\nFouten:\n${errors.join('\n')}`,
               details: 'Alle shift creaties zijn mislukt',
               timestamp: new Date().toISOString()
             }
