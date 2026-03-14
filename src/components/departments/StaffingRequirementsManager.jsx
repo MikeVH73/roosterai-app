@@ -171,6 +171,12 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
   const sortedDayparts = [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  const getDaypartHoursLabel = (daypartId) => {
+    const dp = dayparts.find(d => d.id === daypartId);
+    if (!dp?.startTime || !dp?.endTime) return null;
+    return `${dp.startTime} – ${dp.endTime}`;
+  };
+
   const openBulkDialog = () => {
     setBulkData({
       daypartId: sortedDayparts[0]?.id || '',
@@ -362,6 +368,11 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                     ))}
                   </SelectContent>
                 </Select>
+                {formData.daypartId && getDaypartHoursLabel(formData.daypartId) && (
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                    Uren dagdeel: {getDaypartHoursLabel(formData.daypartId)}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="day_of_week">Dag *</Label>
@@ -488,6 +499,11 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                   ))}
                 </SelectContent>
               </Select>
+              {bulkData.daypartId && getDaypartHoursLabel(bulkData.daypartId) && (
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                  Uren dagdeel: {getDaypartHoursLabel(bulkData.daypartId)}
+                </p>
+              )}
             </div>
 
             <div>
