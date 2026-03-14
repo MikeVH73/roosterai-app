@@ -20,6 +20,7 @@ export function processAIShifts({
   daypartHoursMap,
   alreadyPlannedHours,
   nameToIdMap,
+  staffingReqs,
 }) {
   const issues = {
     idResolution: [],
