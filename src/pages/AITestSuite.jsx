@@ -484,15 +484,22 @@ Vraag: ${finalPrompt}`;
 
       console.log('AI Response:', response);
 
+      // Unwrap nested response if needed (some models wrap in {response: {...}})
+      let aiResult = response;
+      if (!aiResult.shifts && aiResult.response && typeof aiResult.response === 'object') {
+        console.log('Unwrapping nested response object');
+        aiResult = aiResult.response;
+      }
+
       // Test 1: Create actual shifts
       if (testCase.id === 1 && targetSchedule) {
         // Check if AI actually generated shifts
-        if (!response.shifts || !Array.isArray(response.shifts) || response.shifts.length === 0) {
+        if (!aiResult.shifts || !Array.isArray(aiResult.shifts) || aiResult.shifts.length === 0) {
           setTestResults({
             ...testResults,
             [testCase.id]: {
               status: 'failed',
-              response: `❌ AI heeft geen shifts gegenereerd!\n\nAI antwoord was:\n${JSON.stringify(response, null, 2)}`,
+              response: `❌ AI heeft geen shifts gegenereerd!\n\nAI antwoord was:\n${JSON.stringify(aiResult, null, 2).slice(0, 2000)}`,
               details: 'De AI heeft geen shifts array teruggegeven of deze was leeg',
               timestamp: new Date().toISOString()
             }
@@ -502,7 +509,7 @@ Vraag: ${finalPrompt}`;
           return;
         }
 
-        console.log(`AI genereerde ${response.shifts.length} shifts, gaan verwerken...`);
+        console.log(`AI genereerde ${aiResult.shifts.length} shifts, gaan verwerken...`);
         
         // STAP 0: Verwijder bestaande shifts voor deze week
         const existingWeekShifts = await base44.entities.Shift.filter({ scheduleId: targetSchedule.id });
