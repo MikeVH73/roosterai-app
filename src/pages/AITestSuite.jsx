@@ -355,69 +355,98 @@ Vraag: ${finalPrompt}`;
         // Determine which location this schedule is for
         const scheduleLocationId = targetSchedule.locationIds?.[0] || null;
 
-        // Build a human-readable staffing requirements summary per day
+        // Helper: calculate hours from time range
+        const calcHours = (start, end) => {
+          const [sh, sm] = start.split(':').map(Number);
+          const [eh, em] = end.split(':').map(Number);
+          let diff = (eh * 60 + em) - (sh * 60 + sm);
+          if (diff <= 0) diff += 24 * 60; // overnight
+          return diff / 60;
+        };
+
+        // Build precise shift requirements per daypart per day
         const summaryReqs = contextData.bezettingseisen || [];
-        const reqSummaryLines = [];
+        const shiftInstructions = [];
+        let totalShiftsNeeded = 0;
         
         for (const dp of scheduleDayparts) {
           const dept = departments.find(d => d.id === dp.departmentId);
           const deptName = dept?.name || 'Onbekend';
+          const dpHours = calcHours(dp.startTime, dp.endTime);
           const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
           
-          if (dpReqs.length > 0) {
-            for (const r of dpReqs) {
-              const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
-              reqSummaryLines.push(
-                `- ${deptName} > ${dp.name} (${dp.startTime}-${dp.endTime}) op ${dayName}: ${r.doeluren} uur nodig, min ${r.min_bezetting || 1} medewerkers, optimaal ${r.optimaal || '?'} medewerkers`
-              );
+          for (const r of dpReqs) {
+            if (!r.doeluren || r.doeluren <= 0) continue;
+            const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
+            // Calculate how many shifts needed: targetHours / daypart duration, rounded up
+            const shiftsNeeded = Math.ceil(r.doeluren / dpHours);
+            totalShiftsNeeded += shiftsNeeded;
+            
+            // Calculate the actual date for this day_of_week within the week range
+            const targetDayNum = r.dag_van_week;
+            let targetDate = null;
+            for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+              if (d.getDay() === targetDayNum) {
+                targetDate = d.toISOString().split('T')[0];
+                break;
+              }
             }
+            // Reset loop date
+            
+            shiftInstructions.push(
+              `OPDRACHT: ${deptName} > ${dp.name} op ${dayName}${targetDate ? ` (${targetDate})` : ''}:
+  - Dagdeel ID: ${dp.id}
+  - Afdeling ID: ${dp.departmentId}
+  - Start: ${dp.startTime}, Eind: ${dp.endTime} (=${dpHours}u per shift)
+  - Doeluren: ${r.doeluren}u → maak EXACT ${shiftsNeeded} shift(s) van ${dp.startTime}-${dp.endTime}
+  - Totaal geplande uren: ${shiftsNeeded} × ${dpHours} = ${shiftsNeeded * dpHours}u`
+            );
           }
         }
         
-        const reqSummary = reqSummaryLines.length > 0 
-          ? reqSummaryLines.join('\n') 
-          : 'Geen bezettingsnormen gevonden - maak een redelijke inschatting.';
+        const shiftInstructionsText = shiftInstructions.length > 0 
+          ? shiftInstructions.join('\n\n') 
+          : 'Geen bezettingsnormen gevonden.';
 
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
-OPDRACHT: Genereer een COMPLEET weekrooster. Maak diensten aan die EXACT de bezettingsnormen invullen.
+OPDRACHT: Genereer een weekrooster met EXACT het juiste aantal diensten per bezettingsnorm.
 
-=== BEZETTINGSNORMEN (DIT IS JE BELANGRIJKSTE INPUT) ===
-Hieronder staat PER DAGDEEL PER DAG hoeveel uren en medewerkers nodig zijn.
-Elke regel = 1 dienst-vereiste die je MOET invullen met een of meer shifts.
+=== EXACTE SHIFT-OPDRACHTEN (VOLG DIT LETTERLIJK) ===
+Hieronder staat voor elk dagdeel op elke dag PRECIES hoeveel shifts je moet aanmaken.
+Elke shift heeft VASTE start- en eindtijden (= de tijden van het dagdeel).
 
-${reqSummary}
+${shiftInstructionsText}
 
-=== HOE JE DIENSTEN MAAKT ===
-Voor elke bezettingsnorm hierboven:
-1. Kijk naar de DOELUREN en het DAGDEEL (met start- en eindtijd)
-2. Plan genoeg medewerkers in zodat het totaal aantal uren >= doeluren
-3. De start_time en end_time van elke shift MOETEN binnen het dagdeel vallen
-4. Voorbeeld: dagdeel "Dag Ziekenhuis (vroege dienst)" is 07:00-15:30 met doeluren 8h → plan 1 medewerker van 07:00-15:30 (8.5h incl pauze)
-5. Voorbeeld: dagdeel "Balie dienst Ochtend" is 08:00-12:00 met doeluren 4h → plan 1 medewerker van 08:00-12:00
+TOTAAL: Je moet EXACT ${totalShiftsNeeded} shifts aanmaken.
 
-=== BESCHIKBARE DATA ===
-${JSON.stringify(contextData, null, 2)}
+=== TOEWIJZINGSREGELS ===
+Wijs voor elke shift een medewerker toe uit de lijst hieronder. Let op:
+- De medewerker MOET de afdeling in zijn/haar departmentIds hebben
+- Tel per medewerker het totaal geplande uren op en overschrijd NIET hun contract_hours per week
+- Minimaal 11 uur rust tussen twee diensten van dezelfde medewerker
+- Eén medewerker mag MAXIMAAL 1 shift per dagdeel per dag hebben
+- Als je niet genoeg medewerkers hebt voor alle shifts, laat dan de shift WEG en meld dit in unresolved_issues
+
+=== BESCHIKBARE MEDEWERKERS ===
+${JSON.stringify(contextData.medewerkers, null, 2)}
+
+=== DAGDELEN ===
+${JSON.stringify(contextData.dayparts, null, 2)}
+
+=== AFDELINGEN ===
+${JSON.stringify(contextData.afdelingen, null, 2)}
 
 === ROOSTER DETAILS ===
-- Naam: ${targetSchedule.name}
 - Locatie ID: ${scheduleLocationId}
 - Afdelingen in rooster: ${targetSchedule.departmentIds?.join(', ')}
-- Start datum: ${weekStart.toISOString().split('T')[0]}
-- Eind datum: ${weekEnd.toISOString().split('T')[0]}
+- Periode: ${weekStart.toISOString().split('T')[0]} t/m ${weekEnd.toISOString().split('T')[0]}
 
-=== STRIKTE REGELS ===
-1. Gebruik ALLEEN medewerker IDs uit de data hierboven
-2. Gebruik ALLEEN afdeling IDs uit departmentIds van dit rooster: ${targetSchedule.departmentIds?.join(', ')}
-3. Een medewerker mag ALLEEN op een afdeling werken als die afdeling in zijn/haar departmentIds staat
-4. Gebruik ALLEEN dagdeel IDs uit de lijst hierboven
-5. locationId MOET altijd "${scheduleLocationId}" zijn
-6. De start_time en end_time van een shift MOETEN overeenkomen met het dagdeel (startTijd/eindTijd)
-7. Respecteer contracturen: tel het totaal geplande uren per medewerker en overschrijd NIET hun contract_hours per week
-8. Minimaal 11 uur rust tussen diensten van dezelfde medewerker
-9. Een medewerker mag MAXIMAAL 1 dienst per dagdeel per dag hebben
-10. Maak GEEN diensten voor dagen/dagdelen waar geen bezettingsnorm voor bestaat (= 0 uren nodig)
-11. Het totaal aantal shifts moet ALLE bezettingsnormen dekken`;
+=== BELANGRIJK ===
+- start_time en end_time van elke shift MOETEN EXACT gelijk zijn aan de startTijd en eindTijd van het dagdeel
+- Gebruik voor ELKE shift de exacte IDs (daypartId, departmentId, locationId) zoals aangegeven
+- locationId is ALTIJD "${scheduleLocationId}"
+- Als een bezettingsnorm NIET volledig kan worden ingevuld (te weinig beschikbare medewerkers), meld dit in unresolved_issues`;
 
         responseSchema = {
           type: "object",
