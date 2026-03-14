@@ -100,8 +100,9 @@ export default function ShiftDialog({
         has_break: hasBreak
       });
     } else {
-      // Find the daypart to get default times and break duration
+      // Find the daypart to get default times and break settings
       const selectedDaypart = dayparts.find(dp => dp.id === daypartId);
+      const dpBreak = selectedDaypart?.break_duration || 0;
       setFormData({
         ...defaultFormData,
         employeeId: employeeId || '',
@@ -110,20 +111,23 @@ export default function ShiftDialog({
         departmentId: schedule?.departmentIds?.[0] || '',
         start_time: shift?.start_time || selectedDaypart?.startTime || '09:00',
         end_time: selectedDaypart?.endTime || '17:00',
-        break_duration: selectedDaypart?.break_duration || 30
+        break_duration: dpBreak || 30,
+        has_break: dpBreak > 0
       });
     }
   }, [shift, employeeId, date, daypartId, dayparts, open, schedule]);
 
-  // Update times when daypart changes
+  // Update times and break when daypart changes
   const handleDaypartChange = (newDaypartId) => {
     const selectedDaypart = dayparts.find(dp => dp.id === newDaypartId);
+    const dpBreak = selectedDaypart?.break_duration || 0;
     setFormData(prev => ({
       ...prev,
       daypartId: newDaypartId,
       start_time: selectedDaypart?.startTime || prev.start_time,
       end_time: selectedDaypart?.endTime || prev.end_time,
-      break_duration: selectedDaypart?.break_duration || prev.break_duration
+      break_duration: dpBreak || 30,
+      has_break: dpBreak > 0
     }));
   };
 
