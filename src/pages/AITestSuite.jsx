@@ -350,32 +350,69 @@ Vraag: ${finalPrompt}`;
         // Determine which location this schedule is for
         const scheduleLocationId = targetSchedule.locationIds?.[0] || null;
 
+        // Build a human-readable staffing requirements summary per day
+        const allRequirements = contextData.bezettingseisen || [];
+        const reqSummaryLines = [];
+        
+        for (const dp of scheduleDayparts) {
+          const dept = departments.find(d => d.id === dp.departmentId);
+          const deptName = dept?.name || 'Onbekend';
+          const dpReqs = allRequirements.filter(r => r.dagdeelId === dp.id);
+          
+          if (dpReqs.length > 0) {
+            for (const r of dpReqs) {
+              const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
+              reqSummaryLines.push(
+                `- ${deptName} > ${dp.name} (${dp.startTime}-${dp.endTime}) op ${dayName}: ${r.doeluren} uur nodig, min ${r.min_bezetting || 1} medewerkers, optimaal ${r.optimaal || '?'} medewerkers`
+              );
+            }
+          }
+        }
+        
+        const reqSummary = reqSummaryLines.length > 0 
+          ? reqSummaryLines.join('\n') 
+          : 'Geen bezettingsnormen gevonden - maak een redelijke inschatting.';
+
         systemPrompt = `Je bent de AI Planning Assistent voor ${currentCompany?.name}.
 
-OPDRACHT: Genereer een COMPLEET rooster met ECHTE medewerkers uit de database.
+OPDRACHT: Genereer een COMPLEET weekrooster. Maak diensten aan die EXACT de bezettingsnormen invullen.
 
-BESCHIKBARE DATA:
+=== BEZETTINGSNORMEN (DIT IS JE BELANGRIJKSTE INPUT) ===
+Hieronder staat PER DAGDEEL PER DAG hoeveel uren en medewerkers nodig zijn.
+Elke regel = 1 dienst-vereiste die je MOET invullen met een of meer shifts.
+
+${reqSummary}
+
+=== HOE JE DIENSTEN MAAKT ===
+Voor elke bezettingsnorm hierboven:
+1. Kijk naar de DOELUREN en het DAGDEEL (met start- en eindtijd)
+2. Plan genoeg medewerkers in zodat het totaal aantal uren >= doeluren
+3. De start_time en end_time van elke shift MOETEN binnen het dagdeel vallen
+4. Voorbeeld: dagdeel "Dag Ziekenhuis (vroege dienst)" is 07:00-15:30 met doeluren 8h → plan 1 medewerker van 07:00-15:30 (8.5h incl pauze)
+5. Voorbeeld: dagdeel "Balie dienst Ochtend" is 08:00-12:00 met doeluren 4h → plan 1 medewerker van 08:00-12:00
+
+=== BESCHIKBARE DATA ===
 ${JSON.stringify(contextData, null, 2)}
 
-ROOSTER DETAILS:
+=== ROOSTER DETAILS ===
 - Naam: ${targetSchedule.name}
 - Locatie ID: ${scheduleLocationId}
 - Afdelingen in rooster: ${targetSchedule.departmentIds?.join(', ')}
 - Start datum: ${weekStart.toISOString().split('T')[0]}
 - Eind datum: ${weekEnd.toISOString().split('T')[0]}
 
-REGELS (STRIKT):
-1. Gebruik ALLEEN medewerker IDs uit de data hierboven (geen nieuwe verzinnen!)
+=== STRIKTE REGELS ===
+1. Gebruik ALLEEN medewerker IDs uit de data hierboven
 2. Gebruik ALLEEN afdeling IDs uit departmentIds van dit rooster: ${targetSchedule.departmentIds?.join(', ')}
 3. Een medewerker mag ALLEEN op een afdeling werken als die afdeling in zijn/haar departmentIds staat
-4. Gebruik ALLEEN functie IDs uit de lijst hierboven
-5. Gebruik ALLEEN dagdeel IDs uit de lijst hierboven
-6. locationId MOET altijd "${scheduleLocationId}" zijn
-7. Maak shifts voor ELKE werkdag in de periode (ma-za)
-8. Respecteer contracturen: een medewerker met bijv. 20u/week mag MAXIMAAL 20 uur per week werken
-9. Minimaal 11 uur rust tussen diensten
-10. Koppel shifts aan het juiste dagdeel op basis van de start/eindtijden
-11. Verdeel medewerkers eerlijk over de week op basis van hun contracturen`;
+4. Gebruik ALLEEN dagdeel IDs uit de lijst hierboven
+5. locationId MOET altijd "${scheduleLocationId}" zijn
+6. De start_time en end_time van een shift MOETEN overeenkomen met het dagdeel (startTijd/eindTijd)
+7. Respecteer contracturen: tel het totaal geplande uren per medewerker en overschrijd NIET hun contract_hours per week
+8. Minimaal 11 uur rust tussen diensten van dezelfde medewerker
+9. Een medewerker mag MAXIMAAL 1 dienst per dagdeel per dag hebben
+10. Maak GEEN diensten voor dagen/dagdelen waar geen bezettingsnorm voor bestaat (= 0 uren nodig)
+11. Het totaal aantal shifts moet ALLE bezettingsnormen dekken`;
 
         responseSchema = {
           type: "object",
