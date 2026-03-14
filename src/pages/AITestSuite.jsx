@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -161,7 +162,6 @@ export default function AITestSuite() {
   const navigate = useNavigate();
   const { currentCompany, canUseAI } = useCompany();
   const companyId = currentCompany?.id;
-  const navigate = useNavigate();
 
   const [testResults, setTestResults] = useState({});
   const [currentTest, setCurrentTest] = useState(null);
