@@ -390,19 +390,71 @@ Vraag: ${finalPrompt}`;
           daypartHoursMap[dp.id] = brutoUren - pauzeUren;
         });
         
+        // === MAANDELIJKSE UREN BEREKENING ===
+        // Bepaal de maand van deze week
+        const monthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
+        const monthEnd = new Date(weekStart.getFullYear(), weekStart.getMonth() + 1, 0);
+        const monthStartStr = monthStart.toISOString().split('T')[0];
+        const monthEndStr = monthEnd.toISOString().split('T')[0];
+        
+        // Haal alle bestaande shifts voor deze maand op
+        const allMonthShifts = await base44.entities.Shift.filter({ companyId });
+        const monthShifts = allMonthShifts.filter(s => 
+          s.date >= monthStartStr && s.date <= monthEndStr
+        );
+        
+        // Bereken al ingeroosterde uren per medewerker deze maand
+        const alreadyPlannedHours = {};
+        monthShifts.forEach(s => {
+          // Skip shifts in de huidige week (die worden vervangen)
+          if (s.date >= weekStart.toISOString().split('T')[0] && s.date <= weekEnd.toISOString().split('T')[0]) return;
+          const dp = dayparts.find(d => d.id === s.daypartId);
+          if (!dp) return;
+          const bruto = calcHoursFromTime(dp.startTime, dp.endTime);
+          const pauze = (dp.break_duration || 0) / 60;
+          alreadyPlannedHours[s.employeeId] = (alreadyPlannedHours[s.employeeId] || 0) + (bruto - pauze);
+        });
+        
         // Build enriched employee data with contract hours analysis
         const scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
         contextData.medewerkers = relevantEmployees.map(e => {
           const func = functions.find(f => f.id === e.functionId);
           const empScheduleDepts = scheduleDepts.filter(d => (e.departmentIds || []).includes(d.id));
+          
+          // Voorkeur vs Back-up afdelingen (binnen dit rooster)
+          const preferredInSchedule = empScheduleDepts.filter(d => 
+            (e.preferred_departmentIds || []).includes(d.id)
+          );
+          const backupInSchedule = empScheduleDepts.filter(d => 
+            (e.backup_departmentIds || []).includes(d.id)
+          );
+          // Afdelingen zonder voorkeur/backup label = behandel als voorkeur
+          const unlabeledInSchedule = empScheduleDepts.filter(d => 
+            !(e.preferred_departmentIds || []).includes(d.id) &&
+            !(e.backup_departmentIds || []).includes(d.id)
+          );
+          
+          // Maandelijkse uren berekening
+          const weeklyHours = e.contract_hours || 0;
+          const monthlyHours = Math.round((weeklyHours * 13) / 3); // 13 weken per kwartaal / 3 maanden
+          const alreadyPlanned = Math.round(alreadyPlannedHours[e.id] || 0);
+          const remainingThisMonth = Math.max(0, monthlyHours - alreadyPlanned);
+          // Max inzetbaar deze week = min(weekelijkse uren, resterend deze maand)
+          const maxThisWeek = Math.min(weeklyHours, remainingThisMonth);
+          
           return {
             id: e.id,
             naam: `${e.first_name} ${e.last_name}`,
-            contracturen: e.contract_hours,
+            contracturen_per_week: weeklyHours,
+            contracturen_per_maand: monthlyHours,
+            al_ingeroosterd_deze_maand: alreadyPlanned,
+            resterend_deze_maand: remainingThisMonth,
+            max_inzetbaar_deze_week: maxThisWeek,
             contracttype: e.contract_type,
             functieId: e.functionId,
             functieNaam: func?.name || 'Onbekend',
-            afdelingen_in_dit_rooster: empScheduleDepts.map(d => ({ id: d.id, naam: d.name })),
+            voorkeur_afdelingen: [...preferredInSchedule, ...unlabeledInSchedule].map(d => ({ id: d.id, naam: d.name })),
+            backup_afdelingen: backupInSchedule.map(d => ({ id: d.id, naam: d.name })),
             voorkeuren: e.preferences
           };
         });
