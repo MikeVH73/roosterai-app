@@ -508,12 +508,13 @@ Vraag: ${finalPrompt}`;
 
         // Build employee hours budget summary for the prompt
         const employeeBudgetLines = contextData.medewerkers.map(e => {
-          const deptNames = e.afdelingen_in_dit_rooster.map(d => d.naam).join(', ');
-          return `  - ${e.naam} (${e.functieNaam}): ${e.contracturen}u/week, afdelingen: [${deptNames}]`;
+          const voorkeurNames = e.voorkeur_afdelingen.map(d => d.naam).join(', ') || 'geen';
+          const backupNames = e.backup_afdelingen.map(d => d.naam).join(', ') || 'geen';
+          return `  - ${e.naam} (${e.functieNaam}): ${e.max_inzetbaar_deze_week}u deze week (${e.al_ingeroosterd_deze_maand}u/${e.contracturen_per_maand}u maand) | VOORKEUR: [${voorkeurNames}] | BACK-UP: [${backupNames}]`;
         }).join('\n');
         
         // Calculate total available hours vs needed hours
-        const totalAvailableHours = contextData.medewerkers.reduce((sum, e) => sum + (e.contracturen || 0), 0);
+        const totalAvailableHours = contextData.medewerkers.reduce((sum, e) => sum + (e.max_inzetbaar_deze_week || 0), 0);
         let totalNeededHours = 0;
         for (const dp of scheduleDayparts) {
           const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
