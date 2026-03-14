@@ -603,11 +603,17 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
         // === VALIDATIE ===
         const validationLines = [];
         let allMatch = true;
+        let totalOk = 0;
+        let totalFail = 0;
         
-        // Check 1: Staffing requirements met
+        // Groepeer validatie per afdeling
+        const deptValidation = {};
+        
         for (const dp of scheduleDayparts) {
           const dept = departments.find(d => d.id === dp.departmentId);
           const deptName = dept?.name || 'Onbekend';
+          if (!deptValidation[deptName]) deptValidation[deptName] = { ok: 0, fail: 0, issues: [] };
+          
           const dpReqs = summaryReqs.filter(r => r.dagdeelId === dp.id);
           
           for (const r of dpReqs) {
@@ -620,10 +626,25 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
               return s.daypartId === dp.id && shiftDay === r.dag_van_week;
             });
             
-            const icon = matchingShifts.length >= neededStaff ? '✅' : '❌';
-            if (matchingShifts.length < neededStaff) allMatch = false;
-            
-            validationLines.push(`${icon} ${deptName} > ${dp.name} ${dayName}: ${matchingShifts.length}/${neededStaff} medewerker(s)`);
+            if (matchingShifts.length >= neededStaff) {
+              deptValidation[deptName].ok++;
+              totalOk++;
+            } else {
+              deptValidation[deptName].fail++;
+              deptValidation[deptName].issues.push(`${dp.name} ${dayName}: ${matchingShifts.length}/${neededStaff}`);
+              totalFail++;
+              allMatch = false;
+            }
+          }
+        }
+        
+        // Toon compacte samenvatting per afdeling
+        for (const [deptName, val] of Object.entries(deptValidation)) {
+          const total = val.ok + val.fail;
+          const icon = val.fail === 0 ? '✅' : '⚠️';
+          validationLines.push(`${icon} ${deptName}: ${val.ok}/${total} dagdeel-slots ingevuld`);
+          if (val.issues.length > 0) {
+            val.issues.forEach(i => validationLines.push(`   ❌ ${i}`));
           }
         }
         
