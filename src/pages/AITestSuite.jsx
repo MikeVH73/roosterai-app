@@ -669,7 +669,7 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
           ...testResults,
           [testCase.id]: {
             status: allMatch ? 'passed' : 'failed',
-            response: `${statusMsg}\nRooster: ${targetSchedule.name}\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}${validationMsg}${unresolvedMsg}${errorMsg}`,
+            response: `${statusMsg}\nRooster: ${targetSchedule.name}\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}${validationMsg}${unresolvedMsg}${skippedMsg}${errorMsg}`,
             details: `Bekijk week van ${firstDate} in rooster "${targetSchedule.name}"`,
             scheduleId: targetSchedule.id,
             scheduleName: targetSchedule.name,
