@@ -720,6 +720,35 @@ Merk op: start_time en end_time komen EXACT van het dagdeel. break_duration komt
           validationLines.push('', '🔴 DUBBELE INROOSTERINGEN:');
           validationLines.push(...duplicateIssues);
         }
+        
+        // Check 3: Function mismatch warnings
+        const funcMismatches = [];
+        createdShifts.forEach(s => {
+          const emp = employees.find(e => e.id === s.employeeId);
+          const dept = departments.find(d => d.id === s.departmentId);
+          if (emp && dept && emp.functionId) {
+            const func = functions.find(f => f.id === emp.functionId);
+            const funcName = func?.name?.toLowerCase() || '';
+            const deptName = dept.name?.toLowerCase() || '';
+            // Simple heuristic: if function name doesn't appear in dept name and vice versa
+            const isLikelyMismatch = funcName && deptName && 
+              !deptName.includes(funcName.split(' ')[0]) && 
+              !funcName.includes(deptName.split(' ')[0]);
+            if (isLikelyMismatch) {
+              funcMismatches.push(`⚠️ ${emp.first_name} ${emp.last_name} (${func?.name}) → ${dept.name} op ${s.date}`);
+            }
+          }
+        });
+        if (funcMismatches.length > 0) {
+          validationLines.push('', `🔶 FUNCTIE-MISMATCH (${funcMismatches.length}x):`);
+          validationLines.push(...funcMismatches.slice(0, 10));
+        }
+        
+        // Report corrected times
+        if (correctedTimes.length > 0) {
+          validationLines.push('', `🔧 TIJDEN GECORRIGEERD (${correctedTimes.length}x):`);
+          validationLines.push(...correctedTimes.slice(0, 5));
+        }
 
         // Get date range and details of created shifts
         const shiftDates = createdShifts.map(s => s.date).sort();
