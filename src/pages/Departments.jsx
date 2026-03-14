@@ -303,10 +303,14 @@ export default function Departments() {
                   </Link>
 
                   {department.locationIds?.length > 0 && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <MapPin className="w-4 h-4 text-slate-400" />
+                    <div className="flex items-center gap-2 flex-wrap mt-3">
+                      <MapPin className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
                       {getLocationNames(department.locationIds).map((name, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
+                        <Badge key={i} variant="secondary" className="text-xs" style={{ 
+                          backgroundColor: 'var(--color-surface-light)', 
+                          color: 'var(--color-text-secondary)',
+                          borderColor: 'var(--color-border)'
+                        }}>
                           {name}
                         </Badge>
                       ))}

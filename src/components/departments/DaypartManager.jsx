@@ -156,10 +156,10 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
                 className="flex items-center gap-3 p-3 rounded-lg border transition-colors"
                 style={{ backgroundColor: daypart.color || 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}
               >
-                <GripVertical className="w-4 h-4 cursor-grab" style={{ color: 'var(--color-text-muted)' }} />
+                <GripVertical className="w-4 h-4 cursor-grab" style={{ color: '#64748b' }} />
                 <div className="flex-1">
-                  <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{daypart.name}</p>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  <p className="font-medium" style={{ color: '#1e293b' }}>{daypart.name}</p>
+                  <p className="text-sm" style={{ color: '#475569' }}>
                     {daypart.startTime} - {daypart.endTime}
                   </p>
                 </div>

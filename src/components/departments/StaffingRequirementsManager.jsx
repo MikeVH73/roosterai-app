@@ -209,7 +209,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                   <TableCell>
                     <div 
                       className="px-2 py-1 rounded text-sm font-medium"
-                      style={{ backgroundColor: daypart.color || '#F8FAFC' }}
+                      style={{ backgroundColor: daypart.color || '#F8FAFC', color: '#1e293b' }}
                     >
                       {daypart.name}
                     </div>
