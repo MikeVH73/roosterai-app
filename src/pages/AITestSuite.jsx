@@ -285,6 +285,11 @@ Vraag: ${finalPrompt}`;
 
       const daysOfWeekNames = { 0: 'zondag', 1: 'maandag', 2: 'dinsdag', 3: 'woensdag', 4: 'donderdag', 5: 'vrijdag', 6: 'zaterdag' };
 
+      // Shared variables for Test 1 (used in both prompt-building and validation)
+      let scheduleDayparts = [];
+      let summaryReqs = [];
+      let scheduleLocationId = null;
+
       // Special handling for Test 1: Generate actual schedule
       if (testCase.id === 1 && targetSchedule) {
         // Calculate dates within the schedule range
