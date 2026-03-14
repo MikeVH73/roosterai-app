@@ -535,7 +535,7 @@ Vraag: ${finalPrompt}`;
         
         // === PROCESS AI RESPONSE through all validation stages ===
         const { validShifts, issues, budgetTracker } = processAIShifts({
-          aiShifts: response.shifts,
+          aiShifts: aiResult.shifts,
           relevantEmployees,
           allEmployees: employees,
           scheduleDepts,
