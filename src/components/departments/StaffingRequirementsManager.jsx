@@ -53,7 +53,9 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
   const queryClient = useQueryClient();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [selectedReq, setSelectedReq] = useState(null);
+  const [bulkSaving, setBulkSaving] = useState(false);
   const [formData, setFormData] = useState({
     daypartId: '',
     day_of_week: '',
@@ -61,6 +63,14 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
     min_staff: 1,
     optimal_staff: '',
     priority: 'medium'
+  });
+  const [bulkData, setBulkData] = useState({
+    daypartId: '',
+    targetHours: '',
+    min_staff: 1,
+    optimal_staff: '',
+    priority: 'medium',
+    selectedDays: [1, 2, 3, 4, 5] // ma-vr standaard
   });
 
   const createMutation = useMutation({
@@ -153,6 +163,58 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
   const sortedDayparts = [...dayparts].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
+  const openBulkDialog = () => {
+    setBulkData({
+      daypartId: sortedDayparts[0]?.id || '',
+      targetHours: '',
+      min_staff: 1,
+      optimal_staff: '',
+      priority: 'medium',
+      selectedDays: [1, 2, 3, 4, 5]
+    });
+    setBulkDialogOpen(true);
+  };
+
+  const toggleBulkDay = (dayValue) => {
+    setBulkData(prev => ({
+      ...prev,
+      selectedDays: prev.selectedDays.includes(dayValue)
+        ? prev.selectedDays.filter(d => d !== dayValue)
+        : [...prev.selectedDays, dayValue]
+    }));
+  };
+
+  const handleBulkSubmit = async (e) => {
+    e.preventDefault();
+    setBulkSaving(true);
+    
+    for (const dayValue of bulkData.selectedDays) {
+      const existing = requirements.find(r => r.daypartId === bulkData.daypartId && r.day_of_week === dayValue);
+      const data = {
+        companyId,
+        departmentId,
+        daypartId: bulkData.daypartId,
+        day_of_week: dayValue,
+        targetHours: parseFloat(bulkData.targetHours),
+        min_staff: parseInt(bulkData.min_staff),
+        optimal_staff: bulkData.optimal_staff ? parseInt(bulkData.optimal_staff) : null,
+        priority: bulkData.priority
+      };
+      
+      if (existing) {
+        await base44.entities.StaffingRequirement.update(existing.id, data);
+      } else {
+        await base44.entities.StaffingRequirement.create(data);
+      }
+    }
+    
+    queryClient.invalidateQueries(['staffing-requirements', companyId, departmentId]);
+    onUpdate?.();
+    setBulkSaving(false);
+    setBulkDialogOpen(false);
+    toast.success(`Bezettingsnormen ingesteld voor ${bulkData.selectedDays.length} dagen`);
+  };
+
   // Group requirements by daypart
   const groupedReqs = {};
   sortedDayparts.forEach(dp => {
@@ -184,10 +246,16 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
             <Target className="w-4 h-4" />
             Bezettingsnormen (uren per dagdeel)
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={() => openDialog()}>
-            <Plus className="w-4 h-4 mr-1" />
-            Toevoegen
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={openBulkDialog} style={{ color: 'var(--color-text-primary)', borderColor: 'var(--color-border)' }}>
+              <Calendar className="w-4 h-4 mr-1" />
+              Hele week invullen
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => openDialog()} style={{ color: 'var(--color-text-primary)', borderColor: 'var(--color-border)' }}>
+              <Plus className="w-4 h-4 mr-1" />
+              Toevoegen
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -381,6 +449,131 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                   {selectedReq ? 'Opslaan' : 'Toevoegen'}
                 </Button>
               </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Dialog */}
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hele week invullen</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleBulkSubmit} className="space-y-4">
+            <div>
+              <Label>Dagdeel *</Label>
+              <Select 
+                value={bulkData.daypartId} 
+                onValueChange={(v) => setBulkData({ ...bulkData, daypartId: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecteer dagdeel" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortedDayparts.map(dp => (
+                    <SelectItem key={dp.id} value={dp.id}>{dp.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Dagen</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {daysOfWeek.map(day => (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => toggleBulkDay(day.value)}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors"
+                    style={{
+                      backgroundColor: bulkData.selectedDays.includes(day.value) ? '#3b82f6' : 'var(--color-surface-light)',
+                      color: bulkData.selectedDays.includes(day.value) ? '#ffffff' : 'var(--color-text-primary)',
+                      borderColor: bulkData.selectedDays.includes(day.value) ? '#3b82f6' : 'var(--color-border)'
+                    }}
+                  >
+                    {day.label.substring(0, 2)}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button type="button" className="text-xs underline" style={{ color: 'var(--color-accent)' }}
+                  onClick={() => setBulkData(prev => ({ ...prev, selectedDays: [1,2,3,4,5] }))}>
+                  Ma-Vr
+                </button>
+                <button type="button" className="text-xs underline" style={{ color: 'var(--color-accent)' }}
+                  onClick={() => setBulkData(prev => ({ ...prev, selectedDays: [0,1,2,3,4,5,6] }))}>
+                  Hele week
+                </button>
+                <button type="button" className="text-xs underline" style={{ color: 'var(--color-accent)' }}
+                  onClick={() => setBulkData(prev => ({ ...prev, selectedDays: [0,6] }))}>
+                  Weekend
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <Label>Doeluren per dag *</Label>
+              <Input
+                type="number"
+                step="0.5"
+                min="0"
+                value={bulkData.targetHours}
+                onChange={(e) => setBulkData({ ...bulkData, targetHours: e.target.value })}
+                placeholder="bijv. 16"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Min. medewerkers</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={bulkData.min_staff}
+                  onChange={(e) => setBulkData({ ...bulkData, min_staff: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Optimaal medewerkers</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={bulkData.optimal_staff}
+                  onChange={(e) => setBulkData({ ...bulkData, optimal_staff: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Prioriteit</Label>
+              <Select 
+                value={bulkData.priority} 
+                onValueChange={(v) => setBulkData({ ...bulkData, priority: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Laag</SelectItem>
+                  <SelectItem value="medium">Normaal</SelectItem>
+                  <SelectItem value="high">Hoog</SelectItem>
+                  <SelectItem value="critical">Kritiek</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setBulkDialogOpen(false)}>
+                Annuleren
+              </Button>
+              <Button type="submit" disabled={bulkSaving || bulkData.selectedDays.length === 0} className="bg-blue-600 hover:bg-blue-700">
+                {bulkSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {bulkData.selectedDays.length} dagen instellen
+              </Button>
             </div>
           </form>
         </DialogContent>
