@@ -508,12 +508,23 @@ Vraag: ${finalPrompt}`;
           ? shiftInstructions.join('\n\n') 
           : 'Geen bezettingsnormen gevonden.';
 
-        // Build employee hours budget summary for the prompt
+        // Build employee hours budget summary for the prompt — ID is PROMINENT
         const employeeBudgetLines = contextData.medewerkers.map(e => {
           const voorkeurNames = e.voorkeur_afdelingen.map(d => d.naam).join(', ') || 'geen';
           const backupNames = e.backup_afdelingen.map(d => d.naam).join(', ') || 'geen';
-          return `  - ${e.naam} (${e.functieNaam}): ${e.max_inzetbaar_deze_week}u deze week (${e.al_ingeroosterd_deze_maand}u/${e.contracturen_per_maand}u maand) | VOORKEUR: [${voorkeurNames}] | BACK-UP: [${backupNames}]`;
+          return `  - ID="${e.id}" naam="${e.naam}" functie="${e.functieNaam}" max=${e.max_inzetbaar_deze_week}u/week (maand: ${e.al_ingeroosterd_deze_maand}/${e.contracturen_per_maand}u) VOORKEUR:[${voorkeurNames}] BACKUP:[${backupNames}]`;
         }).join('\n');
+        
+        // Build name-to-ID lookup for fallback resolution
+        const nameToIdMap = {};
+        relevantEmployees.forEach(e => {
+          const fullName = `${e.first_name} ${e.last_name}`.toLowerCase().trim();
+          nameToIdMap[fullName] = e.id;
+          // Also map first name only
+          nameToIdMap[e.first_name.toLowerCase().trim()] = e.id;
+          // Also map last name only
+          nameToIdMap[e.last_name.toLowerCase().trim()] = e.id;
+        });
         
         // Calculate total available hours vs needed hours
         const totalAvailableHours = contextData.medewerkers.reduce((sum, e) => sum + (e.max_inzetbaar_deze_week || 0), 0);
