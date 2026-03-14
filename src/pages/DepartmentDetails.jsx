@@ -34,7 +34,7 @@ export default function DepartmentDetails() {
       const depts = await base44.entities.Department.filter({ companyId });
       return depts.find(d => d.id === departmentId);
     },
-    enabled: !!departmentId
+    enabled: !!departmentId && !!companyId
   });
 
   const { data: dayparts = [], isLoading: daypartsLoading } = useQuery({
