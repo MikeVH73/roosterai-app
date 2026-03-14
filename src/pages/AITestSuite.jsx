@@ -563,18 +563,11 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
           return;
         }
 
-        // === VALIDATIE: Controleer of geplande uren overeenkomen met bezettingsnormen ===
-        const calcShiftHours = (s) => {
-          const [sh2, sm2] = s.start_time.split(':').map(Number);
-          const [eh2, em2] = s.end_time.split(':').map(Number);
-          let diff2 = (eh2 * 60 + em2) - (sh2 * 60 + sm2);
-          if (diff2 <= 0) diff2 += 24 * 60;
-          return diff2 / 60;
-        };
-
+        // === VALIDATIE ===
         const validationLines = [];
         let allMatch = true;
         
+        // Check 1: Staffing requirements met
         for (const dp of scheduleDayparts) {
           const dept = departments.find(d => d.id === dp.departmentId);
           const deptName = dept?.name || 'Onbekend';
@@ -583,20 +576,49 @@ Merk op: start_time en end_time komen EXACT van het dagdeel, NIET van de doelure
           for (const r of dpReqs) {
             if (!r.doeluren || r.doeluren <= 0) continue;
             const dayName = daysOfWeekNames[r.dag_van_week] || `dag ${r.dag_van_week}`;
+            const neededStaff = r.min_bezetting || 1;
             
-            // Find created shifts matching this daypart + day
             const matchingShifts = createdShifts.filter(s => {
               const shiftDay = new Date(s.date).getDay();
               return s.daypartId === dp.id && shiftDay === r.dag_van_week;
             });
             
-            const plannedHours = matchingShifts.reduce((sum, s) => sum + calcShiftHours(s), 0);
-            const diff = Math.abs(plannedHours - r.doeluren);
-            const icon = diff < 0.5 ? '✅' : diff <= 2 ? '⚠️' : '❌';
-            if (diff >= 0.5) allMatch = false;
+            const icon = matchingShifts.length >= neededStaff ? '✅' : '❌';
+            if (matchingShifts.length < neededStaff) allMatch = false;
             
-            validationLines.push(`${icon} ${deptName} > ${dp.name} ${dayName}: ${plannedHours}u gepland / ${r.doeluren}u norm${diff >= 0.5 ? ` (afwijking: ${diff > 0 ? '+' : ''}${(plannedHours - r.doeluren).toFixed(1)}u)` : ''}`);
+            validationLines.push(`${icon} ${deptName} > ${dp.name} ${dayName}: ${matchingShifts.length}/${neededStaff} medewerker(s)`);
           }
+        }
+        
+        // Check 2: No duplicate employee per day per department
+        const duplicateIssues = [];
+        const shiftsByDateDept = {};
+        createdShifts.forEach(s => {
+          const key = `${s.date}_${s.departmentId}`;
+          if (!shiftsByDateDept[key]) shiftsByDateDept[key] = [];
+          shiftsByDateDept[key].push(s);
+        });
+        
+        for (const [key, shiftsInGroup] of Object.entries(shiftsByDateDept)) {
+          const empCounts = {};
+          shiftsInGroup.forEach(s => {
+            empCounts[s.employeeId] = (empCounts[s.employeeId] || 0) + 1;
+          });
+          for (const [empId, count] of Object.entries(empCounts)) {
+            if (count > 1) {
+              const emp = employees.find(e => e.id === empId);
+              const empName = emp ? `${emp.first_name} ${emp.last_name}` : empId;
+              const [date, deptId] = key.split('_');
+              const deptObj = departments.find(d => d.id === deptId);
+              duplicateIssues.push(`❌ ${empName} staat ${count}x op ${date} bij ${deptObj?.name || deptId}`);
+              allMatch = false;
+            }
+          }
+        }
+        
+        if (duplicateIssues.length > 0) {
+          validationLines.push('', '🔴 DUBBELE INROOSTERINGEN:');
+          validationLines.push(...duplicateIssues);
         }
 
         // Get date range and details of created shifts
