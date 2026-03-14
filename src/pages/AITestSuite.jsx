@@ -518,7 +518,7 @@ Vraag: ${finalPrompt}`;
         }).join('\n');
         
         // Build name-to-ID lookup for fallback resolution
-        const nameToIdMap = {};
+        nameToIdMap = {};
         relevantEmployees.forEach(e => {
           const fullName = `${e.first_name} ${e.last_name}`.toLowerCase().trim();
           nameToIdMap[fullName] = e.id;
