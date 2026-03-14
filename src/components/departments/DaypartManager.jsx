@@ -8,7 +8,8 @@ import {
   Trash2,
   GripVertical,
   Clock,
-  Loader2
+  Loader2,
+  Coffee
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 const colorOptions = [
@@ -43,7 +45,9 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
     startTime: '08:00',
     endTime: '12:00',
     color: '#FEF3C7',
-    sortOrder: 0
+    sortOrder: 0,
+    has_break: false,
+    break_duration: 30
   });
 
   const createMutation = useMutation({
@@ -83,7 +87,9 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
         startTime: daypart.startTime || '08:00',
         endTime: daypart.endTime || '12:00',
         color: daypart.color || '#FEF3C7',
-        sortOrder: daypart.sortOrder || 0
+        sortOrder: daypart.sortOrder || 0,
+        has_break: (daypart.break_duration || 0) > 0,
+        break_duration: daypart.break_duration || 30
       });
     } else {
       setSelectedDaypart(null);
@@ -93,7 +99,9 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
         startTime: '08:00',
         endTime: '12:00',
         color: '#FEF3C7',
-        sortOrder: maxOrder + 1
+        sortOrder: maxOrder + 1,
+        has_break: false,
+        break_duration: 30
       });
     }
     setDialogOpen(true);
@@ -109,8 +117,10 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
     const submitData = { 
       ...formData, 
       companyId,
-      departmentId 
+      departmentId,
+      break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
     };
+    delete submitData.has_break;
 
     if (selectedDaypart) {
       await updateMutation.mutateAsync({ id: selectedDaypart.id, data: submitData });
@@ -161,6 +171,15 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
                   <p className="font-medium" style={{ color: '#1e293b' }}>{daypart.name}</p>
                   <p className="text-sm" style={{ color: '#475569' }}>
                     {daypart.startTime} - {daypart.endTime}
+                    {daypart.break_duration > 0 && (
+                      <span className="ml-2 inline-flex items-center gap-1">
+                        <Coffee className="w-3 h-3" />
+                        {daypart.break_duration} min pauze
+                      </span>
+                    )}
+                    {(!daypart.break_duration || daypart.break_duration === 0) && (
+                      <span className="ml-2 opacity-60">• geen pauze</span>
+                    )}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -228,6 +247,36 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
                   required
                 />
               </div>
+            </div>
+
+            <div>
+              <div className="flex items-center space-x-2 mb-3">
+                <Checkbox 
+                  id="daypart-has-break"
+                  checked={formData.has_break}
+                  onCheckedChange={(checked) => setFormData({ 
+                    ...formData, 
+                    has_break: checked,
+                    break_duration: checked ? (formData.break_duration || 30) : 0
+                  })}
+                />
+                <Label htmlFor="daypart-has-break" className="text-sm font-medium leading-none">
+                  Pauze in dit dagdeel
+                </Label>
+              </div>
+              {formData.has_break && (
+                <div className="ml-6 mb-2">
+                  <Label htmlFor="daypart-break-duration" className="text-sm">Pauze duur (minuten)</Label>
+                  <Input
+                    id="daypart-break-duration"
+                    type="number"
+                    value={formData.break_duration}
+                    onChange={(e) => setFormData({ ...formData, break_duration: e.target.value })}
+                    min={0}
+                    className="mt-1 w-32"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
