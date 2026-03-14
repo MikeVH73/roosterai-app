@@ -734,10 +734,37 @@ ${JSON.stringify(scheduleDepts.map(d => ({ id: d.id, naam: d.name })), null, 2)}
         const daypartLookup = {};
         scheduleDayparts.forEach(dp => { daypartLookup[dp.id] = dp; });
         
+        // Build ID sets for validation
+        const validEmployeeIds = new Set(relevantEmployees.map(e => e.id));
+        const validDeptIds = new Set(scheduleDepts.map(d => d.id));
+        const validDaypartIds = new Set(scheduleDayparts.map(dp => dp.id));
+        
+        // Resolve AI responses: if AI used names instead of IDs, map them back
+        const resolvedShifts = [];
+        const resolutionIssues = [];
+        for (const shift of response.shifts) {
+          // Fix employeeId if it's a name instead of an ID
+          if (shift.employeeId && !validEmployeeIds.has(shift.employeeId)) {
+            const resolvedId = nameToIdMap[shift.employeeId.toLowerCase().trim()];
+            if (resolvedId) {
+              resolutionIssues.push(`Naam→ID: "${shift.employeeId}" → ${resolvedId}`);
+              shift.employeeId = resolvedId;
+            } else {
+              resolutionIssues.push(`⚠️ Onbekende medewerker: "${shift.employeeId}" — shift overgeslagen`);
+              continue;
+            }
+          }
+          resolvedShifts.push(shift);
+        }
+        
+        if (resolutionIssues.length > 0) {
+          console.warn('ID-resolutie:', resolutionIssues);
+        }
+        
         // Filter, deduplicate, and correct shifts
         const validShifts = [];
         const correctedTimes = [];
-        for (const shift of response.shifts) {
+        for (const shift of resolvedShifts) {
           const trackKey = `${shift.date}_${shift.departmentId}_${shift.employeeId}`;
           if (assignmentTracker[trackKey]) {
             skipped.push(`${shift.date}: ${shift.employeeId} al ingeroosterd bij ${shift.departmentId}`);
