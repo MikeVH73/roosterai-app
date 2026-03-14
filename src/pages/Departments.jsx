@@ -13,7 +13,8 @@ import {
   MapPin,
   Loader2,
   Clock,
-  Settings
+  Settings,
+  Briefcase
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ export default function Departments() {
     description: '',
     color: '#3B82F6',
     locationIds: [],
+    allowedFunctionIds: [],
     status: 'active'
   });
 
@@ -91,6 +93,12 @@ export default function Departments() {
   const { data: dayparts = [] } = useQuery({
     queryKey: ['dayparts', companyId],
     queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  const { data: functions = [] } = useQuery({
+    queryKey: ['functions', companyId],
+    queryFn: () => base44.entities.Function.filter({ companyId }),
     enabled: !!companyId
   });
 
@@ -126,6 +134,7 @@ export default function Departments() {
         description: department.description || '',
         color: department.color || '#3B82F6',
         locationIds: department.locationIds || [],
+        allowedFunctionIds: department.allowedFunctionIds || [],
         status: department.status || 'active'
       });
     } else {
@@ -136,6 +145,7 @@ export default function Departments() {
         description: '',
         color: '#3B82F6',
         locationIds: [],
+        allowedFunctionIds: [],
         status: 'active'
       });
     }
@@ -184,6 +194,20 @@ export default function Departments() {
         ? prev.locationIds.filter(id => id !== locId)
         : [...prev.locationIds, locId]
     }));
+  };
+
+  const toggleFunction = (funcId) => {
+    setFormData(prev => ({
+      ...prev,
+      allowedFunctionIds: prev.allowedFunctionIds.includes(funcId)
+        ? prev.allowedFunctionIds.filter(id => id !== funcId)
+        : [...prev.allowedFunctionIds, funcId]
+    }));
+  };
+
+  const getFunctionNames = (ids) => {
+    if (!ids?.length) return [];
+    return ids.map(id => functions.find(f => f.id === id)?.name).filter(Boolean);
   };
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
