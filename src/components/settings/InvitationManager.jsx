@@ -347,9 +347,9 @@ export default function InvitationManager() {
 
       {/* Accepted History */}
       {acceptedInvitations.length > 0 && (
-        <Card className="border-0 shadow-sm">
+        <Card className="border-0 shadow-sm settings-card">
           <CardHeader>
-            <CardTitle className="text-base text-slate-600">Geaccepteerde uitnodigingen</CardTitle>
+            <CardTitle className="text-base" style={{ color: 'var(--color-text-secondary)' }}>Geaccepteerde uitnodigingen</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
