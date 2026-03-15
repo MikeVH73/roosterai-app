@@ -185,7 +185,7 @@ export default function CompanySettings() {
           </TabsList>
 
           <TabsContent value="company">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm settings-card">
               <CardHeader>
                 <CardTitle>Bedrijfsgegevens</CardTitle>
                 <CardDescription style={{ color: 'var(--color-text-muted)' }}>Basis informatie over je organisatie</CardDescription>
