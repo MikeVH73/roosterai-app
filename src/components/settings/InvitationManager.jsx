@@ -299,7 +299,7 @@ export default function InvitationManager() {
       </Card>
 
       {/* Password Reset Section */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm settings-card">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Key className="w-4 h-4" />
