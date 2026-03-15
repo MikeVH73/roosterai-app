@@ -277,7 +277,7 @@ export default function InvitationManager() {
                     </div>
                     <div className="flex items-center gap-2">
                       {inv.expires_at && (
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                           Verloopt {format(parseISO(inv.expires_at), 'd MMM', { locale: nl })}
                         </span>
                       )}
