@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import EmployeeDialog from '@/components/employees/EmployeeDialog';
+import EmployeeExport from '@/components/employees/EmployeeExport';
 import {
   Plus,
   Search,
