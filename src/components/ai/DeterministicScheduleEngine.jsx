@@ -45,16 +45,47 @@ export function generateDeterministicSchedule({
   const assignments = [];
   const unresolved = [];
 
-  // Sort slots: departments with fewer candidates first (most constrained first)
-  const slotsWithCandidates = slots.map(slot => {
+  // ── Determine department processing order ──
+  // Key insight: departments whose preferred employees are EXCLUSIVE to that dept
+  // must be processed first, so those employees don't get "stolen" by other depts.
+  
+  // Build all slots with their static candidate lists
+  const allSlotsWithCandidates = slots.map(slot => {
     const candidates = findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests, functions);
     return { ...slot, candidates };
   });
-  
-  // Sort: most constrained slots first
-  slotsWithCandidates.sort((a, b) => a.candidates.length - b.candidates.length);
 
-  for (const slot of slotsWithCandidates) {
+  // Calculate "exclusivity score" per department:
+  // How many of this dept's preferred employees ONLY work in this department?
+  const deptExclusivity = {};
+  for (const slot of allSlotsWithCandidates) {
+    if (deptExclusivity[slot.departmentId] !== undefined) continue;
+    const preferredIds = slot.candidates.filter(c => c.isPreferred).map(c => c.employeeId);
+    let exclusiveCount = 0;
+    for (const empId of preferredIds) {
+      const emp = relevantEmployees.find(e => e.id === empId);
+      if (!emp) continue;
+      // Employee is "exclusive" if they only appear as preferred in ONE department
+      const otherDepts = allSlotsWithCandidates.filter(s => 
+        s.departmentId !== slot.departmentId && 
+        s.candidates.some(c => c.employeeId === empId && c.isPreferred)
+      );
+      if (otherDepts.length === 0) exclusiveCount++;
+    }
+    // Score = ratio of exclusive preferred staff (higher = process first)
+    const totalPreferred = preferredIds.length;
+    deptExclusivity[slot.departmentId] = totalPreferred > 0 ? exclusiveCount / totalPreferred : 0;
+  }
+
+  // Sort slots: departments with more exclusive preferred staff first, then by fewest total candidates
+  allSlotsWithCandidates.sort((a, b) => {
+    const excA = deptExclusivity[a.departmentId] ?? 0;
+    const excB = deptExclusivity[b.departmentId] ?? 0;
+    if (excB !== excA) return excB - excA; // Higher exclusivity first
+    return a.candidates.length - b.candidates.length; // Fewer candidates first as tiebreaker
+  });
+
+  for (const slot of allSlotsWithCandidates) {
     const { candidates } = slot;
 
     if (candidates.length === 0) {
@@ -78,7 +109,6 @@ export function generateDeterministicSchedule({
       const budget = budgets[c.employeeId];
       if (!budget) return false;
       const effectiveMax = c.maxHoursPreference ? Math.min(budget.maxThisWeek, c.maxHoursPreference) : budget.maxThisWeek;
-      // Check for actual time conflict (not just different dept)
       const hasConflict = assignments.some(a => {
         if (a.employeeId !== c.employeeId || a.date !== slot.date) return false;
         const aStart = a.start_time || '00:00';
