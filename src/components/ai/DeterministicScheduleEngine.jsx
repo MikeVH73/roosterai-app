@@ -1,15 +1,15 @@
 /**
  * DeterministicScheduleEngine
  * 
- * Builds the schedule deterministically using hard rules (function, department, hours).
- * Uses AI ONLY to pick the best candidate when multiple qualify for the same slot.
+ * Builds the schedule deterministically.
  * 
- * Flow:
- * 1. Build all required slots from StaffingRequirements
- * 2. Build candidate lists per slot (hard-filtered by function + department)
- * 3. Sort candidates by priority (preferred > backup) and hours balance
- * 4. Assign greedily, tracking hours per employee
- * 5. Return the complete shift list — no AI needed for structure
+ * Rules:
+ * - Preferred employees fill their full contract hours on their own department first.
+ * - Function is NOT a hard block — department membership is the primary gate.
+ * - Backup employees (can be from other locations) are ONLY used when:
+ *     a) No preferred employee with remaining budget is available, AND
+ *     b) The backup is not already scheduled in ANY other roster on that day.
+ * - The same backup can appear in multiple departments' backup groups.
  */
 
 import { calcHoursFromTime } from './SchedulePromptBuilder';
