@@ -30,6 +30,7 @@ export function generateDeterministicSchedule({
   alreadyPlannedHours,
   vacationRequests = [],
   functions = [],
+  allCompanyShifts = [],   // All shifts across ALL rosters — used to check backup availability
 }) {
   const log = [];
   const warnings = [];
