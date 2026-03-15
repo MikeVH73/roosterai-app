@@ -294,11 +294,17 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
     );
     if (alreadyOnThisDaypart) continue;
 
-    // Check if already assigned to ANY shift on same date in a DIFFERENT department (prevent cross-dept double-booking)
-    const alreadyWorkingOtherDept = existingAssignments.some(
-      a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId !== slot.departmentId
-    );
-    if (alreadyWorkingOtherDept) continue;
+    // Check for TIME OVERLAP on same date (prevents double-booking with actual conflicting times)
+    const hasTimeConflict = existingAssignments.some(a => {
+      if (a.employeeId !== c.employeeId || a.date !== slot.date) return false;
+      // Check if times overlap
+      const aStart = a.start_time || '00:00';
+      const aEnd = a.end_time || '23:59';
+      const slotDp = slot.startTime;
+      const slotEnd = slot.endTime;
+      return aStart < slotEnd && aEnd > slotDp;
+    });
+    if (hasTimeConflict) continue;
     
     // Score calculation
     let score = 0;
