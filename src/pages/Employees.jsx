@@ -44,6 +44,7 @@ export default function Employees() {
   const companyId = currentCompany?.id;
   const queryClient = useQueryClient();
   
+  const { theme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('active');
