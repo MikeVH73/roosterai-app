@@ -150,9 +150,21 @@ export function buildSchedulePrompt({
   
   let totalShiftsNeeded = deptBlocks.reduce((sum, b) => sum + b.totalShifts, 0);
   
+  // Calculate total targetHours per department for the week (= bezettingsnorm)
+  const deptWeekTargetHours = {};
+  for (const block of deptBlocks) {
+    let totalTarget = 0;
+    for (const s of block.shiftLines) {
+      totalTarget += s.targetHours * s.shiftsNeeded;
+    }
+    deptWeekTargetHours[block.deptId] = totalTarget;
+  }
+  const grandTotalTargetHours = Object.values(deptWeekTargetHours).reduce((a, b) => a + b, 0);
+  
   // Build the per-department sections
   const deptSections = deptBlocks.map(block => {
     const empMap = deptEmployeeMap[block.deptId] || { preferred: [], backup: [] };
+    const weekTarget = deptWeekTargetHours[block.deptId] || 0;
     
     // Format employees for this department
     const prefLines = empMap.preferred.map(e => {
@@ -171,6 +183,7 @@ export function buildSchedulePrompt({
 ═══════════════════════════════════════
 AFDELING: ${block.deptName} (ID="${block.deptId}")
 ═══════════════════════════════════════
+WEEKNORM BEZETTING: ${weekTarget} uren totaal deze week
 TOTAAL: ${block.totalShifts} shifts nodig
 
 SHIFT-OPDRACHTEN:
