@@ -197,9 +197,10 @@ ${backupLines.length > 0 ? backupLines.join('\n') : '    (geen back-up medewerke
 `;
   }).join('\n');
   
-  // Build simple employee overview with remaining hours tracking
+  // Build employee overview with target shifts calculation
   const empOverview = relevantEmployees.map(e => {
-    return `  ID="${e.id}" ${e.first_name} ${e.last_name}: max=${e._maxThisWeek}u/week (maand: ${e._alreadyPlanned}/${e._monthlyMax}u)`;
+    const func = functions.find(f => f.id === e.functionId);
+    return `  ID="${e.id}" ${e.first_name} ${e.last_name} (${func?.name || 'Onbekend'}): contract=${e.contractUren || e.contract_hours || 0}u/week, max_deze_week=${e._maxThisWeek}u (maand: ${e._alreadyPlanned}/${e._monthlyMax}u)`;
   }).join('\n');
   
   const prompt = `Je bent de AI Planning Assistent voor ${companyName}.
