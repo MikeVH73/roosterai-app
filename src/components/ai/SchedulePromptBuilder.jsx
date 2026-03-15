@@ -245,8 +245,11 @@ URENBUDGET ALLE MEDEWERKERS
 ════════════════════════════════
 ${empOverview}
 
-CAPACITEIT: ${totalAvailableHours}u beschikbaar, ~${Math.round(totalNeededHours)}u nodig.
+CAPACITEIT: ${totalAvailableHours}u beschikbaar van medewerkers, ${Math.round(grandTotalTargetHours)}u bezettingsnorm, ~${Math.round(totalNeededHours)}u nodig in shifts.
 TOTAAL SHIFTS: ${totalShiftsNeeded}
+
+BELANGRIJK: De BEZETTINGSNORM (${Math.round(grandTotalTargetHours)}u) is hoeveel uur er totaal ingevuld moet worden.
+Verdeel dit eerlijk over alle beschikbare medewerkers op basis van hun contracturen.
 
 ════════════════════════════════
 VOORBEELD SHIFT-OBJECT
