@@ -168,7 +168,7 @@ export default function CompanySettings() {
             <Card className="border-0 shadow-sm">
               <CardHeader>
                 <CardTitle>Bedrijfsgegevens</CardTitle>
-                <CardDescription>Basis informatie over je organisatie</CardDescription>
+                <CardDescription style={{ color: 'var(--color-text-muted)' }}>Basis informatie over je organisatie</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
