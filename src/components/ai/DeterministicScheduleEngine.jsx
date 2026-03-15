@@ -353,36 +353,37 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
     // Score calculation
     let score = 0;
     
-    // 1. Preferred > Backup (+100 points)
-    if (c.isPreferred) score += 100;
+    // 1. Preferred vs Backup — very strong separation so backups are truly last resort
+    if (c.isPreferred) score += 300;
     
-    // 2. Day preference matching (+50 points)
+    // 2. Hours balance: MOST important factor — employees who still need hours to reach
+    //    their weekly contract get a very high bonus. This ensures preferred employees
+    //    fill their contract hours before anyone else gets a look-in.
+    const hoursNeeded = effectiveMax - budget.planned;
+    const fillRatio = effectiveMax > 0 ? budget.planned / effectiveMax : 1;
+    score += Math.round((1 - fillRatio) * 200); // 0% filled = +200, 100% filled = 0
+    
+    // 3. Day preference matching (+50 points)
     const dayNameEnglish = dayOfWeekToEnglish(slot.dayOfWeek);
     if (c.preferredDays.length > 0 && c.preferredDays.includes(dayNameEnglish)) {
       score += 50;
     } else if (c.preferredDays.length > 0 && !c.preferredDays.includes(dayNameEnglish)) {
-      score -= 30; // Penalty for non-preferred day
+      score -= 30;
     }
     
-    // 3. Check notes for day avoidance (e.g., "werkt liever nooit op woensdag")
+    // 4. Check notes for day avoidance (e.g., "werkt liever nooit op woensdag")
     const avoidancePenalty = checkDayAvoidance(c.notes, slot.dayOfWeek);
     score += avoidancePenalty;
     
-    // 4. Hours balance: strongly prefer employees who still need MORE hours to reach contract
-    const hoursNeeded = effectiveMax - budget.planned;
-    const fillRatio = effectiveMax > 0 ? budget.planned / effectiveMax : 1;
-    score += Math.round((1 - fillRatio) * 80); // More empty = higher score (doubled weight)
-    
-    // 5. Spread: only a tiny penalty so preferred employees fill their hours first
+    // 5. Spread: very small penalty per day already working (don't concentrate all hours in 1-2 days)
     const uniqueDays = new Set(budget.assignedDates).size;
-    score -= uniqueDays * 2; // Very small penalty per day already working
+    score -= uniqueDays * 2;
     
-    // 6. Same dept same day: only penalize if it's the SAME daypart (true duplicate)
-    // Multiple dayparts on same day in same dept is ALLOWED (e.g. morning + afternoon)
+    // 6. Hard duplicate: same daypart on same day in same dept
     const sameDeptSameDaypart = existingAssignments.filter(
       a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId === slot.departmentId && a.daypartId === slot.daypartId
     ).length;
-    if (sameDeptSameDaypart > 0) score -= 200; // Heavy penalty only for true duplicate
+    if (sameDeptSameDaypart > 0) score -= 500;
     
     scored.push({
       ...c,
