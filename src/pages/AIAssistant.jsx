@@ -283,7 +283,7 @@ export default function AIAssistant() {
                   items: {
                     type: "object",
                     properties: {
-                      employeeId: { type: "string", description: "Employee ID" },
+                      employeeId: { type: "string", description: "Employee ID uit de kandidatenlijst" },
                       name: { type: "string" },
                       reasoning: { type: "string" }
                     }
@@ -296,6 +296,19 @@ export default function AIAssistant() {
           }
         }
       });
+
+      // For replacement: make sure suggested employees are validated against the availableBackups list
+      if (selectedAction.id === 'replacement' && response.suggested_changes?.replacements) {
+        response.suggested_changes.replacements = response.suggested_changes.replacements
+          .map(r => {
+            // Try to match by ID first, then by name
+            const matched = availableBackups.find(e => e.id === r.employeeId) ||
+              availableBackups.find(e => `${e.first_name} ${e.last_name}`.toLowerCase() === r.name?.toLowerCase());
+            if (!matched) return null;
+            return { ...r, employeeId: matched.id, name: `${matched.first_name} ${matched.last_name}` };
+          })
+          .filter(Boolean);
+      }
 
       // Create AI suggestion record with WhatsApp info
       const suggestionData = {
