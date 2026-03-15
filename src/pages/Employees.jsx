@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { GlowCard } from "@/components/ui/glow-card";
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 export default function Employees() {
   const { currentCompany, hasPermission } = useCompany();
