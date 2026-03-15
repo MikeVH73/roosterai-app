@@ -189,6 +189,31 @@ export default function AIAssistant() {
       notes: actionParams.notes
     };
 
+    // For replacement: find backup candidates who are free on that date
+    let availableBackups = [];
+    if (selectedAction.id === 'replacement' && actionParams.date && selectedEmployee) {
+      // Find which department(s) the falling employee is scheduled in on that date
+      const fallenShifts = scheduleShifts.filter(s => 
+        s.employeeId === actionParams.employeeId && s.date === actionParams.date
+      );
+      const affectedDeptIds = [...new Set(fallenShifts.map(s => s.departmentId).filter(Boolean))];
+      
+      // Collect all backup employees for those departments
+      const backupCandidates = employees.filter(e =>
+        e.id !== actionParams.employeeId &&
+        affectedDeptIds.some(deptId => (e.backup_departmentIds || []).includes(deptId))
+      );
+      
+      // Filter to only those NOT already scheduled on that date (across all shifts)
+      availableBackups = backupCandidates.filter(e =>
+        !shifts.some(s => 
+          s.employeeId === e.id && 
+          s.date === actionParams.date && 
+          s.status !== 'cancelled'
+        )
+      );
+    }
+
     const prompts = {
       replacement: `Je bent een roostering-assistent voor ${currentCompany?.name}. 
         Analyseer de situatie en suggereer de beste vervangers voor de uitgevallen medewerker.
@@ -197,12 +222,19 @@ export default function AIAssistant() {
         Datum: ${actionParams.date}
         Extra informatie: ${actionParams.notes}
         
-        Beschikbare medewerkers en hun contracten:
-        ${employees.filter(e => e.id !== actionParams.employeeId).map(e => 
-          `- ${e.first_name} ${e.last_name}: ${e.contract_hours || 'flex'}u/week, ${e.contract_type}`
-        ).join('\n')}
+        BELANGRIJK: Kies ALLEEN uit de onderstaande beschikbare back-up medewerkers.
+        Dit zijn medewerkers die als back-up zijn aangemerkt voor de betreffende afdeling én die op ${actionParams.date} nog VRIJ zijn (geen andere dienst).
         
-        Geef 3 suggesties voor vervangers, met overwegingen voor elke keuze.`,
+        Beschikbare back-up kandidaten:
+        ${availableBackups.length > 0 
+          ? availableBackups.map(e => 
+              `- ${e.first_name} ${e.last_name} (ID: ${e.id}): ${e.contract_hours || 'flex'}u/week, ${e.contract_type || 'onbekend'}`
+            ).join('\n')
+          : '⚠️ Geen back-up medewerkers beschikbaar die vrij zijn op deze datum.'
+        }
+        
+        Geef maximaal 3 suggesties uit bovenstaande lijst, met een korte toelichting per kandidaat waarom zij geschikt zijn.
+        Als er geen beschikbare kandidaten zijn, geef dit duidelijk aan.`,
       
       optimization: `Je bent een roostering-assistent voor ${currentCompany?.name}.
         Analyseer het rooster en geef optimalisatiesuggesties.
