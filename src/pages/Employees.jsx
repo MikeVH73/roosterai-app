@@ -144,10 +144,13 @@ export default function Employees() {
         subtitle={`${employees.length} medewerkers`}
         actions={
           hasPermission('manage_schedules') && (
-            <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Medewerker toevoegen
-            </Button>
+            <div className="flex gap-2">
+              <EmployeeExport employees={employees} departments={departments} functions={functions} />
+              <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Medewerker toevoegen
+              </Button>
+            </div>
           )
         }
       />
