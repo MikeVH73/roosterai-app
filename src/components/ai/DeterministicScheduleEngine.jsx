@@ -252,27 +252,25 @@ function buildBudgets(relevantEmployees, alreadyPlannedHours) {
 }
 
 /**
- * Find valid candidates for a slot. HARD filter on function + department.
+ * Find valid candidates for a slot.
+ * 
+ * Gate 1 (hard): Employee must be linked to this department (departmentIds).
+ * Gate 2 (removed): Function is NO longer a hard block — department membership is enough.
+ * Gate 3 (hard): Employee must not be on approved leave on this date.
+ * Gate 4 (backup only): Backup employees are excluded if they already have a shift
+ *   in ANY other roster on the same date (cross-roster availability check).
  */
-function findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests, functions) {
-  const dept = scheduleDepts.find(d => d.id === slot.departmentId);
-  const allowedFunctionIds = dept?.allowedFunctionIds || [];
-  
+function findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests, allCompanyShifts) {
   const candidates = [];
   
   for (const emp of relevantEmployees) {
     if (emp.status !== 'active') continue;
     
-    // HARD FILTER 1: Employee must be assigned to this department
+    // GATE 1: Employee must be assigned to this department
     const empDepts = emp.departmentIds || [];
     if (!empDepts.includes(slot.departmentId)) continue;
     
-    // HARD FILTER 2: Employee's function must be in department's allowed functions
-    if (allowedFunctionIds.length > 0 && emp.functionId) {
-      if (!allowedFunctionIds.includes(emp.functionId)) continue;
-    }
-    
-    // HARD FILTER 3: Check vacation/sick leave
+    // GATE 2: Check vacation/sick leave
     const isOnLeave = vacationRequests.some(v => 
       v.employeeId === emp.id && 
       v.status === 'approved' && 
@@ -288,6 +286,17 @@ function findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests
     
     // If employee has labels but is neither preferred nor backup for this dept, skip
     if (hasLabels && !isPreferred && !isBackup) continue;
+    
+    // GATE 3 (backup only): Backup employees may come from other locations.
+    // Only propose a backup if they are NOT already scheduled anywhere on this date.
+    if (isBackup && !isPreferred) {
+      const alreadyScheduledElsewhere = allCompanyShifts.some(s =>
+        s.employeeId === emp.id &&
+        s.date === slot.date &&
+        s.status !== 'cancelled'
+      );
+      if (alreadyScheduledElsewhere) continue;
+    }
     
     candidates.push({
       employeeId: emp.id,
