@@ -37,7 +37,7 @@ function buildDeptEmployeeMap(scheduleDepts, relevantEmployees, functions) {
         functieId: emp.functionId,
         functieNaam: func?.name || 'Onbekend',
         maxWeek: emp._maxThisWeek || 0,
-        contractUren: emp.contract_hours || 0,
+        contractUren: emp.contract_hours || emp.contractUren || 0,
       };
       
       // Check function match — HARD FILTER: skip employees with wrong function entirely
