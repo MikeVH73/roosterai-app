@@ -303,7 +303,7 @@ Vraag: ${finalPrompt}`;
       let scheduleDepts = [];
       let nameToIdMap = {};
 
-      // Special handling for Test 1: Generate actual schedule
+      // Special handling for Test 1: Generate schedule DETERMINISTICALLY (no AI)
       if (testCase.id === 1 && targetSchedule) {
         // Calculate dates within the schedule range
         const scheduleStart = new Date(targetSchedule.start_date);
@@ -320,7 +320,6 @@ Vraag: ${finalPrompt}`;
         if (weekEnd > scheduleEnd) weekEnd = new Date(scheduleEnd);
 
         scheduleDayparts = dayparts.filter(dp => targetSchedule.departmentIds?.includes(dp.departmentId));
-        const scheduleLocations = locations.filter(l => targetSchedule.locationIds?.includes(l.id));
         scheduleLocationId = targetSchedule.locationIds?.[0] || null;
         const scheduleDeptIds = targetSchedule.departmentIds || [];
         scheduleDepts = departments.filter(d => scheduleDeptIds.includes(d.id));
@@ -362,17 +361,6 @@ Vraag: ${finalPrompt}`;
           alreadyPlannedHours[s.employeeId] = (alreadyPlannedHours[s.employeeId] || 0) + (bruto - pauze);
         });
         
-        // Enrich employees with budget info (used by PromptBuilder)
-        relevantEmployees.forEach(e => {
-          const weeklyHours = e.contract_hours || 0;
-          const monthlyMax = Math.round((weeklyHours * 13) / 3);
-          const alreadyPlanned = Math.round(alreadyPlannedHours[e.id] || 0);
-          const remainingThisMonth = Math.max(0, monthlyMax - alreadyPlanned);
-          e._maxThisWeek = Math.min(weeklyHours, remainingThisMonth);
-          e._alreadyPlanned = alreadyPlanned;
-          e._monthlyMax = monthlyMax;
-        });
-        
         // Staffing requirements
         const allRequirements = await base44.entities.StaffingRequirement.filter({ companyId });
         summaryReqs = allRequirements
@@ -390,88 +378,123 @@ Vraag: ${finalPrompt}`;
         for (let d = new Date(weekStart); d <= weekEnd; d = new Date(d.getTime() + 24 * 60 * 60 * 1000)) {
           weekDates[d.getDay()] = d.toISOString().split('T')[0];
         }
-        
-        // Calculate totals
-        const totalAvailableHours = relevantEmployees.reduce((sum, e) => sum + (e._maxThisWeek || 0), 0);
-        let totalNeededHours = 0;
-        for (const dp of scheduleDayparts) {
-          const dpReqs = summaryReqs.filter(r => r.daypartId === dp.id);
-          for (const r of dpReqs) {
-            if (!r.targetHours || r.targetHours <= 0) continue;
-            totalNeededHours += (r.min_staff || 1) * (daypartHoursMap[dp.id] || 4);
-          }
-        }
-        
-        // Build name-to-ID lookup
-        nameToIdMap = {};
-        employees.forEach(e => {
-          const fullName = `${e.first_name} ${e.last_name}`.toLowerCase().trim();
-          nameToIdMap[fullName] = e.id;
-          nameToIdMap[e.first_name.toLowerCase().trim()] = e.id;
-          nameToIdMap[e.last_name.toLowerCase().trim()] = e.id;
-        });
 
-        // === BUILD STRUCTURED PROMPT ===
-        const { prompt: structuredPrompt, totalShiftsNeeded } = buildSchedulePrompt({
-          companyName: currentCompany?.name,
-          scheduleLocationId,
-          locationName: scheduleLocations[0]?.name || 'Onbekend',
-          weekStartStr,
-          weekEndStr,
-          monthStartStr,
-          monthEndStr,
+        // Fetch vacation requests
+        let vacationRequests = [];
+        try {
+          vacationRequests = await base44.entities.VacationRequest.filter({ companyId, status: 'approved' });
+        } catch (e) { /* no vacations */ }
+
+        // === RUN DETERMINISTIC ENGINE ===
+        console.log('🚀 Starting Deterministic Schedule Engine...');
+        const result = generateDeterministicSchedule({
           scheduleDepts,
           scheduleDayparts,
-          relevantEmployees,
           staffingReqs: summaryReqs,
+          relevantEmployees,
           weekDates,
           daypartHoursMap,
+          scheduleLocationId,
+          alreadyPlannedHours,
+          vacationRequests,
           functions,
-          totalAvailableHours,
-          totalNeededHours,
         });
 
-        systemPrompt = structuredPrompt;
+        console.log(`Engine result: ${result.assignments.length} shifts, ${result.unresolved.length} unresolved`);
+        console.log(result.summary);
 
-        responseSchema = {
-          type: "object",
-          properties: {
-            shifts: {
-              type: "array",
-              description: `Array van EXACT ${totalShiftsNeeded} shifts. Eén object per shift.`,
-              items: {
-                type: "object",
-                properties: {
-                  employeeId: { type: "string", description: "Exact database ID (hex string) van medewerker" },
-                  departmentId: { type: "string", description: "Exact database ID van afdeling" },
-                  locationId: { type: "string", description: "Database ID van locatie" },
-                  daypartId: { type: "string", description: "Exact database ID van dagdeel" },
-                  date: { type: "string", description: "Datum YYYY-MM-DD" },
-                  start_time: { type: "string", description: "Starttijd HH:mm uit shift-opdracht" },
-                  end_time: { type: "string", description: "Eindtijd HH:mm uit shift-opdracht" },
-                  break_duration: { type: "number", description: "Pauze minuten (0=geen pauze)" }
-                },
-                required: ["employeeId", "departmentId", "locationId", "daypartId", "date", "start_time", "end_time"]
-              }
-            },
-            unresolved_issues: {
-              type: "array",
-              description: "Shift-opdrachten die NIET gevuld konden worden",
-              items: {
-                type: "object",
-                properties: {
-                  daypart_name: { type: "string" },
-                  date: { type: "string" },
-                  target_hours: { type: "number" },
-                  planned_hours: { type: "number" },
-                  reason: { type: "string" }
-                }
-              }
-            },
-            summary: { type: "string", description: "Korte samenvatting" }
-          },
-          required: ["shifts", "unresolved_issues", "summary"]
+        // Now we have deterministic shifts — skip AI entirely for structure
+        // Use AI only if needed for preferences (future enhancement)
+        
+        // Delete existing shifts for this week
+        const existingWeekShifts = await base44.entities.Shift.filter({ scheduleId: targetSchedule.id });
+        const weekStartStr2 = weekStart.toISOString().split('T')[0];
+        const weekEndStr2 = weekEnd.toISOString().split('T')[0];
+        const shiftsToDelete = existingWeekShifts.filter(s => s.date >= weekStartStr2 && s.date <= weekEndStr2);
+        
+        const processBatch = async (items, fn, batchSize = 5, delayMs = 500) => {
+          const results = [];
+          for (let i = 0; i < items.length; i += batchSize) {
+            const batch = items.slice(i, i + batchSize);
+            const batchResults = await Promise.all(batch.map(fn));
+            results.push(...batchResults);
+            if (i + batchSize < items.length) await new Promise(r => setTimeout(r, delayMs));
+          }
+          return results;
         };
+        
+        if (shiftsToDelete.length > 0) {
+          console.log(`Verwijder ${shiftsToDelete.length} bestaande shifts`);
+          await processBatch(shiftsToDelete, s => base44.entities.Shift.delete(s.id));
+        }
+
+        // Create the shifts from deterministic engine
+        const createdShifts = [];
+        const errors = [];
+        
+        await processBatch(result.assignments, async (shift) => {
+          try {
+            const created = await base44.entities.Shift.create({
+              companyId,
+              scheduleId: targetSchedule.id,
+              employeeId: shift.employeeId,
+              departmentId: shift.departmentId || null,
+              locationId: shift.locationId || scheduleLocationId || null,
+              daypartId: shift.daypartId || null,
+              date: shift.date,
+              start_time: shift.start_time,
+              end_time: shift.end_time,
+              break_duration: shift.break_duration ?? 0,
+              status: 'scheduled'
+            });
+            createdShifts.push(created);
+          } catch (err) {
+            console.error('Shift creation error:', err);
+            errors.push(`${shift.date}: ${err.message}`);
+          }
+        });
+
+        const deletedMsg = shiftsToDelete.length > 0 ? ` (${shiftsToDelete.length} oude verwijderd)` : '';
+        const allMatch = result.unresolved.length === 0 && errors.length === 0;
+        const statusMsg = `${allMatch ? '✅' : '⚠️'} ${createdShifts.length} diensten aangemaakt${deletedMsg}`;
+        
+        const unresolvedMsg = result.unresolved.length > 0
+          ? `\n\n❌ NIET GEVULDE SLOTS (${result.unresolved.length}):\n${result.unresolved.map(u => `  ${u.departmentName} - ${u.daypartName} op ${u.dayName} ${u.date}: ${u.reason}`).join('\n')}`
+          : '';
+        
+        const errorMsg = errors.length > 0 
+          ? `\n\n❌ Fouten bij opslaan (${errors.length}):\n${errors.slice(0, 5).join('\n')}` 
+          : '';
+        
+        // Get date range
+        const shiftDates = createdShifts.map(s => s.date).sort();
+        const firstDate = shiftDates[0] || weekStartStr;
+        const lastDate = shiftDates[shiftDates.length - 1] || weekEndStr;
+        
+        const shiftsPerDate = {};
+        createdShifts.forEach(s => { shiftsPerDate[s.date] = (shiftsPerDate[s.date] || 0) + 1; });
+        const dateBreakdown = Object.entries(shiftsPerDate)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([date, count]) => `  ${date}: ${count} diensten`)
+          .join('\n');
+
+        setTestResults({
+          ...testResults,
+          [testCase.id]: {
+            status: allMatch ? 'passed' : 'failed',
+            response: `🔧 DETERMINISTISCH ROOSTER (geen AI prompt gebruikt)\n\n${statusMsg}\nRooster: ${targetSchedule.name}\nPeriode: ${firstDate} t/m ${lastDate}\n\n${dateBreakdown}\n\n${result.summary}${unresolvedMsg}${errorMsg}`,
+            details: `Bekijk week van ${firstDate} in rooster "${targetSchedule.name}"`,
+            scheduleId: targetSchedule.id,
+            scheduleName: targetSchedule.name,
+            weekDate: firstDate,
+            shiftsCreated: createdShifts.length,
+            timestamp: new Date().toISOString()
+          }
+        });
+        setIsRunning(false);
+        setCurrentTest(null);
+        setTestInput('');
+        return;
       }
 
       // Use a stronger model for schedule generation (Test 1) to handle 30+ shifts
