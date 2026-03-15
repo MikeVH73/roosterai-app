@@ -50,11 +50,11 @@ function generateToken() {
 }
 
 const statusConfig = {
-  pending: { label: 'In wachtrij', color: 'bg-slate-100 text-slate-700', icon: Clock },
-  sent: { label: 'Verzonden', color: 'bg-blue-100 text-blue-700', icon: Mail },
-  accepted: { label: 'Geaccepteerd', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
-  expired: { label: 'Verlopen', color: 'bg-amber-100 text-amber-700', icon: AlertTriangle },
-  failed: { label: 'Mislukt', color: 'bg-red-100 text-red-700', icon: XCircle }
+  pending: { label: 'In wachtrij', style: { backgroundColor: 'rgba(100,116,139,0.15)', color: '#94a3b8' }, icon: Clock },
+  sent: { label: 'Verzonden', style: { backgroundColor: 'rgba(59,130,246,0.15)', color: '#60a5fa' }, icon: Mail },
+  accepted: { label: 'Geaccepteerd', style: { backgroundColor: 'rgba(34,197,94,0.15)', color: '#4ade80' }, icon: CheckCircle2 },
+  expired: { label: 'Verlopen', style: { backgroundColor: 'rgba(245,158,11,0.15)', color: '#fbbf24' }, icon: AlertTriangle },
+  failed: { label: 'Mislukt', style: { backgroundColor: 'rgba(239,68,68,0.15)', color: '#f87171' }, icon: XCircle }
 };
 
 const roleLabels = {
