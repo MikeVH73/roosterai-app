@@ -397,7 +397,7 @@ export default function CompanySettings() {
           </TabsContent>
 
           <TabsContent value="notifications">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm settings-card">
               <CardHeader>
                 <CardTitle>Notificatie voorkeuren</CardTitle>
                 <CardDescription>Bepaal welke e-mails medewerkers ontvangen</CardDescription>
