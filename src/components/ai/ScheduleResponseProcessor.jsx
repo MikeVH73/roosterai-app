@@ -287,7 +287,7 @@ export function processAIShifts({
       ? calcHoursFromTime(dp.startTime, dp.endTime) - (dp.break_duration || 0) / 60 
       : 4;
     
-    if (budget.maxThisWeek > 0 && budget.planned + shiftHours > budget.maxThisWeek * 1.15) {
+    if (budget.maxThisWeek > 0 && budget.planned + shiftHours > budget.maxThisWeek * 1.05) {
       issues.budgetRejected.push(
         `🚫 ${budget.name}: ${shift.date} geweigerd (${Math.round(budget.planned)}u + ${shiftHours}u = ${Math.round(budget.planned + shiftHours)}u, max=${budget.maxThisWeek}u)`
       );
