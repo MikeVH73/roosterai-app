@@ -309,7 +309,7 @@ export default function CompanySettings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Automatisch suggesties geven</Label>
-                    <p className="text-sm text-slate-500">De AI geeft proactief suggesties voor verbeteringen</p>
+                    <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>De AI geeft proactief suggesties voor verbeteringen</p>
                   </div>
                   <Switch
                     checked={settingsData.ai_preferences.auto_suggest}
