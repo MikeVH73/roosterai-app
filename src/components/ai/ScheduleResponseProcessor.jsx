@@ -182,36 +182,46 @@ export function processAIShifts({
     dedupShifts.push(shift);
   }
   
-  // Stage 3.5: Cap shifts per daypart+day to staffing requirement (max_staff or min_staff)
+  // Stage 3.5: Cap shifts per department+daypart+day to staffing requirement
   const cappedShifts = [];
   if (staffingReqs && staffingReqs.length > 0) {
-    const slotTracker = {}; // key: daypartId_dayOfWeek → count
+    const slotTracker = {}; // key: deptId_daypartId_dayOfWeek → count
     
-    // Build a lookup: daypartId_dayOfWeek → max allowed shifts
+    // Build a lookup: deptId_daypartId_dayOfWeek → max allowed shifts
     const maxPerSlot = {};
     for (const r of staffingReqs) {
       if (!r.targetHours || r.targetHours <= 0) continue;
-      const key = `${r.daypartId}_${r.day_of_week}`;
+      const key = `${r.departmentId}_${r.daypartId}_${r.day_of_week}`;
       maxPerSlot[key] = r.min_staff || 1;
     }
     
     for (const shift of dedupShifts) {
       const shiftDayOfWeek = new Date(shift.date).getDay();
-      const key = `${shift.daypartId}_${shiftDayOfWeek}`;
+      const key = `${shift.departmentId}_${shift.daypartId}_${shiftDayOfWeek}`;
       const maxAllowed = maxPerSlot[key];
       
-      if (maxAllowed !== undefined) {
-        const currentCount = slotTracker[key] || 0;
-        if (currentCount >= maxAllowed) {
-          const emp = relevantEmployees.find(e => e.id === shift.employeeId);
-          const dp = daypartLookup[shift.daypartId];
-          issues.invalid.push(
-            `🚫 Overcapaciteit: ${emp?.first_name || shift.employeeId} op ${shift.date} ${dp?.name || ''} — al ${currentCount}/${maxAllowed} medewerkers ingepland, shift verwijderd`
-          );
-          continue;
-        }
-        slotTracker[key] = currentCount + 1;
+      // If there is NO staffing requirement for this combination, reject the shift
+      if (maxAllowed === undefined) {
+        const emp = relevantEmployees.find(e => e.id === shift.employeeId);
+        const dp = daypartLookup[shift.daypartId];
+        const dept = scheduleDepts.find(d => d.id === shift.departmentId);
+        issues.invalid.push(
+          `🚫 Geen bezettingsnorm: ${emp?.first_name || shift.employeeId} op ${shift.date} ${dept?.name || ''} ${dp?.name || ''} — geen requirement gevonden, shift verwijderd`
+        );
+        continue;
       }
+      
+      const currentCount = slotTracker[key] || 0;
+      if (currentCount >= maxAllowed) {
+        const emp = relevantEmployees.find(e => e.id === shift.employeeId);
+        const dp = daypartLookup[shift.daypartId];
+        const dept = scheduleDepts.find(d => d.id === shift.departmentId);
+        issues.invalid.push(
+          `🚫 Overcapaciteit: ${emp?.first_name || shift.employeeId} op ${shift.date} ${dept?.name || ''} ${dp?.name || ''} — al ${currentCount}/${maxAllowed} ingepland, shift verwijderd`
+        );
+        continue;
+      }
+      slotTracker[key] = currentCount + 1;
       cappedShifts.push(shift);
     }
   } else {
