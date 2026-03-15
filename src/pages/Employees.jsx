@@ -115,10 +115,15 @@ export default function Employees() {
     stagiair: 'Stagiair'
   };
 
-  const statusColors = {
-    active: 'bg-green-100 text-green-700',
-    inactive: 'bg-slate-100 text-slate-600',
-    on_leave: 'bg-amber-100 text-amber-700'
+  const statusStyles = {
+    active: { backgroundColor: '#065f46', color: '#6ee7b7' },
+    inactive: { backgroundColor: '#334155', color: '#94a3b8' },
+    on_leave: { backgroundColor: '#78350f', color: '#fcd34d' },
+  };
+  const statusStylesLight = {
+    active: { backgroundColor: '#dcfce7', color: '#166534' },
+    inactive: { backgroundColor: '#f1f5f9', color: '#475569' },
+    on_leave: { backgroundColor: '#fef3c7', color: '#92400e' },
   };
 
   const handleEdit = (employee) => {
