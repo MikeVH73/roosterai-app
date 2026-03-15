@@ -74,9 +74,26 @@ export function processAIShifts({
     }
   }
   
+  // Stage 1.5: Function mismatch — HARD REJECT employees with wrong function for department
+  for (const shift of resolvedShifts) {
+    const emp = relevantEmployees.find(e => e.id === shift.employeeId);
+    if (!emp) continue;
+    
+    const dept = scheduleDepts.find(d => d.id === shift.departmentId);
+    if (dept && dept.allowedFunctionIds?.length > 0 && emp.functionId) {
+      if (!dept.allowedFunctionIds.includes(emp.functionId)) {
+        issues.preferenceWarnings.push(
+          `🔴 FUNCTIE-MISMATCH: ${emp.first_name} ${emp.last_name} (functie niet toegestaan op ${dept?.name}) — shift verwijderd`
+        );
+        shift._rejected = true;
+      }
+    }
+  }
+  
   // Stage 2: Preference validation — STRICT enforcement
   // First pass: mark each shift as preferred, backup, or rejected
   for (const shift of resolvedShifts) {
+    if (shift._rejected) continue;
     const emp = relevantEmployees.find(e => e.id === shift.employeeId);
     if (!emp) continue;
     
