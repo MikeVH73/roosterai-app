@@ -78,10 +78,14 @@ export function generateDeterministicSchedule({
       const budget = budgets[c.employeeId];
       if (!budget) return false;
       const effectiveMax = c.maxHoursPreference ? Math.min(budget.maxThisWeek, c.maxHoursPreference) : budget.maxThisWeek;
-      // Also check not already working that day in another dept
-      const alreadyOtherDept = assignments.some(a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId !== slot.departmentId);
-      const alreadySameDaypart = assignments.some(a => a.employeeId === c.employeeId && a.date === slot.date && a.daypartId === slot.daypartId);
-      return !alreadyOtherDept && !alreadySameDaypart && (budget.planned + slot.nettoHours <= effectiveMax * 1.05);
+      // Check for actual time conflict (not just different dept)
+      const hasConflict = assignments.some(a => {
+        if (a.employeeId !== c.employeeId || a.date !== slot.date) return false;
+        const aStart = a.start_time || '00:00';
+        const aEnd = a.end_time || '23:59';
+        return aStart < slot.endTime && aEnd > slot.startTime;
+      });
+      return !hasConflict && (budget.planned + slot.nettoHours <= effectiveMax * 1.05);
     });
 
     // If preferred employees can still cover this slot, don't allow backups
