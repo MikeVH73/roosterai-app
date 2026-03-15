@@ -238,7 +238,7 @@ export default function InvitationManager() {
       )}
 
       {/* Pending Invitations */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm settings-card">
         <CardHeader>
           <CardTitle className="text-base">Openstaande uitnodigingen</CardTitle>
         </CardHeader>
