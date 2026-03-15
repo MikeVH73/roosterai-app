@@ -213,22 +213,26 @@ STAP-VOOR-STAP INSTRUCTIES
 
 STAP 1: Lees per AFDELING de shift-opdrachten en beschikbare medewerkers.
 STAP 2: Wijs EERST voorkeur-medewerkers (✅) toe. Gebruik backup (🔶) ALLEEN als er niet genoeg voorkeur is.
-STAP 3: Houd het weekbudget bij: elke shift kost X netto uren. STOP als een medewerker op max zit.
-STAP 4: Als een shift niet gevuld kan worden, meld het in unresolved_issues.
+STAP 3: Verdeel uren EERLIJK over alle medewerkers. Elke medewerker moet zoveel mogelijk richting zijn contract-uren komen.
+  - Bereken per medewerker: hoeveel diensten = contracturen / netto uren per dienst (afgerond).
+  - Verdeel deze diensten over de week. Geef NIET alle diensten aan 1 of 2 medewerkers.
+STAP 4: Houd per medewerker een running total bij. STOP zodra max_deze_week bereikt is.
+STAP 5: Als een shift niet gevuld kan worden, meld het in unresolved_issues.
 
 ════════════════════════════════
 HARDE REGELS (KRITIEK - VOLG EXACT)
 ════════════════════════════════
 
-1. GEBRUIK ALLEEN ID's uit deze prompt. Kopieer letterlijk.
-2. MAX 1 SHIFT PER MEDEWERKER PER DAGDEEL PER DAG. Twee verschillende dagdelen op dezelfde dag MAG.
-3. EXACT AANTAL SHIFTS: Maak PRECIES het aantal shifts dat in elke shift-opdracht staat (het "medewerker(s) nodig" getal). NOOIT MEER. Als er staat "1 medewerker(s) nodig", maak dan EXACT 1 shift voor dat dagdeel op die dag.
-4. VOORKEUR IS VERPLICHT: Gebruik ALLEEN ✅-medewerkers. Gebruik 🔶 back-up medewerkers UITSLUITEND als er voor een specifieke shift-opdracht GEEN ENKELE ✅-medewerker meer beschikbaar is (alle op max uren of al ingepland op dat dagdeel).
-5. FUNCTIE-MISMATCH: Medewerkers met ⚠️FUNCTIE-MISMATCH alleen als allerlaatste optie.
-6. URENBUDGET: NOOIT meer plannen dan max uren/week. Bij twijfel → minder plannen.
-7. TIJDEN: Kopieer start_time, end_time en break_duration EXACT uit de shift-opdracht.
-8. ELKE shift-opdracht MOET gevuld worden met PRECIES het gevraagde aantal, tenzij er echt niemand beschikbaar is.
-9. GEEN EXTRA SHIFTS: Het totaal aantal shifts in je antwoord moet EXACT gelijk zijn aan het totaal hieronder. Niet meer, niet minder.
+1. GEBRUIK ALLEEN medewerkers uit de ✅ en 🔶 lijsten per afdeling. Er staan ALLEEN medewerkers met de JUISTE FUNCTIE in deze lijsten.
+2. GEBRUIK ALLEEN ID's uit deze prompt. Kopieer letterlijk.
+3. MAX 1 SHIFT PER MEDEWERKER PER DAGDEEL PER DAG. Twee verschillende dagdelen op dezelfde dag MAG.
+4. EXACT AANTAL SHIFTS: Maak PRECIES het aantal shifts dat in elke shift-opdracht staat (het "medewerker(s) nodig" getal). NOOIT MEER.
+5. VOORKEUR IS VERPLICHT: Gebruik ALLEEN ✅-medewerkers. Gebruik 🔶 back-up medewerkers UITSLUITEND als er voor een specifieke shift-opdracht GEEN ENKELE ✅-medewerker meer beschikbaar is.
+6. EERLIJKE URENVERDELING: Elke medewerker moet zo dicht mogelijk bij zijn contracturen komen. Vermijd dat sommigen veel te weinig en anderen te veel krijgen.
+7. URENBUDGET: NOOIT meer plannen dan max_deze_week. Bij twijfel → minder plannen.
+8. TIJDEN: Kopieer start_time, end_time en break_duration EXACT uit de shift-opdracht.
+9. ELKE shift-opdracht MOET gevuld worden met PRECIES het gevraagde aantal, tenzij er echt niemand beschikbaar is.
+10. GEEN EXTRA SHIFTS: Het totaal aantal shifts in je antwoord moet EXACT gelijk zijn aan het totaal hieronder. Niet meer, niet minder.
 
 ════════════════════════════════
 AFDELINGEN & OPDRACHTEN
