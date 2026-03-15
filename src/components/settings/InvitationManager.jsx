@@ -213,11 +213,11 @@ export default function InvitationManager() {
           <CardContent>
             <div className="space-y-2">
               {failedInvitations.map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
                   <div>
-                    <p className="font-medium text-slate-900">{inv.email}</p>
-                    <p className="text-sm text-red-600">{inv.error_message || 'Verzenden mislukt'}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{inv.email}</p>
+                    <p className="text-sm" style={{ color: '#ef4444' }}>{inv.error_message || 'Verzenden mislukt'}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                       {inv.send_attempts} poging(en)
                     </p>
                   </div>
