@@ -354,12 +354,12 @@ export default function InvitationManager() {
           <CardContent>
             <div className="space-y-2">
               {acceptedInvitations.slice(0, 5).map((inv) => (
-                <div key={inv.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
                   <div className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    <CheckCircle2 className="w-5 h-5" style={{ color: '#4ade80' }} />
                     <div>
-                      <p className="font-medium text-slate-900">{inv.email}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{inv.email}</p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                         Geaccepteerd op {inv.accepted_at ? format(parseISO(inv.accepted_at), 'd MMM yyyy', { locale: nl }) : 'Onbekend'}
                       </p>
                     </div>
