@@ -979,11 +979,11 @@ Vraag: ${finalPrompt}`;
                           />
                           <Button 
                             onClick={() => runTest(test)}
-                            disabled={isRunning || !canUseAI()}
+                            disabled={isRunning || (test.id !== 1 && !canUseAI())}
                             size="sm"
                           >
                             <Sparkles className="w-4 h-4 mr-2" />
-                            Test uitvoeren
+                            {test.id === 1 ? 'Rooster genereren (deterministisch)' : 'Test uitvoeren'}
                           </Button>
                         </div>
                       )}
