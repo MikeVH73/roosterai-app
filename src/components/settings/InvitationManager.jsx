@@ -265,7 +265,7 @@ export default function InvitationManager() {
                       <div>
                         <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{inv.email}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge className={statusConfig[inv.status].color}>
+                          <Badge style={statusConfig[inv.status].style}>
                             <StatusIcon className="w-3 h-3 mr-1" />
                             {statusConfig[inv.status].label}
                           </Badge>
