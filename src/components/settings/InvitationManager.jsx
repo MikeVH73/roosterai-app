@@ -269,7 +269,7 @@ export default function InvitationManager() {
                             <StatusIcon className="w-3 h-3 mr-1" />
                             {statusConfig[inv.status].label}
                           </Badge>
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                             {roleLabels[inv.company_role]}
                           </span>
                         </div>
