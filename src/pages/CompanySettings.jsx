@@ -320,7 +320,7 @@ export default function CompanySettings() {
           </TabsContent>
 
           <TabsContent value="ai">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm settings-card">
               <CardHeader>
                 <CardTitle>AI Voorkeuren</CardTitle>
                 <CardDescription>Pas aan hoe de AI assistent werkt</CardDescription>
