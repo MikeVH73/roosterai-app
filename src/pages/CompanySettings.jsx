@@ -245,7 +245,7 @@ export default function CompanySettings() {
           </TabsContent>
 
           <TabsContent value="planning">
-            <Card className="border-0 shadow-sm">
+            <Card className="border-0 shadow-sm settings-card">
               <CardHeader>
                 <CardTitle>Planning regels</CardTitle>
                 <CardDescription>Stel regels in voor de roosterplanning</CardDescription>
