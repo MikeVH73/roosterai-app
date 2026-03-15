@@ -205,7 +205,7 @@ export default function InvitationManager() {
       {failedInvitations.length > 0 && (
         <Card className="border-0 shadow-sm settings-card border-l-4 border-l-red-500">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2 text-red-700">
+            <CardTitle className="text-base flex items-center gap-2" style={{ color: '#ef4444' }}>
               <AlertTriangle className="w-5 h-5" />
               Mislukte uitnodigingen ({failedInvitations.length})
             </CardTitle>
