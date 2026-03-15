@@ -497,26 +497,21 @@ Vraag: ${finalPrompt}`;
         return;
       }
 
-      // Use a stronger model for schedule generation (Test 1) to handle 30+ shifts
-      const modelToUse = testCase.id === 1 ? 'claude_sonnet_4_6' : undefined;
-      
+      // For non-schedule tests, use AI
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: systemPrompt,
         response_json_schema: responseSchema,
-        ...(modelToUse ? { model: modelToUse } : {})
       });
 
       console.log('AI Response:', response);
 
-      // Unwrap nested response if needed (some models wrap in {response: {...}})
       let aiResult = response;
       if (!aiResult.shifts && aiResult.response && typeof aiResult.response === 'object') {
-        console.log('Unwrapping nested response object');
         aiResult = aiResult.response;
       }
 
-      // Test 1: Create actual shifts
-      if (testCase.id === 1 && targetSchedule) {
+      // This block is legacy — Test 1 now returns early via deterministic engine
+      if (false) {
         // Check if AI actually generated shifts
         if (!aiResult.shifts || !Array.isArray(aiResult.shifts) || aiResult.shifts.length === 0) {
           setTestResults({
