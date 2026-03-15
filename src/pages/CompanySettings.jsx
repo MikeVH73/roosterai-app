@@ -139,7 +139,27 @@ export default function CompanySettings() {
         subtitle={currentCompany?.name}
       />
 
-      <div className="p-6 max-w-4xl mx-auto">
+      <style>{`
+        .settings-container label,
+        .settings-container [class*="CardTitle"] {
+          color: var(--color-text-primary) !important;
+        }
+        .settings-container [class*="CardDescription"],
+        .settings-container p.text-sm {
+          color: var(--color-text-muted) !important;
+        }
+        .settings-container input {
+          background-color: var(--color-surface) !important;
+          color: var(--color-text-primary) !important;
+          border-color: var(--color-border) !important;
+        }
+        .settings-container .settings-card {
+          background-color: var(--color-surface) !important;
+          border-color: var(--color-border) !important;
+        }
+      `}</style>
+
+      <div className="p-6 max-w-4xl mx-auto settings-container">
         <Tabs defaultValue="company">
           <TabsList className="mb-6">
             <TabsTrigger value="company" className="flex items-center gap-2">
