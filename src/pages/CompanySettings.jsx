@@ -133,7 +133,7 @@ export default function CompanySettings() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Instellingen" 
         subtitle={currentCompany?.name}
