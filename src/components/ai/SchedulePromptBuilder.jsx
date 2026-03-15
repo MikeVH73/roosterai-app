@@ -40,9 +40,10 @@ function buildDeptEmployeeMap(scheduleDepts, relevantEmployees, functions) {
         contractUren: emp.contract_hours || 0,
       };
       
-      // Check function match
+      // Check function match — HARD FILTER: skip employees with wrong function entirely
       if (dept.allowedFunctionIds?.length > 0 && !dept.allowedFunctionIds.includes(emp.functionId)) {
-        empInfo.functieMismatch = true;
+        // Do NOT include this employee for this department at all
+        continue;
       }
       
       const isPreferred = (emp.preferred_departmentIds || []).includes(dept.id);
@@ -155,12 +156,10 @@ export function buildSchedulePrompt({
     
     // Format employees for this department
     const prefLines = empMap.preferred.map(e => {
-      const warn = e.functieMismatch ? ' ⚠️FUNCTIE-MISMATCH' : '';
-      return `    ✅ ID="${e.id}" ${e.naam} (${e.functieNaam}) max=${e.maxWeek}u/week${warn}`;
+      return `    ✅ ID="${e.id}" ${e.naam} (${e.functieNaam}) contract=${e.contractUren}u/week max_deze_week=${e.maxWeek}u`;
     });
     const backupLines = empMap.backup.map(e => {
-      const warn = e.functieMismatch ? ' ⚠️FUNCTIE-MISMATCH' : '';
-      return `    🔶 ID="${e.id}" ${e.naam} (${e.functieNaam}) max=${e.maxWeek}u/week${warn}`;
+      return `    🔶 ID="${e.id}" ${e.naam} (${e.functieNaam}) contract=${e.contractUren}u/week max_deze_week=${e.maxWeek}u`;
     });
     
     // Format shift requirements as a table
