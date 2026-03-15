@@ -71,8 +71,26 @@ export function generateDeterministicSchedule({
       continue;
     }
 
+    // Check if any preferred candidates still have budget — if so, block backups from being used
+    const preferredCandidates = candidates.filter(c => c.isPreferred);
+    const backupCandidates = candidates.filter(c => c.isBackup);
+    const anyPreferredHasBudget = preferredCandidates.some(c => {
+      const budget = budgets[c.employeeId];
+      if (!budget) return false;
+      const effectiveMax = c.maxHoursPreference ? Math.min(budget.maxThisWeek, c.maxHoursPreference) : budget.maxThisWeek;
+      // Also check not already working that day in another dept
+      const alreadyOtherDept = assignments.some(a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId !== slot.departmentId);
+      const alreadySameDaypart = assignments.some(a => a.employeeId === c.employeeId && a.date === slot.date && a.daypartId === slot.daypartId);
+      return !alreadyOtherDept && !alreadySameDaypart && (budget.planned + slot.nettoHours <= effectiveMax * 1.05);
+    });
+
+    // If preferred employees can still cover this slot, don't allow backups
+    const effectiveCandidates = (anyPreferredHasBudget && backupCandidates.length > 0)
+      ? preferredCandidates
+      : candidates;
+
     // Rank candidates
-    const ranked = rankCandidates(candidates, slot, budgets, assignments);
+    const ranked = rankCandidates(effectiveCandidates, slot, budgets, assignments);
 
     if (ranked.length === 0) {
       unresolved.push({
