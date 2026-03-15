@@ -307,7 +307,7 @@ export default function Employees() {
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge className={statusColors[employee.status]}>
+                      <Badge style={theme === 'dark' ? statusStyles[employee.status] : statusStylesLight[employee.status]}>
                         {employee.status === 'active' ? 'Actief' : employee.status === 'inactive' ? 'Inactief' : 'Afwezig'}
                       </Badge>
                       <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
