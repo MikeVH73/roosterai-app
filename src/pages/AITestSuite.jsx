@@ -915,7 +915,7 @@ Vraag: ${finalPrompt}`;
         <Alert className="mb-6" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
           <Sparkles className="h-4 h-4" style={{ color: 'var(--color-accent)' }} />
           <AlertDescription style={{ color: 'var(--color-text-secondary)' }}>
-            Test alle 17 AI functionaliteiten systematisch. AI gebruik: {currentCompany?.ai_actions_used || 0} / {currentCompany?.ai_actions_limit || 300}. Test 1 gebruikt een sterker model (meer credits).
+            Test alle AI functionaliteiten. Test 1 gebruikt de DETERMINISTISCHE engine (geen AI credits). Overige tests gebruiken AI ({currentCompany?.ai_actions_used || 0} / {currentCompany?.ai_actions_limit || 300} credits).
           </AlertDescription>
         </Alert>
 
