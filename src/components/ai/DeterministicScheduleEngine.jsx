@@ -318,20 +318,21 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
     const avoidancePenalty = checkDayAvoidance(c.notes, slot.dayOfWeek);
     score += avoidancePenalty;
     
-    // 4. Hours balance: prefer employees who need MORE hours to reach contract
+    // 4. Hours balance: strongly prefer employees who still need MORE hours to reach contract
     const hoursNeeded = effectiveMax - budget.planned;
     const fillRatio = effectiveMax > 0 ? budget.planned / effectiveMax : 1;
-    score += Math.round((1 - fillRatio) * 40); // More empty = higher score
+    score += Math.round((1 - fillRatio) * 80); // More empty = higher score (doubled weight)
     
-    // 5. Spread: prefer employees with fewer days already assigned this week
+    // 5. Spread: only a tiny penalty so preferred employees fill their hours first
     const uniqueDays = new Set(budget.assignedDates).size;
-    score -= uniqueDays * 5; // Small penalty per day already working
+    score -= uniqueDays * 2; // Very small penalty per day already working
     
-    // 6. Avoid assigning someone to same department multiple times on same day
-    const sameDeptSameDay = existingAssignments.filter(
-      a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId === slot.departmentId
+    // 6. Same dept same day: only penalize if it's the SAME daypart (true duplicate)
+    // Multiple dayparts on same day in same dept is ALLOWED (e.g. morning + afternoon)
+    const sameDeptSameDaypart = existingAssignments.filter(
+      a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId === slot.departmentId && a.daypartId === slot.daypartId
     ).length;
-    if (sameDeptSameDay > 0) score -= 200; // Heavy penalty
+    if (sameDeptSameDaypart > 0) score -= 200; // Heavy penalty only for true duplicate
     
     scored.push({
       ...c,
