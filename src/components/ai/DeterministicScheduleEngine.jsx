@@ -276,11 +276,11 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
     );
     if (alreadyOnThisDaypart) continue;
 
-    // Check if already assigned to ANY shift on same date (prevent double-booking across departments)
-    const alreadyWorkingThatDay = existingAssignments.some(
-      a => a.employeeId === c.employeeId && a.date === slot.date
+    // Check if already assigned to ANY shift on same date in a DIFFERENT department (prevent cross-dept double-booking)
+    const alreadyWorkingOtherDept = existingAssignments.some(
+      a => a.employeeId === c.employeeId && a.date === slot.date && a.departmentId !== slot.departmentId
     );
-    if (alreadyWorkingThatDay) continue;
+    if (alreadyWorkingOtherDept) continue;
     
     // Score calculation
     let score = 0;
