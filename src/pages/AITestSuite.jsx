@@ -214,7 +214,8 @@ export default function AITestSuite() {
   });
 
   const runTest = async (testCase) => {
-    if (!canUseAI()) {
+    // Test 1 uses deterministic engine, no AI credits needed
+    if (testCase.id !== 1 && !canUseAI()) {
       alert('AI limiet bereikt');
       return;
     }
