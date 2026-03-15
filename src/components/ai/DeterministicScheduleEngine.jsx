@@ -52,7 +52,7 @@ export function generateDeterministicSchedule({
   
   // Build all slots with their static candidate lists
   const allSlotsWithCandidates = slots.map(slot => {
-    const candidates = findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests, functions);
+    const candidates = findCandidates(slot, relevantEmployees, scheduleDepts, vacationRequests, allCompanyShifts);
     return { ...slot, candidates };
   });
 
