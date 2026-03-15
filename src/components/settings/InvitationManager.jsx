@@ -257,13 +257,13 @@ export default function InvitationManager() {
               {pendingInvitations.map((inv) => {
                 const StatusIcon = statusConfig[inv.status].icon;
                 return (
-                  <div key={inv.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                  <div key={inv.id} className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: 'var(--color-surface-light)' }}>
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Mail className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(59,130,246,0.15)' }}>
+                        <Mail className="w-5 h-5" style={{ color: '#3b82f6' }} />
                       </div>
                       <div>
-                        <p className="font-medium text-slate-900">{inv.email}</p>
+                        <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{inv.email}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge className={statusConfig[inv.status].color}>
                             <StatusIcon className="w-3 h-3 mr-1" />
