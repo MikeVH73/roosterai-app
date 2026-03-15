@@ -399,6 +399,7 @@ Vraag: ${finalPrompt}`;
           alreadyPlannedHours,
           vacationRequests,
           functions,
+          allCompanyShifts: allMonthShifts, // Pass all shifts for cross-roster backup check
         });
 
         console.log(`Engine result: ${result.assignments.length} shifts, ${result.unresolved.length} unresolved`);
