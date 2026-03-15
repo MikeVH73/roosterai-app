@@ -186,7 +186,7 @@ export default function InvitationManager() {
   return (
     <div className="space-y-6">
       {/* Invite Button */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm settings-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
