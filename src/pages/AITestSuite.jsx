@@ -27,9 +27,9 @@ const testCases = [
     id: 1,
     category: 'Planning & Roosters',
     name: 'Automatisch rooster genereren',
-    description: 'Test of AI een compleet rooster kan maken op basis van behoeftes',
-    prompt: 'Genereer een rooster voor volgende week met alle beschikbare medewerkers. Houd rekening met contracturen en rusttijden.',
-    expectedResult: 'Compleet rooster met alle diensten ingevuld'
+    description: 'Deterministisch rooster: code berekent exact de juiste slots, functies en urenverdeling — zonder AI',
+    prompt: 'Genereer een rooster voor volgende week met alle beschikbare medewerkers.',
+    expectedResult: 'Compleet rooster met exact het juiste aantal diensten per afdeling, juiste functies, eerlijke urenverdeling'
   },
   {
     id: 2,
