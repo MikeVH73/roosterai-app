@@ -258,13 +258,23 @@ export default function DaypartScheduleGrid({
                           })}
                         </div>
                         
-                        {/* Add button - always visible (even when shifts exist) */}
-                        <button
-                          onClick={() => onCellClick?.(null, dateStr, daypart.id)}
-                          className={`${cellShifts.length === 0 ? 'absolute top-2 left-2' : 'mt-1 w-full'} w-6 h-6 rounded flex items-center justify-center transition-all opacity-30 hover:opacity-100 hover:bg-slate-200`}
-                        >
-                          <Plus className="w-4 h-4 text-slate-500" />
-                        </button>
+                        {/* Add button - always visible, even when shifts already exist */}
+                        {cellShifts.length === 0 ? (
+                          <button
+                            onClick={() => onCellClick?.(null, dateStr, daypart.id)}
+                            className="absolute top-2 left-2 w-6 h-6 rounded flex items-center justify-center transition-all opacity-30 hover:opacity-100 hover:bg-slate-200"
+                          >
+                            <Plus className="w-4 h-4 text-slate-500" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => onCellClick?.(null, dateStr, daypart.id)}
+                            className="mt-1 w-full flex items-center justify-center gap-1 py-0.5 rounded text-[10px] transition-all opacity-20 hover:opacity-70 hover:bg-slate-200"
+                          >
+                            <Plus className="w-3 h-3 text-slate-500" />
+                            <span className="text-slate-500">toevoegen</span>
+                          </button>
+                        )}
                       </td>
                             );
                           })}
