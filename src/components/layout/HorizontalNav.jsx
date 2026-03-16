@@ -119,6 +119,15 @@ export default function HorizontalNav({ currentPage }) {
 
             {/* Primary Navigation - Desktop */}
             <div className="hidden lg:flex items-center gap-1">
+              <Link
+                to="/Landing"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                style={{ color: 'var(--color-text-muted)' }}
+                title="Terug naar homepage"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Home</span>
+              </Link>
               {primaryItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.page;

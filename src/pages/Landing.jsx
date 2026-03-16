@@ -52,7 +52,7 @@ export default function Landing() {
               onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = 'white'}>Home</a>
               <a href="#features" className="text-slate-400 font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
               onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = ''}> Functies</a>
-              <a href="#pricing" className="text-slate-400 font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
+              <a href="/Abonnementen" className="text-slate-400 font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
               onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = ''}>Prijzen</a>
             </nav>
           </div>
