@@ -176,7 +176,7 @@ export default function Landing() {
                 'Geautomatiseerde meldingen via WhatsApp',
                 'Laat de AI Assistent het rooster voor volgende week maken'].
                 map((item, i) =>
-                <li key={i} className="flex items-center gap-3 font-medium text-slate-900">
+                <li key={i} className="text-gray-950 font-medium flex items-center gap-3">
                     <span style={{ color: '#39FF14', fontSize: '20px' }}>✓</span> {item}
                   </li>
                 )}
