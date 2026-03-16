@@ -214,7 +214,7 @@ export default function Dashboard() {
           {/* Quick Actions */}
           <div className="lg:col-span-2 space-y-6">
             {/* Week Chart */}
-            <WeekChart shifts={thisWeekShifts} weekStart={weekStart} />
+            <WeekChart shifts={myShiftsThisWeek} weekStart={weekStart} />
             {/* Active Schedules */}
             <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
               <CardHeader className="pb-3">
