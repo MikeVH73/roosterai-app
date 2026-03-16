@@ -17,7 +17,8 @@ import {
   ChevronDown,
   Menu,
   Sun,
-  Moon
+  Moon,
+  Crown
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ const allNavItems = [
   { id: 'vacation-requests', label: 'Verlofaanvragen', icon: Calendar, page: 'VacationRequests', permission: null },
   { id: 'swap-requests', label: 'Ruilverzoeken', icon: Calendar, page: 'SwapRequests', permission: null },
   { id: 'settings', label: 'Instellingen', icon: Settings, page: 'CompanySettings', permission: 'manage_company' },
+  { id: 'abonnementen', label: 'Abonnementen', icon: Crown, page: 'Abonnementen', permission: 'manage_billing' },
 ];
 
 export default function HorizontalNav({ currentPage }) {

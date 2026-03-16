@@ -74,6 +74,11 @@ const AuthenticatedApp = () => {
           <Landing />
         </LayoutWrapper>
       } />
+      <Route path="/Abonnementen" element={
+        <LayoutWrapper currentPageName="Abonnementen">
+          <Abonnementen />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
