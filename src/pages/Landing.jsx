@@ -133,7 +133,7 @@ export default function Landing() {
           <section id="features">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
               <div>
-                <h2 className="bg-gray-700 text-lime-400 pl-6 text-4xl font-extrabold opacity-100" style={{ borderLeft: '4px solid #39FF14' }}>Krachtige Features</h2>
+                <h2 className="bg-transparent text-gray-950 pl-6 text-4xl font-extrabold opacity-100" style={{ borderLeft: '4px solid #39FF14' }}>Krachtige Features</h2>
                 <p className="text-gray-950 mt-4 max-w-xl">Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
               </div>
               <button className="font-bold flex items-center gap-2" style={{ color: '#39FF14', transition: 'gap 0.2s' }}>
