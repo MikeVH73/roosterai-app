@@ -64,8 +64,19 @@ function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
 }
 
 export default function Dashboard() {
-  const { currentCompany, hasPermission, canUseAI } = useCompany();
+  const { currentCompany, hasPermission, canUseAI, user } = useCompany();
   const companyId = currentCompany?.id;
+  const isEmployee = !hasPermission('manage_schedules');
+
+  // My employee profile
+  const { data: myProfile } = useQuery({
+    queryKey: ['my-profile', companyId, user?.email],
+    queryFn: async () => {
+      const profiles = await base44.entities.EmployeeProfile.filter({ companyId, email: user?.email });
+      return profiles[0] || null;
+    },
+    enabled: !!companyId && !!user?.email
+  });
 
   // Fetch employees
   const { data: employees = [] } = useQuery({
