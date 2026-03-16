@@ -127,7 +127,7 @@ export default function Landing() {
         </section>
 
         {/* Content Sections */}
-        <div className="max-w-7xl mx-auto px-6 py-24 space-y-32" style={{ background: '#f8f6f6' }}>
+        <div className="max-w-7xl mx-auto px-6 py-24 space-y-32" style={{ background: '#1a0b16' }}>
 
           {/* Features */}
           <section id="features">
