@@ -258,15 +258,13 @@ export default function DaypartScheduleGrid({
                           })}
                         </div>
                         
-                        {/* Add button - always visible in empty cells */}
-                        {cellShifts.length === 0 && (
-                          <button
-                            onClick={() => onCellClick?.(null, dateStr, daypart.id)}
-                            className="absolute top-2 left-2 w-6 h-6 rounded flex items-center justify-center transition-all opacity-30 hover:opacity-100 hover:bg-slate-200"
-                          >
-                            <Plus className="w-4 h-4 text-slate-500" />
-                          </button>
-                        )}
+                        {/* Add button - always visible (even when shifts exist) */}
+                        <button
+                          onClick={() => onCellClick?.(null, dateStr, daypart.id)}
+                          className={`${cellShifts.length === 0 ? 'absolute top-2 left-2' : 'mt-1 w-full'} w-6 h-6 rounded flex items-center justify-center transition-all opacity-30 hover:opacity-100 hover:bg-slate-200`}
+                        >
+                          <Plus className="w-4 h-4 text-slate-500" />
+                        </button>
                       </td>
                             );
                           })}
