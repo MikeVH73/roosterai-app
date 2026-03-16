@@ -165,30 +165,49 @@ export default function Dashboard() {
       <div className="p-6 max-w-7xl mx-auto">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard
-            title="Actieve medewerkers"
-            value={employees.length}
-            icon={Users}
-            color="blue"
-          />
-          <StatCard
-            title="Diensten deze week"
-            value={thisWeekShifts.length}
-            icon={Calendar}
-            color="green"
-          />
-          <StatCard
-            title="Openstaande verzoeken"
-            value={pendingRequests}
-            icon={Clock}
-            color="orange"
-          />
-          <StatCard
-            title="AI Suggesties"
-            value={aiSuggestions.length}
-            icon={Sparkles}
-            color="purple"
-          />
+          {isEmployee ? (
+            <>
+              <StatCard
+                title="Mijn diensten deze week"
+                value={myShiftsThisWeek.length}
+                icon={Calendar}
+                color="green"
+              />
+              <StatCard
+                title="Mijn verlofaanvragen"
+                value={vacationRequests.filter(r => r.employeeId === myProfile?.id).length}
+                icon={Clock}
+                color="orange"
+              />
+            </>
+          ) : (
+            <>
+              <StatCard
+                title="Actieve medewerkers"
+                value={employees.length}
+                icon={Users}
+                color="blue"
+              />
+              <StatCard
+                title="Diensten deze week"
+                value={thisWeekShifts.length}
+                icon={Calendar}
+                color="green"
+              />
+              <StatCard
+                title="Openstaande verzoeken"
+                value={pendingRequests}
+                icon={Clock}
+                color="orange"
+              />
+              <StatCard
+                title="AI Suggesties"
+                value={aiSuggestions.length}
+                icon={Sparkles}
+                color="purple"
+              />
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
