@@ -270,10 +270,11 @@ export default function DaypartScheduleGrid({
                                 </div>
                               </div>
                             );
-                          })}
-                        </div>
-                        
-                        {/* Add button - always visible, even when shifts already exist */}
+                            });
+                            })()}
+                            </div>
+
+                            {/* Add button - always visible, even when shifts already exist */}
                         {cellShifts.length === 0 ? (
                           <button
                             onClick={() => onCellClick?.(null, dateStr, daypart.id)}
