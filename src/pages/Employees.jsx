@@ -331,6 +331,7 @@ export default function Employees() {
         employee={selectedEmployee}
         departments={departments}
         functions={functions}
+        employeeCount={employees.filter(e => e.status === 'active').length}
       />
     </div>
   );
