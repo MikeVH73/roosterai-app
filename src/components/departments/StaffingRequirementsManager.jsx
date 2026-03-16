@@ -386,7 +386,10 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                 <Label htmlFor="daypartId">Dagdeel *</Label>
                 <Select 
                   value={formData.daypartId} 
-                  onValueChange={(v) => setFormData({ ...formData, daypartId: v })}
+                  onValueChange={(v) => {
+                    const newTarget = getAutoTargetHours(v, formData.min_staff);
+                    setFormData({ ...formData, daypartId: v, targetHours: newTarget });
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecteer dagdeel" />
@@ -397,11 +400,18 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                     ))}
                   </SelectContent>
                 </Select>
-                {formData.daypartId && getDaypartHoursLabel(formData.daypartId) && (
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                    Uren dagdeel: {getDaypartHoursLabel(formData.daypartId)}
-                  </p>
-                )}
+                {formData.daypartId && (() => {
+                  const dur = getDaypartDuration(formData.daypartId);
+                  if (!dur) return null;
+                  return (
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                      {dur.dp.startTime} – {dur.dp.endTime}
+                      {dur.breakMins > 0
+                        ? ` · ${dur.grossHours.toFixed(1)}u incl. ${dur.breakMins}min pauze (${dur.netHours.toFixed(1)}u netto werkuren)`
+                        : ` · ${dur.grossHours.toFixed(1)}u (geen pauze)`}
+                    </p>
+                  );
+                })()}
               </div>
               <div>
                 <Label htmlFor="day_of_week">Dag *</Label>
@@ -422,7 +432,25 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
             </div>
 
             <div>
-              <Label htmlFor="targetHours">Doeluren *</Label>
+              <Label htmlFor="min_staff">Hoeveel diensten wilt u inplannen? *</Label>
+              <Input
+                id="min_staff"
+                type="number"
+                min="1"
+                value={formData.min_staff}
+                onChange={(e) => {
+                  const newMin = e.target.value;
+                  const newTarget = getAutoTargetHours(formData.daypartId, newMin);
+                  setFormData({ ...formData, min_staff: newMin, targetHours: newTarget });
+                }}
+              />
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                Elke dienst duurt de volledige duur van het dagdeel. Bij 2 diensten worden er 2 medewerkers ingepland.
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="targetHours">Totaal netto werkuren *</Label>
               <Input
                 id="targetHours"
                 type="number"
@@ -430,34 +458,41 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                 min="0"
                 value={formData.targetHours}
                 onChange={(e) => setFormData({ ...formData, targetHours: e.target.value })}
-                placeholder="bijv. 8"
                 required
               />
               <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                Totaal aantal te plannen uren voor dit dagdeel op deze dag
+                Automatisch berekend op basis van netto werkuren per dienst × aantal diensten. U kunt dit handmatig aanpassen.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="min_staff">Min. medewerkers</Label>
-                <Input
-                  id="min_staff"
-                  type="number"
-                  min="0"
-                  value={formData.min_staff}
-                  onChange={(e) => setFormData({ ...formData, min_staff: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="optimal_staff">Optimaal medewerkers</Label>
+                <Label htmlFor="optimal_staff">Met hoeveel medewerkers bij voorkeur?</Label>
                 <Input
                   id="optimal_staff"
                   type="number"
                   min="0"
                   value={formData.optimal_staff}
                   onChange={(e) => setFormData({ ...formData, optimal_staff: e.target.value })}
+                  placeholder="bijv. 2"
                 />
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                  Ideaal aantal medewerkers voor dit dagdeel
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="max_staff">Mogen het er meer zijn indien nodig?</Label>
+                <Input
+                  id="max_staff"
+                  type="number"
+                  min="0"
+                  value={formData.max_staff}
+                  onChange={(e) => setFormData({ ...formData, max_staff: e.target.value })}
+                  placeholder="bijv. 4"
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                  Maximum toegestaan (leeg = geen limiet)
+                </p>
               </div>
             </div>
 
