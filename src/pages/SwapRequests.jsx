@@ -44,11 +44,11 @@ const swapTypes = [
 ];
 
 const statusConfig = {
-  pending: { label: 'In afwachting', color: 'bg-amber-100 text-amber-700', icon: Clock },
-  accepted_by_colleague: { label: 'Geaccepteerd door collega', color: 'bg-blue-100 text-blue-700', icon: CheckCircle2 },
-  approved: { label: 'Goedgekeurd', color: 'bg-green-100 text-green-700', icon: CheckCircle2 },
-  rejected: { label: 'Afgewezen', color: 'bg-red-100 text-red-700', icon: XCircle },
-  cancelled: { label: 'Geannuleerd', color: 'bg-slate-100 text-slate-500', icon: XCircle }
+  pending: { label: 'In afwachting', style: { backgroundColor: 'rgba(251,191,36,0.15)', color: '#fbbf24' }, icon: Clock },
+  accepted_by_colleague: { label: 'Geaccepteerd door collega', style: { backgroundColor: 'rgba(56,189,248,0.15)', color: '#38bdf8' }, icon: CheckCircle2 },
+  approved: { label: 'Goedgekeurd', style: { backgroundColor: 'rgba(74,222,128,0.15)', color: '#4ade80' }, icon: CheckCircle2 },
+  rejected: { label: 'Afgewezen', style: { backgroundColor: 'rgba(239,68,68,0.15)', color: '#f87171' }, icon: XCircle },
+  cancelled: { label: 'Geannuleerd', style: { backgroundColor: 'rgba(148,163,184,0.15)', color: '#94a3b8' }, icon: XCircle }
 };
 
 export default function SwapRequests() {
