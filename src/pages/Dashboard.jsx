@@ -139,7 +139,20 @@ export default function Dashboard() {
     }
   });
 
-  const activeSchedules = schedules.filter(s => s.status === 'published' || s.status === 'draft');
+  // For employees: filter to only their own shifts and schedules
+  const myShiftsThisWeek = isEmployee
+    ? thisWeekShifts.filter(s => s.employeeId === myProfile?.id)
+    : thisWeekShifts;
+
+  const activeSchedules = schedules.filter(s => {
+    if (s.status !== 'published' && s.status !== 'draft') return false;
+    if (isEmployee && myProfile) {
+      // Only show schedules that contain shifts for this employee
+      return shifts.some(shift => shift.scheduleId === s.id && shift.employeeId === myProfile.id);
+    }
+    return true;
+  });
+
   const pendingRequests = vacationRequests.length + swapRequests.length;
 
   return (
