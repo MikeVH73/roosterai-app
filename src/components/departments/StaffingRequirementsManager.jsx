@@ -145,7 +145,8 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
       day_of_week: parseInt(formData.day_of_week),
       targetHours: parseFloat(formData.targetHours),
       min_staff: parseInt(formData.min_staff),
-      optimal_staff: formData.optimal_staff ? parseInt(formData.optimal_staff) : null
+      optimal_staff: formData.optimal_staff ? parseInt(formData.optimal_staff) : null,
+      max_staff: formData.max_staff ? parseInt(formData.max_staff) : null
     };
 
     if (selectedReq) {
