@@ -13,7 +13,9 @@ import {
   Loader2,
   Users,
   Mail,
-  UserPlus
+  UserPlus,
+  Crown,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,6 +183,10 @@ export default function CompanySettings() {
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Team
+            </TabsTrigger>
+            <TabsTrigger value="subscription" className="flex items-center gap-2">
+              <Crown className="w-4 h-4" />
+              Abonnement
             </TabsTrigger>
           </TabsList>
 
@@ -462,6 +468,41 @@ export default function CompanySettings() {
 
           <TabsContent value="team">
             <InvitationManager />
+          </TabsContent>
+
+          <TabsContent value="subscription">
+            <Card className="border-0 shadow-sm settings-card">
+              <CardHeader>
+                <CardTitle>Abonnement</CardTitle>
+                <CardDescription>Overzicht van je huidige abonnement en limieten</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>Huidig plan</p>
+                    <p className="text-xl font-bold capitalize mt-0.5" style={{ color: 'var(--color-text-primary)' }}>{currentCompany?.subscription_plan || 'starter'}</p>
+                  </div>
+                  <Crown className="w-8 h-8" style={{ color: '#38bdf8' }} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                    <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Max. medewerkers</p>
+                    <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>{currentCompany?.max_users || 10}</p>
+                  </div>
+                  <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                    <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>AI acties/maand</p>
+                    <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>{currentCompany?.ai_actions_limit || 300}</p>
+                  </div>
+                </div>
+                <Link to="/Abonnementen">
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+                    <Crown className="w-4 h-4" />
+                    Bekijk & upgrade abonnement
+                    <ArrowRight className="w-4 h-4 ml-auto" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
