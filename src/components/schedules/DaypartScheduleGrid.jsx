@@ -208,13 +208,15 @@ export default function DaypartScheduleGrid({
                       >
                         <div className="space-y-1.5 min-h-[60px]">
                           {(() => {
-                            // Count how many shifts each employee has in this cell
-                            const empCounts = {};
-                            cellShifts.forEach(s => { empCounts[s.employeeId] = (empCounts[s.employeeId] || 0) + 1; });
+                            // Count how many shifts each employee has across the ENTIRE day (all dayparts)
+                            const empDayCount = {};
+                            shifts.filter(s => s.date === dateStr).forEach(s => {
+                              empDayCount[s.employeeId] = (empDayCount[s.employeeId] || 0) + 1;
+                            });
 
-                            // Split: multi-shift employees first, then single-shift employees
-                            const multi = cellShifts.filter(s => empCounts[s.employeeId] > 1);
-                            const single = cellShifts.filter(s => empCounts[s.employeeId] === 1);
+                            // Split: employees with multiple shifts today first, then single-shift employees
+                            const multi = cellShifts.filter(s => empDayCount[s.employeeId] > 1);
+                            const single = cellShifts.filter(s => empDayCount[s.employeeId] === 1);
 
                             // Sort multi: group by employee, then by start_time within each employee
                             multi.sort((a, b) => {
