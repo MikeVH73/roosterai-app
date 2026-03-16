@@ -164,8 +164,8 @@ export default function Landing() {
           {/* Product Preview */}
           <section className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <h2 className="bg-cyan-900 text-slate-950 text-4xl font-black leading-tight">
-                Ontworpen voor <span style={{ color: '#39FF14' }}>gebruiksgemak</span>
+              <h2 style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: '1.2', color: '#000000 !important', WebkitTextFillColor: '#000000', background: 'none' }}>
+                Ontworpen voor <span style={{ color: '#39FF14 !important', WebkitTextFillColor: '#39FF14' }}>gebruiksgemak</span>
               </h2>
               <p className="text-gray-950 text-lg leading-relaxed">Geen complexe handleidingen nodig. Onze interface is intuïtief en reageert direct op veranderingen. Beheer uw team vanaf elk apparaat met hetzelfde gemak.
 
