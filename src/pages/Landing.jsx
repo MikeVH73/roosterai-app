@@ -99,12 +99,12 @@ export default function Landing() {
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     Start nu gratis
                   </button>
-                  <button
-                    style={{ background: 'rgba(255,255,255,0.1)', color: 'white', height: '56px', padding: '0 40px', borderRadius: '12px', fontWeight: 700, fontSize: '18px', border: '1px solid rgba(255,255,255,0.1)', transition: 'background 0.2s' }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
-                    Bekijk Demo
-                  </button>
+                  
+
+
+
+
+
                 </div>
 
                 <div className="grid grid-cols-3 gap-6 pt-12" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
