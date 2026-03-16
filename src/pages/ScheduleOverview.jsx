@@ -58,7 +58,7 @@ function calculateNetHours(shift) {
 
 export default function ScheduleOverview() {
   const navigate = useNavigate();
-  const { currentCompany } = useCompany();
+  const { currentCompany, hasPermission, user } = useCompany();
   const companyId = currentCompany?.id;
   const queryClient = useQueryClient();
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
