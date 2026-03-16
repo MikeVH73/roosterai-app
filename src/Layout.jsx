@@ -5,7 +5,7 @@ import HorizontalNav from './components/layout/HorizontalNav';
 import { Loader2 } from 'lucide-react';
 
 // Pages that don't need company context
-const publicPages = ['CompanySelect', 'CompanyOnboarding'];
+const publicPages = ['CompanySelect', 'CompanyOnboarding', 'Landing'];
 
 function LayoutContent({ children, currentPageName }) {
   const { currentCompany, loading } = useCompany();
