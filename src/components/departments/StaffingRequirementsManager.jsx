@@ -243,6 +243,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
         targetHours: parseFloat(bulkData.targetHours),
         min_staff: parseInt(bulkData.min_staff),
         optimal_staff: bulkData.optimal_staff ? parseInt(bulkData.optimal_staff) : null,
+        max_staff: bulkData.max_staff ? parseInt(bulkData.max_staff) : null,
         priority: bulkData.priority
       };
       
