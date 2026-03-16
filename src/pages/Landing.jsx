@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Calendar, Users, Zap, Clock, MessageSquare, TrendingUp, ChevronRight } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
