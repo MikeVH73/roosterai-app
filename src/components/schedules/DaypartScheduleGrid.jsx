@@ -207,7 +207,22 @@ export default function DaypartScheduleGrid({
                         style={{ backgroundColor: `${daypart.color}05` || '#FAFAFA' }}
                       >
                         <div className="space-y-1.5 min-h-[60px]">
-                          {cellShifts.map((shift) => {
+                          {(() => {
+                            // Count how many shifts each employee has in this cell
+                            const empCounts = {};
+                            cellShifts.forEach(s => { empCounts[s.employeeId] = (empCounts[s.employeeId] || 0) + 1; });
+
+                            // Split: multi-shift employees first, then single-shift employees
+                            const multi = cellShifts.filter(s => empCounts[s.employeeId] > 1);
+                            const single = cellShifts.filter(s => empCounts[s.employeeId] === 1);
+
+                            // Sort multi: group by employee, then by start_time within each employee
+                            multi.sort((a, b) => {
+                              if (a.employeeId !== b.employeeId) return a.employeeId.localeCompare(b.employeeId);
+                              return a.start_time.localeCompare(b.start_time);
+                            });
+
+                            return [...multi, ...single].map((shift) => {
                             const employee = getEmployee(shift.employeeId);
                             if (!employee) return null;
 
