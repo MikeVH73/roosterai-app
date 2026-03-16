@@ -65,11 +65,14 @@ const shiftTypes = [
   { value: 'night', label: 'Nacht' },
 ];
 
-export default function EmployeeDialog({ open, onClose, employee, departments, functions }) {
+export default function EmployeeDialog({ open, onClose, employee, departments, functions, employeeCount }) {
   const { currentCompany } = useCompany();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(defaultFormData);
   const [activeTab, setActiveTab] = useState('general');
+
+  const employeeLimit = currentCompany?.max_users || 9999;
+  const isAtLimit = !employee && (employeeCount ?? 0) >= employeeLimit;
 
   useEffect(() => {
     if (employee) {
@@ -198,6 +201,26 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
           </DialogTitle>
         </DialogHeader>
 
+        {isAtLimit ? (
+          <div className="p-6 text-center space-y-4">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: 'rgba(251,146,60,0.15)' }}>
+              <span className="text-2xl">🚫</span>
+            </div>
+            <p className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Medewerkerslimiet bereikt</p>
+            <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+              Je hebt het maximum aantal medewerkers voor je abonnement bereikt ({employeeLimit}). Upgrade je plan om meer medewerkers toe te voegen.
+            </p>
+            <div className="flex gap-3 justify-center pt-2">
+              <Button variant="outline" onClick={onClose}>Sluiten</Button>
+              <Button
+                onClick={() => { onClose(); window.location.href = '/Abonnementen'; }}
+                style={{ backgroundColor: '#38bdf8', color: '#0f172a' }}
+              >
+                Bekijk abonnementen
+              </Button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
             <TabsList className="grid w-full grid-cols-3 h-11" style={{ backgroundColor: 'var(--color-surface-light)' }}>
@@ -527,6 +550,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );
