@@ -182,6 +182,27 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
     return `${dp.startTime} – ${dp.endTime}`;
   };
 
+  // Calculate net and gross hours for a daypart
+  const getDaypartDuration = (daypartId) => {
+    const dp = dayparts.find(d => d.id === daypartId);
+    if (!dp?.startTime || !dp?.endTime) return null;
+    const [sh, sm] = dp.startTime.split(':').map(Number);
+    const [eh, em] = dp.endTime.split(':').map(Number);
+    let totalMins = (eh * 60 + em) - (sh * 60 + sm);
+    if (totalMins < 0) totalMins += 24 * 60;
+    const breakMins = dp.break_duration || 0;
+    const grossHours = totalMins / 60;
+    const netHours = (totalMins - breakMins) / 60;
+    return { grossHours, netHours, breakMins, dp };
+  };
+
+  // Auto-calculate targetHours when min_staff or daypartId changes
+  const getAutoTargetHours = (daypartId, minStaff) => {
+    const dur = getDaypartDuration(daypartId);
+    if (!dur) return '';
+    return (dur.netHours * parseInt(minStaff || 1)).toFixed(1);
+  };
+
   const openBulkDialog = () => {
     setBulkData({
       daypartId: sortedDayparts[0]?.id || '',
