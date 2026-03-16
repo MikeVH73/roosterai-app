@@ -552,7 +552,10 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
               <Label>Dagdeel *</Label>
               <Select 
                 value={bulkData.daypartId} 
-                onValueChange={(v) => setBulkData({ ...bulkData, daypartId: v })}
+                onValueChange={(v) => {
+                  const newTarget = getAutoTargetHours(v, bulkData.min_staff);
+                  setBulkData({ ...bulkData, daypartId: v, targetHours: newTarget });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecteer dagdeel" />
@@ -563,11 +566,18 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
                   ))}
                 </SelectContent>
               </Select>
-              {bulkData.daypartId && getDaypartHoursLabel(bulkData.daypartId) && (
-                <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
-                  Uren dagdeel: {getDaypartHoursLabel(bulkData.daypartId)}
-                </p>
-              )}
+              {bulkData.daypartId && (() => {
+                const dur = getDaypartDuration(bulkData.daypartId);
+                if (!dur) return null;
+                return (
+                  <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                    {dur.dp.startTime} – {dur.dp.endTime}
+                    {dur.breakMins > 0
+                      ? ` · ${dur.grossHours.toFixed(1)}u incl. ${dur.breakMins}min pauze (${dur.netHours.toFixed(1)}u netto werkuren)`
+                      : ` · ${dur.grossHours.toFixed(1)}u (geen pauze)`}
+                  </p>
+                );
+              })()}
             </div>
 
             <div>
