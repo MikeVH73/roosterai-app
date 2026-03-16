@@ -632,14 +632,16 @@ export default function ScheduleOverview() {
                             >
                               {isFullscreen ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
                             </Button>
-                            <Button 
-                              size="sm"
-                              onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
-                              className="h-7 px-3 text-xs"
-                              style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
-                            >
-                              Bewerken
-                            </Button>
+                            {hasPermission('manage_schedules') && (
+                              <Button 
+                                size="sm"
+                                onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}
+                                className="h-7 px-3 text-xs"
+                                style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
+                              >
+                                Bewerken
+                              </Button>
+                            )}
                           </div>
                           </div>
 
