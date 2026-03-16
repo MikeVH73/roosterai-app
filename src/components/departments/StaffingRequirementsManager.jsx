@@ -62,6 +62,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
     targetHours: '',
     min_staff: 1,
     optimal_staff: '',
+    max_staff: '',
     priority: 'medium'
   });
   const [bulkData, setBulkData] = useState({
@@ -69,6 +70,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
     targetHours: '',
     min_staff: 1,
     optimal_staff: '',
+    max_staff: '',
     priority: 'medium',
     selectedDays: [1, 2, 3, 4, 5] // ma-vr standaard
   });
