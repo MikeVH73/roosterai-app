@@ -138,129 +138,211 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Content Sections */}
-        <div className="max-w-7xl mx-auto px-6 py-24 space-y-32" style={{ background: '#f8f6f6' }}>
-
-          {/* Features */}
-          <section id="features">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-              <div>
-                <h2 style={{ borderLeft: '4px solid #39FF14', paddingLeft: '24px', fontSize: '2.25rem', fontWeight: 800, color: '#000000 !important', WebkitTextFillColor: '#000000' }}>Krachtige Features</h2>
-                <p style={{ marginTop: '16px', maxWidth: '36rem', color: '#000000 !important', WebkitTextFillColor: '#000000' }}>Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
-              </div>
-              <button className="font-bold flex items-center gap-2" style={{ color: '#39FF14', transition: 'gap 0.2s' }}>
-                Alle Features →
-              </button>
+        {/* Features Section */}
+        <section id="features" style={{ background: '#120a10', padding: '100px 0' }}>
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: 'rgba(57,255,20,0.1)', color: '#39FF14', border: '1px solid rgba(57,255,20,0.2)' }}>Functies</div>
+              <h2 className="text-white font-black mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>Voor planners die het druk hebben</h2>
+              <p className="text-slate-400 text-lg max-w-2xl mx-auto">Je doet de planning er 'bij' — RoosterAI zorgt dat het toch perfect is.</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-6">
               {[
-              { icon: '✦', title: 'AI-gestuurde Planning', desc: 'Laat onze algoritmes de perfecte match vinden tussen beschikbaarheid, vaardigheden en werkdruk voor een optimaal rooster.' },
-              { icon: '👥', title: 'Medewerkersbeheer', desc: 'Een centraal dashboard voor alle contracten, verlofaanvragen en kwalificaties van je team, altijd up-to-date.' },
-              { icon: '📊', title: 'Realtime Inzicht', desc: 'Directe, diepgaande rapportages over arbeidskosten, productiviteit en budgetoverschrijdingen in één oogopslag.' }].
-              map((f, i) =>
-              <div key={i} className="feature-card h-full flex flex-col gap-6 p-8 rounded-3xl transition-all"
-              style={{ background: '#1a0b16', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div className="flex items-center justify-center rounded-2xl text-3xl" style={{ width: '56px', height: '56px', background: 'rgba(57,255,20,0.1)', color: '#39FF14' }}>
+                { icon: <Zap size={24} />, title: 'AI-gestuurde Planning', desc: 'Één klik en het rooster staat. De AI houdt rekening met contracturen, vaardigheden, voorkeuren en bezettingsnormen.' },
+                { icon: <Users size={24} />, title: 'Medewerkersbeheer', desc: 'Alles over je team op één plek: contracten, verlof, functies en wie waar kan werken.' },
+                { icon: <TrendingUp size={24} />, title: 'Realtime Inzicht', desc: 'Direct zien hoeveel uren er ingepland zijn, wat het kost en waar gaten zitten — zonder Excel.' },
+              ].map((f, i) => (
+                <div key={i} className="feature-card flex flex-col gap-5 p-8 rounded-2xl" style={{ background: '#1a0b16', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="flex items-center justify-center rounded-xl" style={{ width: '52px', height: '52px', background: 'rgba(57,255,20,0.1)', color: '#39FF14' }}>
                     {f.icon}
                   </div>
                   <div>
-                    <h3 className="text-white text-2xl font-bold mb-3">{f.title}</h3>
-                    <p className="text-slate-400 leading-relaxed">{f.desc}</p>
+                    <h3 className="text-white text-xl font-bold mb-2">{f.title}</h3>
+                    <p className="text-slate-400 leading-relaxed text-sm">{f.desc}</p>
+                  </div>
+                  <div className="mt-auto flex items-center gap-2 text-sm font-bold" style={{ color: '#39FF14' }}>
+                    Meer weten <ChevronRight size={16} />
                   </div>
                 </div>
-              )}
+              ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Product Preview */}
-          <section className="grid lg:grid-cols-2 gap-16 items-center">
+        {/* Time Savings Chart Section */}
+        <section style={{ background: '#1a0b16', padding: '100px 0' }}>
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-6">
+                <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest" style={{ background: 'rgba(57,255,20,0.1)', color: '#39FF14', border: '1px solid rgba(57,255,20,0.2)' }}>Tijdswinst</div>
+                <h2 className="text-white font-black" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.2 }}>
+                  Van <span style={{ color: '#39FF14' }}>uren</span> naar<br />minuten per week
+                </h2>
+                <p className="text-slate-400 text-lg leading-relaxed">
+                  De gemiddelde planner besteedt 6–8 uur per week aan het maken en aanpassen van roosters. Met RoosterAI is dat nog geen uur.
+                </p>
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  {[
+                    { label: 'Uur bespaard per week', value: '6–8u' },
+                    { label: 'Minder planningsfouten', value: '–90%' },
+                    { label: 'Sneller rooster klaar', value: '×10' },
+                    { label: 'Tevredenheid medewerkers', value: '+35%' },
+                  ].map((stat, i) => (
+                    <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(57,255,20,0.05)', border: '1px solid rgba(57,255,20,0.1)' }}>
+                      <p className="font-black text-2xl" style={{ color: '#39FF14' }}>{stat.value}</p>
+                      <p className="text-slate-400 text-xs mt-1">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chart */}
+              <div className="rounded-2xl p-8" style={{ background: '#120a10', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h4 className="text-white font-bold text-lg">Uren besteed aan planning</h4>
+                    <p className="text-slate-500 text-sm mt-1">Per dag — voor en na RoosterAI</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs font-bold">
+                    <span className="flex items-center gap-1.5"><span style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(148,163,184,0.4)', display: 'inline-block' }}></span><span className="text-slate-400">Zonder AI</span></span>
+                    <span className="flex items-center gap-1.5"><span style={{ width: 10, height: 10, borderRadius: 2, background: '#39FF14', display: 'inline-block' }}></span><span style={{ color: '#39FF14' }}>Met RoosterAI</span></span>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={timeData} barCategoryGap="30%" barGap={4}>
+                    <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}u`} />
+                    <Tooltip
+                      contentStyle={{ background: '#1a0b16', border: '1px solid rgba(57,255,20,0.2)', borderRadius: 8, color: 'white' }}
+                      formatter={(value, name) => [`${value}u`, name === 'voor' ? 'Zonder AI' : 'Met RoosterAI']}
+                      labelStyle={{ color: '#94a3b8' }}
+                    />
+                    <Bar dataKey="voor" radius={[4, 4, 0, 0]} fill="rgba(148,163,184,0.25)" />
+                    <Bar dataKey="na" radius={[4, 4, 0, 0]} fill="#39FF14" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section style={{ background: '#120a10', padding: '100px 0' }}>
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: 'rgba(57,255,20,0.1)', color: '#39FF14', border: '1px solid rgba(57,255,20,0.2)' }}>Hoe het werkt</div>
+              <h2 className="text-white font-black mb-4" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>In 4 stappen een perfect rooster</h2>
+              <p className="text-slate-400 text-lg">Geen opleiding nodig. Gewoon doen.</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {steps.map((step, i) => (
+                <div key={i} className="step-card rounded-2xl p-6 relative" style={{ background: '#1a0b16', border: '1px solid rgba(255,255,255,0.07)', transition: 'border-color 0.2s' }}>
+                  <div className="text-5xl font-black mb-4" style={{ color: 'rgba(57,255,20,0.12)', lineHeight: 1 }}>{step.num}</div>
+                  <div className="mb-4 flex items-center justify-center rounded-xl" style={{ width: '44px', height: '44px', background: 'rgba(57,255,20,0.1)', color: '#39FF14' }}>
+                    {step.icon}
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">{step.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{step.desc}</p>
+                  {i < steps.length - 1 && (
+                    <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 z-10" style={{ color: 'rgba(57,255,20,0.3)' }}>
+                      <ChevronRight size={20} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Product Preview */}
+        <section style={{ background: '#1a0b16', padding: '100px 0' }}>
+          <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <h2 style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: '1.2', color: '#000000 !important', WebkitTextFillColor: '#000000', background: 'none' }}>
-                Ontworpen voor <span style={{ color: '#39FF14 !important', WebkitTextFillColor: '#39FF14' }}>gebruiksgemak</span>
+              <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest" style={{ background: 'rgba(57,255,20,0.1)', color: '#39FF14', border: '1px solid rgba(57,255,20,0.2)' }}>Gebruiksgemak</div>
+              <h2 className="text-white font-black" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.2 }}>
+                Ontworpen voor <span style={{ color: '#39FF14' }}>planners</span><br />die het druk hebben
               </h2>
-              <p className="text-gray-950 text-lg leading-relaxed">Geen complexe handleidingen nodig. Onze interface is intuïtief en reageert direct op veranderingen. Beheer uw team vanaf elk apparaat met hetzelfde gemak.
-
+              <p className="text-slate-400 text-lg leading-relaxed">
+                Geen ingewikkelde handleiding. Gewoon inloggen, en de AI helpt je direct verder. Werkt op je telefoon, tablet of laptop.
               </p>
               <ul className="space-y-4 pt-4">
                 {[
-                'Deel medewerkers in op voorkeurslocatie en back-up locatie',
-                'Geautomatiseerde meldingen via WhatsApp',
-                'Laat de AI Assistent het rooster voor volgende week maken'].
-                map((item, i) =>
-                <li key={i} className="text-gray-950 font-medium flex items-center gap-3">
-                    <span style={{ color: '#39FF14', fontSize: '20px' }}>✓</span> {item}
+                  'Medewerkers op voorkeurslocatie of back-up locatie inplannen',
+                  'Automatische WhatsApp-berichten naar je team',
+                  'AI maakt het rooster voor volgende week in één klik',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-slate-300 font-medium">
+                    <span className="mt-0.5 flex-shrink-0 flex items-center justify-center rounded-full" style={{ width: 22, height: 22, background: 'rgba(57,255,20,0.15)', color: '#39FF14', fontSize: 12, fontWeight: 900 }}>✓</span>
+                    {item}
                   </li>
-                )}
+                ))}
               </ul>
+              <button onClick={handleLogin} className="flex items-center gap-2 font-bold mt-4" style={{ color: '#39FF14' }}>
+                Probeer zelf <ChevronRight size={16} />
+              </button>
             </div>
 
             {/* Demo Card */}
-            <div className="rounded-3xl p-10 border relative" style={{ background: 'linear-gradient(135deg, #361728 0%, #1a0b16 100%)', borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.3)' }}>
+            <div className="rounded-3xl p-8 border relative" style={{ background: 'linear-gradient(135deg, #361728 0%, #1a0b16 100%)', borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 25px 50px rgba(0,0,0,0.4)' }}>
               <div className="absolute -top-4 -right-4 px-4 py-2 rounded-xl font-black text-sm italic shadow-xl" style={{ background: '#39FF14', color: '#1a0b16' }}>
                 LIVE DEMO
               </div>
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h4 className="text-white text-2xl font-bold">Weekoverzicht</h4>
+                  <h4 className="text-white text-xl font-bold">Weekoverzicht</h4>
                   <p className="text-xs font-bold uppercase tracking-widest mt-1" style={{ color: '#39FF14' }}>Systeem Status: Optimaal</p>
                 </div>
-                <span style={{ color: '#39FF14', fontSize: '36px' }}>📅</span>
+                <Calendar size={32} style={{ color: '#39FF14' }} />
               </div>
-
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[
-                { name: 'Mark de Vries', shift: 'Ochtenddienst • 08:00 - 16:00', label: 'BEVESTIGD', labelBg: 'rgba(57,255,20,0.2)', labelColor: '#39FF14',
-                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2ELlfG6kOC7eP5drp0jTg23-5cVILJjV79otvr337bbz7ETb2OTLYtTCAHLMg87DnTPBcH5X1pQfnZNd4ITOzz89BAmQ-S_uqASccKK4Of3B7pejuk1a1-j8KE61LDayfU3n9BIb_AfojSZgNIborBsR1j2ehqKYk-fyprAjB6j6RhMFg9JACbKy7UCoTAkSHPAi50mU_5WG4UTED_mVZNJO0i7CP0uS3-phIzKoKLW_-lWWhdvLWEjZJZ6cIns8Sih5hRROa69s' },
-                { name: 'Sophie Jansen', shift: 'Avonddienst • 16:00 - 00:00', label: 'NIEUW', labelBg: '#39FF14', labelColor: '#1a0b16',
-                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVWj_OJJzs2uLGVKV8dNUN686zSeacscZvio6_fEtz1JxQIXl8cuhJZ-QDAqqFQVPiZfhQNGQSimKmPGIM7OJLRcEQo9Pngc4EszjD69OILRD9X-1jp0FzZ74DkPUSMYNlq2vTWW70jazzhCjt3-VRbFTm8XtwdTaveBgch_fXsSSYODNXTv2qqRraO1tYxjk4yYfJpkG7xkdvdhaV0zkSJJaP3xfc7rFXld90Vw2N8d-LRhrUe7wh0bV0ThY7sNFxYal2t-YcCK0' }].
-                map((emp, i) =>
-                <div key={i} className="flex items-center gap-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div className="rounded-full overflow-hidden flex-shrink-0" style={{ width: '56px', height: '56px', ring: '2px solid rgba(57,255,20,0.2)' }}>
-                      <img src={emp.img} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  { name: 'Mark de Vries', shift: 'Ochtenddienst • 08:00–16:00', label: 'BEVESTIGD', labelBg: 'rgba(57,255,20,0.15)', labelColor: '#39FF14', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2ELlfG6kOC7eP5drp0jTg23-5cVILJjV79otvr337bbz7ETb2OTLYtTCAHLMg87DnTPBcH5X1pQfnZNd4ITOzz89BAmQ-S_uqASccKK4Of3B7pejuk1a1-j8KE61LDayfU3n9BIb_AfojSZgNIborBsR1j2ehqKYk-fyprAjB6j6RhMFg9JACbKy7UCoTAkSHPAi50mU_5WG4UTED_mVZNJO0i7CP0uS3-phIzKoKLW_-lWWhdvLWEjZJZ6cIns8Sih5hRROa69s' },
+                  { name: 'Sophie Jansen', shift: 'Avonddienst • 16:00–00:00', label: 'NIEUW', labelBg: '#39FF14', labelColor: '#1a0b16', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVWj_OJJzs2uLGVKV8dNUN686zSeacscZvio6_fEtz1JxQIXl8cuhJZ-QDAqqFQVPiZfhQNGQSimKmPGIM7OJLRcEQo9Pngc4EszjD69OILRD9X-1jp0FzZ74DkPUSMYNlq2vTWW70jazzhCjt3-VRbFTm8XtwdTaveBgch_fXsSSYODNXTv2qqRraO1tYxjk4yYfJpkG7xkdvdhaV0zkSJJaP3xfc7rFXld90Vw2N8d-LRhrUe7wh0bV0ThY7sNFxYal2t-YcCK0' },
+                ].map((emp, i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <img src={emp.img} alt={emp.name} className="rounded-full flex-shrink-0" style={{ width: 48, height: 48, objectFit: 'cover' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold truncate">{emp.name}</p>
+                      <p className="text-slate-400 text-sm">{emp.shift}</p>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-white text-lg font-bold">{emp.name}</p>
-                      <p className="text-slate-400 italic text-sm">{emp.shift}</p>
-                    </div>
-                    <div className="px-4 py-2 rounded-lg" style={{ background: emp.labelBg }}>
-                      <span className="text-xs font-black italic tracking-widest" style={{ color: emp.labelColor }}>{emp.label}</span>
+                    <div className="px-3 py-1.5 rounded-lg flex-shrink-0" style={{ background: emp.labelBg }}>
+                      <span className="text-xs font-black tracking-widest" style={{ color: emp.labelColor }}>{emp.label}</span>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
-
-              <div className="mt-10 pt-8 flex justify-center" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <button onClick={handleLogin} className="font-bold flex items-center gap-3" style={{ color: '#39FF14', transition: 'gap 0.2s' }}>
-                  Open Volledig Rooster Dashboard →
+              <div className="mt-8 pt-6 flex justify-center" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                <button onClick={handleLogin} className="flex items-center gap-2 font-bold" style={{ color: '#39FF14' }}>
+                  Open Volledig Rooster Dashboard <ChevronRight size={16} />
                 </button>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* CTA */}
-          <section>
-            <div className="rounded-3xl p-12 md:p-20 text-center relative overflow-hidden" style={{ background: '#39FF14', color: '#1a0b16' }}>
-              <div style={{ position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(255,255,255,0.1)', borderRadius: '9999px', marginRight: '-128px', marginTop: '-128px', filter: 'blur(40px)' }}></div>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, width: '256px', height: '256px', background: 'rgba(26,11,22,0.1)', borderRadius: '9999px', marginLeft: '-128px', marginBottom: '-128px', filter: 'blur(40px)' }}></div>
-              <div className="relative max-w-3xl mx-auto space-y-8">
-                <h2 className="font-black tracking-tight leading-none" style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: '#1a0b16' }}>Klaar voor de toekomst?</h2>
-                <p className="text-xl md:text-2xl font-bold max-w-2xl mx-auto" style={{ opacity: 0.8, color: '#1a0b16' }}>
-                  Sluit je aan bij 500+ bedrijven die hun planning al hebben geoptimaliseerd met RoosterAI.
-                </p>
-                <div className="flex flex-col items-center gap-6 pt-4">
-                  <button onClick={handleLogin}
-                  style={{ background: '#1a0b16', color: 'white', padding: '20px 48px', borderRadius: '16px', fontWeight: 900, fontSize: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.4)', transition: 'transform 0.2s' }}
+        {/* CTA */}
+        <section style={{ padding: '80px 24px' }}>
+          <div className="max-w-4xl mx-auto rounded-3xl p-12 md:p-20 text-center relative overflow-hidden" style={{ background: '#39FF14' }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, width: '256px', height: '256px', background: 'rgba(255,255,255,0.15)', borderRadius: '9999px', marginRight: '-128px', marginTop: '-128px', filter: 'blur(40px)' }}></div>
+            <div className="relative space-y-8">
+              <h2 className="font-black tracking-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', color: '#1a0b16', lineHeight: 1.1 }}>Klaar voor de toekomst?</h2>
+              <p className="text-xl font-bold" style={{ color: 'rgba(26,11,22,0.75)', maxWidth: '30rem', margin: '0 auto' }}>
+                Sluit je aan bij 500+ bedrijven die hun planning al hebben geoptimaliseerd met RoosterAI.
+              </p>
+              <div className="flex flex-col items-center gap-4">
+                <button onClick={handleLogin}
+                  style={{ background: '#1a0b16', color: 'white', padding: '18px 48px', borderRadius: '14px', fontWeight: 900, fontSize: '18px', boxShadow: '0 10px 40px rgba(0,0,0,0.3)', transition: 'transform 0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                    Start 14 Dagen Gratis Proef
-                  </button>
-                  <p className="text-sm font-bold italic" style={{ opacity: 0.6, color: '#1a0b16' }}>Geen creditcard nodig • In 5 minuten opgezet • Directe resultaten</p>
-                </div>
+                  Start 14 Dagen Gratis Proef
+                </button>
+                <p className="text-sm font-bold italic" style={{ color: 'rgba(26,11,22,0.55)' }}>Geen creditcard nodig • In 5 minuten opgezet • Directe resultaten</p>
               </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
