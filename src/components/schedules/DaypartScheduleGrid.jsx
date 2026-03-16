@@ -214,17 +214,19 @@ export default function DaypartScheduleGrid({
                               empDayCount[s.employeeId] = (empDayCount[s.employeeId] || 0) + 1;
                             });
 
-                            // Split: employees with multiple shifts today first, then single-shift employees
-                            const multi = cellShifts.filter(s => empDayCount[s.employeeId] > 1);
-                            const single = cellShifts.filter(s => empDayCount[s.employeeId] === 1);
-
-                            // Sort multi: group by employee, then by start_time within each employee
-                            multi.sort((a, b) => {
-                              if (a.employeeId !== b.employeeId) return a.employeeId.localeCompare(b.employeeId);
-                              return a.start_time.localeCompare(b.start_time);
+                            // Sort: employees with more shifts that day come first, then by employee name for consistency
+                            const sorted = [...cellShifts].sort((a, b) => {
+                              const countDiff = (empDayCount[b.employeeId] || 1) - (empDayCount[a.employeeId] || 1);
+                              if (countDiff !== 0) return countDiff;
+                              // Same count: sort by employee name for stable ordering
+                              const empA = employees.find(e => e.id === a.employeeId);
+                              const empB = employees.find(e => e.id === b.employeeId);
+                              const nameA = `${empA?.first_name} ${empA?.last_name}` || '';
+                              const nameB = `${empB?.first_name} ${empB?.last_name}` || '';
+                              return nameA.localeCompare(nameB);
                             });
 
-                            return [...multi, ...single].map((shift) => {
+                            return sorted.map((shift) => {
                             const employee = getEmployee(shift.employeeId);
                             if (!employee) return null;
 
