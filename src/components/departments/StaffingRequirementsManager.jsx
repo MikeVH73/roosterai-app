@@ -204,11 +204,13 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
   };
 
   const openBulkDialog = () => {
+    const firstDp = sortedDayparts[0];
     setBulkData({
-      daypartId: sortedDayparts[0]?.id || '',
-      targetHours: '',
+      daypartId: firstDp?.id || '',
+      targetHours: firstDp ? getAutoTargetHours(firstDp.id, 1) : '',
       min_staff: 1,
       optimal_staff: '',
+      max_staff: '',
       priority: 'medium',
       selectedDays: [1, 2, 3, 4, 5]
     });
