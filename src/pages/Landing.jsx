@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, Sparkles, Users, Clock, ShieldCheck, BarChart3, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 
 const features = [
   {
