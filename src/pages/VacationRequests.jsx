@@ -226,7 +226,7 @@ export default function VacationRequests() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge className={statusConfig[request.status].color}>
+                                <Badge style={statusConfig[request.status].style}>
                                   <StatusIcon className="w-3 h-3 mr-1" />
                                   {statusConfig[request.status].label}
                                 </Badge>
@@ -234,7 +234,7 @@ export default function VacationRequests() {
                                   {requestTypes.find(t => t.value === request.type)?.label}
                                 </Badge>
                               </div>
-                              <p className="font-medium text-slate-900">
+                              <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                                 {format(parseISO(request.start_date), 'd MMM', { locale: nl })} - {format(parseISO(request.end_date), 'd MMM yyyy', { locale: nl })}
                                 <span className="text-slate-500 font-normal ml-2">({days} dagen)</span>
                               </p>
@@ -296,7 +296,7 @@ export default function VacationRequests() {
                                   <span className="font-medium text-slate-900">
                                     {employee?.first_name} {employee?.last_name}
                                   </span>
-                                  <Badge className={statusConfig[request.status].color}>
+                                  <Badge style={statusConfig[request.status].style}>
                                     <StatusIcon className="w-3 h-3 mr-1" />
                                     {statusConfig[request.status].label}
                                   </Badge>
@@ -304,7 +304,7 @@ export default function VacationRequests() {
                                     {requestTypes.find(t => t.value === request.type)?.label}
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-slate-600">
+                                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                                   {format(parseISO(request.start_date), 'd MMM', { locale: nl })} - {format(parseISO(request.end_date), 'd MMM yyyy', { locale: nl })}
                                   <span className="text-slate-400 ml-2">({days} dagen)</span>
                                 </p>
