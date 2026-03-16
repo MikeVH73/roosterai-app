@@ -46,8 +46,6 @@ const benefits = [
 ];
 
 export default function Landing() {
-  const navigate = useNavigate();
-
   const handleLogin = () => {
     base44.auth.redirectToLogin('/CompanySelect');
   };
