@@ -37,23 +37,23 @@ export default function Landing() {
             <h2 className="text-white text-2xl font-black tracking-tight italic uppercase">RoosterAI</h2>
             <nav className="hidden md:flex items-center gap-6">
               <a href="#" className="text-white font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color='#39FF14'} onMouseLeave={e => e.target.style.color='white'}>Home</a>
+              onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = 'white'}>Home</a>
               <a href="#features" className="text-slate-400 font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color='#39FF14'} onMouseLeave={e => e.target.style.color=''}> Functies</a>
+              onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = ''}> Functies</a>
               <a href="#pricing" className="text-slate-400 font-bold text-sm uppercase tracking-wider" style={{ transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color='#39FF14'} onMouseLeave={e => e.target.style.color=''}>Prijzen</a>
+              onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = ''}>Prijzen</a>
             </nav>
           </div>
           <div className="flex items-center gap-4">
             <button onClick={handleLogin} className="hidden md:block text-white font-bold text-sm"
-              style={{ transition: 'color 0.2s' }}
-              onMouseEnter={e => e.target.style.color='#39FF14'} onMouseLeave={e => e.target.style.color='white'}>
+            style={{ transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.target.style.color = '#39FF14'} onMouseLeave={(e) => e.target.style.color = 'white'}>
               Inloggen
             </button>
             <button onClick={handleLogin} style={{ background: '#39FF14', color: '#1a0b16', boxShadow: '0 4px 20px rgba(57,255,20,0.2)', transition: 'transform 0.2s' }}
-              className="px-6 py-2 rounded-lg font-bold text-sm"
-              onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
-              onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+            className="px-6 py-2 rounded-lg font-bold text-sm"
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
               Gratis Starten
             </button>
           </div>
@@ -68,14 +68,14 @@ export default function Landing() {
             <img
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAoitrOH4zojRqkj4jkQUTdTPHX-IxzmlCNQsDmENWdqG2mY3_JQwdbUa1uv54P54uKfGLDOxzE6eJwkwb-3tFcy3aIpdRnAyWMQcI4QJlnJgjP3OxMXIBJKvyTsjP4JfM8mrhGSBV09hFwq4Jz2vHIkZmHzCKL08E_5faaz9KdUhI0m5cb8d8oohH3Hyhpp76SKZ82mlGfOGvt8Oc97XXFhD9pmlNqvZAtFL_icmMDLxyQQapr1_qvMMq7RdaCi9GWq_C9dGQ8PY"
               alt="Modern office with digital scheduling screens"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+
           </div>
           <div style={{ position: 'relative', zIndex: 2, width: '100%' }}>
             <div className="max-w-7xl mx-auto px-6 py-24">
               <div className="max-w-2xl space-y-8">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider"
-                  style={{ background: 'rgba(57,255,20,0.1)', border: '1px solid rgba(57,255,20,0.2)', color: '#39FF14' }}>
+                style={{ background: 'rgba(57,255,20,0.1)', border: '1px solid rgba(57,255,20,0.2)', color: '#39FF14' }}>
                   <span style={{ position: 'relative', display: 'flex', height: '8px', width: '8px' }}>
                     <span style={{ position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '9999px', background: '#39FF14', opacity: 0.75, animation: 'ping 1s cubic-bezier(0,0,0.2,1) infinite' }}></span>
                     <span style={{ position: 'relative', display: 'inline-flex', borderRadius: '9999px', height: '8px', width: '8px', background: '#39FF14' }}></span>
@@ -94,15 +94,15 @@ export default function Landing() {
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4">
                   <button onClick={handleLogin}
-                    style={{ background: '#39FF14', color: '#1a0b16', height: '56px', padding: '0 40px', borderRadius: '12px', fontWeight: 700, fontSize: '18px', boxShadow: '0 4px 20px rgba(57,255,20,0.2)', transition: 'transform 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
-                    onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+                  style={{ background: '#39FF14', color: '#1a0b16', height: '56px', padding: '0 40px', borderRadius: '12px', fontWeight: 700, fontSize: '18px', boxShadow: '0 4px 20px rgba(57,255,20,0.2)', transition: 'transform 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     Start nu gratis
                   </button>
                   <button
                     style={{ background: 'rgba(255,255,255,0.1)', color: 'white', height: '56px', padding: '0 40px', borderRadius: '12px', fontWeight: 700, fontSize: '18px', border: '1px solid rgba(255,255,255,0.1)', transition: 'background 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.2)'}
-                    onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.1)'}>
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
                     Bekijk Demo
                   </button>
                 </div>
@@ -133,8 +133,8 @@ export default function Landing() {
           <section id="features">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
               <div>
-                <h2 className="text-4xl font-black pl-6 text-slate-900" style={{ borderLeft: '4px solid #39FF14' }}>Krachtige Features</h2>
-                <p className="text-slate-400 mt-4 max-w-xl">Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
+                <h2 className="bg-gray-700 text-lime-400 pl-6 text-4xl font-extrabold opacity-100" style={{ borderLeft: '4px solid #39FF14' }}>Krachtige Features</h2>
+                <p className="text-gray-950 mt-4 max-w-xl">Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
               </div>
               <button className="font-bold flex items-center gap-2" style={{ color: '#39FF14', transition: 'gap 0.2s' }}>
                 Alle Features →
@@ -143,12 +143,12 @@ export default function Landing() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { icon: '✦', title: 'AI-gestuurde Planning', desc: 'Laat onze algoritmes de perfecte match vinden tussen beschikbaarheid, vaardigheden en werkdruk voor een optimaal rooster.' },
-                { icon: '👥', title: 'Medewerkersbeheer', desc: 'Een centraal dashboard voor alle contracten, verlofaanvragen en kwalificaties van je team, altijd up-to-date.' },
-                { icon: '📊', title: 'Realtime Inzicht', desc: 'Directe, diepgaande rapportages over arbeidskosten, productiviteit en budgetoverschrijdingen in één oogopslag.' },
-              ].map((f, i) => (
-                <div key={i} className="feature-card h-full flex flex-col gap-6 p-8 rounded-3xl transition-all"
-                  style={{ background: '#1a0b16', border: '1px solid rgba(255,255,255,0.05)' }}>
+              { icon: '✦', title: 'AI-gestuurde Planning', desc: 'Laat onze algoritmes de perfecte match vinden tussen beschikbaarheid, vaardigheden en werkdruk voor een optimaal rooster.' },
+              { icon: '👥', title: 'Medewerkersbeheer', desc: 'Een centraal dashboard voor alle contracten, verlofaanvragen en kwalificaties van je team, altijd up-to-date.' },
+              { icon: '📊', title: 'Realtime Inzicht', desc: 'Directe, diepgaande rapportages over arbeidskosten, productiviteit en budgetoverschrijdingen in één oogopslag.' }].
+              map((f, i) =>
+              <div key={i} className="feature-card h-full flex flex-col gap-6 p-8 rounded-3xl transition-all"
+              style={{ background: '#1a0b16', border: '1px solid rgba(255,255,255,0.05)' }}>
                   <div className="flex items-center justify-center rounded-2xl text-3xl" style={{ width: '56px', height: '56px', background: 'rgba(57,255,20,0.1)', color: '#39FF14' }}>
                     {f.icon}
                   </div>
@@ -157,29 +157,29 @@ export default function Landing() {
                     <p className="text-slate-400 leading-relaxed">{f.desc}</p>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           </section>
 
           {/* Product Preview */}
           <section className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <h2 className="text-4xl font-black leading-tight text-slate-900">
+              <h2 className="bg-cyan-900 text-slate-950 text-4xl font-black leading-tight">
                 Ontworpen voor <span style={{ color: '#39FF14' }}>gebruiksgemak</span>
               </h2>
-              <p className="text-slate-400 text-lg leading-relaxed">
-                Geen complexe handleidingen nodig. Onze interface is intuïtief en reageert direct op veranderingen. Beheer uw team vanaf elk apparaat met hetzelfde gemak.
+              <p className="text-gray-950 text-lg leading-relaxed">Geen complexe handleidingen nodig. Onze interface is intuïtief en reageert direct op veranderingen. Beheer uw team vanaf elk apparaat met hetzelfde gemak.
+
               </p>
               <ul className="space-y-4 pt-4">
                 {[
-                  'Deel medewerkers in op voorkeurslocatie en back-up locatie',
-                  'Geautomatiseerde meldingen via WhatsApp',
-                  'Laat de AI Assistent het rooster voor volgende week maken',
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 font-medium text-slate-900">
+                'Deel medewerkers in op voorkeurslocatie en back-up locatie',
+                'Geautomatiseerde meldingen via WhatsApp',
+                'Laat de AI Assistent het rooster voor volgende week maken'].
+                map((item, i) =>
+                <li key={i} className="flex items-center gap-3 font-medium text-slate-900">
                     <span style={{ color: '#39FF14', fontSize: '20px' }}>✓</span> {item}
                   </li>
-                ))}
+                )}
               </ul>
             </div>
 
@@ -198,12 +198,12 @@ export default function Landing() {
 
               <div className="space-y-4">
                 {[
-                  { name: 'Mark de Vries', shift: 'Ochtenddienst • 08:00 - 16:00', label: 'BEVESTIGD', labelBg: 'rgba(57,255,20,0.2)', labelColor: '#39FF14',
-                    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2ELlfG6kOC7eP5drp0jTg23-5cVILJjV79otvr337bbz7ETb2OTLYtTCAHLMg87DnTPBcH5X1pQfnZNd4ITOzz89BAmQ-S_uqASccKK4Of3B7pejuk1a1-j8KE61LDayfU3n9BIb_AfojSZgNIborBsR1j2ehqKYk-fyprAjB6j6RhMFg9JACbKy7UCoTAkSHPAi50mU_5WG4UTED_mVZNJO0i7CP0uS3-phIzKoKLW_-lWWhdvLWEjZJZ6cIns8Sih5hRROa69s' },
-                  { name: 'Sophie Jansen', shift: 'Avonddienst • 16:00 - 00:00', label: 'NIEUW', labelBg: '#39FF14', labelColor: '#1a0b16',
-                    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVWj_OJJzs2uLGVKV8dNUN686zSeacscZvio6_fEtz1JxQIXl8cuhJZ-QDAqqFQVPiZfhQNGQSimKmPGIM7OJLRcEQo9Pngc4EszjD69OILRD9X-1jp0FzZ74DkPUSMYNlq2vTWW70jazzhCjt3-VRbFTm8XtwdTaveBgch_fXsSSYODNXTv2qqRraO1tYxjk4yYfJpkG7xkdvdhaV0zkSJJaP3xfc7rFXld90Vw2N8d-LRhrUe7wh0bV0ThY7sNFxYal2t-YcCK0' },
-                ].map((emp, i) => (
-                  <div key={i} className="flex items-center gap-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                { name: 'Mark de Vries', shift: 'Ochtenddienst • 08:00 - 16:00', label: 'BEVESTIGD', labelBg: 'rgba(57,255,20,0.2)', labelColor: '#39FF14',
+                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2ELlfG6kOC7eP5drp0jTg23-5cVILJjV79otvr337bbz7ETb2OTLYtTCAHLMg87DnTPBcH5X1pQfnZNd4ITOzz89BAmQ-S_uqASccKK4Of3B7pejuk1a1-j8KE61LDayfU3n9BIb_AfojSZgNIborBsR1j2ehqKYk-fyprAjB6j6RhMFg9JACbKy7UCoTAkSHPAi50mU_5WG4UTED_mVZNJO0i7CP0uS3-phIzKoKLW_-lWWhdvLWEjZJZ6cIns8Sih5hRROa69s' },
+                { name: 'Sophie Jansen', shift: 'Avonddienst • 16:00 - 00:00', label: 'NIEUW', labelBg: '#39FF14', labelColor: '#1a0b16',
+                  img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVWj_OJJzs2uLGVKV8dNUN686zSeacscZvio6_fEtz1JxQIXl8cuhJZ-QDAqqFQVPiZfhQNGQSimKmPGIM7OJLRcEQo9Pngc4EszjD69OILRD9X-1jp0FzZ74DkPUSMYNlq2vTWW70jazzhCjt3-VRbFTm8XtwdTaveBgch_fXsSSYODNXTv2qqRraO1tYxjk4yYfJpkG7xkdvdhaV0zkSJJaP3xfc7rFXld90Vw2N8d-LRhrUe7wh0bV0ThY7sNFxYal2t-YcCK0' }].
+                map((emp, i) =>
+                <div key={i} className="flex items-center gap-6 p-5 rounded-2xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div className="rounded-full overflow-hidden flex-shrink-0" style={{ width: '56px', height: '56px', ring: '2px solid rgba(57,255,20,0.2)' }}>
                       <img src={emp.img} alt={emp.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
@@ -215,7 +215,7 @@ export default function Landing() {
                       <span className="text-xs font-black italic tracking-widest" style={{ color: emp.labelColor }}>{emp.label}</span>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
 
               <div className="mt-10 pt-8 flex justify-center" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
@@ -238,9 +238,9 @@ export default function Landing() {
                 </p>
                 <div className="flex flex-col items-center gap-6 pt-4">
                   <button onClick={handleLogin}
-                    style={{ background: '#1a0b16', color: 'white', padding: '20px 48px', borderRadius: '16px', fontWeight: 900, fontSize: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.4)', transition: 'transform 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.transform='scale(1.05)'}
-                    onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+                  style={{ background: '#1a0b16', color: 'white', padding: '20px 48px', borderRadius: '16px', fontWeight: 900, fontSize: '20px', boxShadow: '0 10px 40px rgba(0,0,0,0.4)', transition: 'transform 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     Start 14 Dagen Gratis Proef
                   </button>
                   <p className="text-sm font-bold italic" style={{ opacity: 0.6, color: '#1a0b16' }}>Geen creditcard nodig • In 5 minuten opgezet • Directe resultaten</p>
@@ -259,26 +259,26 @@ export default function Landing() {
             <p className="text-slate-400 text-sm leading-relaxed">De slimste manier om je personeel te managen en je bedrijf te laten groeien met de kracht van kunstmatige intelligentie.</p>
           </div>
           {[
-            { title: 'Product', links: ['Features', 'Prijzen', 'Demo', 'Integraties'] },
-            { title: 'Bedrijf', links: ['Over Ons', 'Blog', 'Contact', 'Vacatures'] },
-            { title: 'Legal', links: ['Privacy', 'Voorwaarden', 'Cookiebeleid'] },
-          ].map((col, i) => (
-            <div key={i} className="space-y-6">
+          { title: 'Product', links: ['Features', 'Prijzen', 'Demo', 'Integraties'] },
+          { title: 'Bedrijf', links: ['Over Ons', 'Blog', 'Contact', 'Vacatures'] },
+          { title: 'Legal', links: ['Privacy', 'Voorwaarden', 'Cookiebeleid'] }].
+          map((col, i) =>
+          <div key={i} className="space-y-6">
               <h4 className="text-white font-bold uppercase tracking-widest text-sm">{col.title}</h4>
               <ul className="space-y-4 text-slate-400 text-sm">
-                {col.links.map((link, j) => (
-                  <li key={j}><a href="#" style={{ transition: 'color 0.2s' }}
-                    onMouseEnter={e => e.target.style.color='#39FF14'}
-                    onMouseLeave={e => e.target.style.color=''}>{link}</a></li>
-                ))}
+                {col.links.map((link, j) =>
+              <li key={j}><a href="#" style={{ transition: 'color 0.2s' }}
+                onMouseEnter={(e) => e.target.style.color = '#39FF14'}
+                onMouseLeave={(e) => e.target.style.color = ''}>{link}</a></li>
+              )}
               </ul>
             </div>
-          ))}
+          )}
         </div>
         <div className="max-w-7xl mx-auto px-6 pt-10 flex flex-col md:flex-row justify-between items-center gap-6" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">© {new Date().getFullYear()} RoosterAI. Alle rechten voorbehouden.</p>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
