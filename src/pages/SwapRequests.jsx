@@ -166,7 +166,7 @@ export default function SwapRequests() {
   const isSubmitting = createMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Ruilverzoeken" 
         subtitle={`${requests.filter(r => r.status === 'pending').length} openstaand`}
