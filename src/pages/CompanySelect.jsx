@@ -118,29 +118,14 @@ export default function CompanySelect() {
           </Card>
         }
 
-        {/* Create New Company */}
-        <Button
-          onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
-          className="w-full h-14"
-          style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: '#ffffff !important', border: 'none' }}>
-
-          <Plus className="w-5 h-5 mr-2" />
-          Nieuwe organisatie aanmaken
-        </Button>
-
-        {/* Dev Tools */}
-        {companies.length > 0 && (
+        {/* Create New Company - only show if user has no companies yet */}
+        {companies.length === 0 && (
           <Button
-            onClick={async () => {
-              await selectCompany(companies[0].id);
-              navigate(createPageUrl('AITestSuite'));
-            }}
-            variant="outline"
-            className="w-full h-12 mt-4 border-slate-600 hover:border-blue-500 hover:bg-slate-800/50"
-            style={{ color: '#94a3b8' }}
-          >
-            <Beaker className="w-4 h-4 mr-2" />
-            AI Test Suite (Dev)
+            onClick={() => navigate(createPageUrl('CompanyOnboarding'))}
+            className="w-full h-14"
+            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', color: '#ffffff !important', border: 'none' }}>
+            <Plus className="w-5 h-5 mr-2" />
+            Nieuwe organisatie aanmaken
           </Button>
         )}
 
