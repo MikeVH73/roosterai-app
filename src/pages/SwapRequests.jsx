@@ -237,13 +237,13 @@ export default function SwapRequests() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge className={statusConfig[request.status].color}>
-                                  <StatusIcon className="w-3 h-3 mr-1" />
-                                  {statusConfig[request.status].label}
-                                </Badge>
-                                <Badge variant="outline">
-                                  {swapTypes.find(t => t.value === request.swap_type)?.label}
-                                </Badge>
+                                <Badge style={statusConfig[request.status].style}>
+                                   <StatusIcon className="w-3 h-3 mr-1" />
+                                   {statusConfig[request.status].label}
+                                 </Badge>
+                                 <Badge variant="outline">
+                                   {swapTypes.find(t => t.value === request.swap_type)?.label}
+                                 </Badge>
                               </div>
                               {shift && (
                                 <p className="font-medium text-slate-900">
@@ -317,7 +317,7 @@ export default function SwapRequests() {
                                   <span className="font-medium text-slate-900">
                                     {requester?.first_name} {requester?.last_name}
                                   </span>
-                                  <Badge className={statusConfig[request.status].color}>
+                                  <Badge style={statusConfig[request.status].style}>
                                     <StatusIcon className="w-3 h-3 mr-1" />
                                     {statusConfig[request.status].label}
                                   </Badge>
