@@ -19,11 +19,23 @@ export function CompanyProvider({ children }) {
       const currentUser = await base44.auth.me();
       setUser(currentUser);
       
-      // Get all company memberships for this user
-      const memberships = await base44.entities.CompanyMember.filter({
-        email: currentUser.email,
-        status: 'active'
+      // Get all company memberships for this user (active or invited)
+      const allMemberships = await base44.entities.CompanyMember.filter({
+        email: currentUser.email
       });
+
+      // Auto-activate any 'invited' memberships when the user actually logs in
+      const invitedMemberships = allMemberships.filter(m => m.status === 'invited');
+      for (const m of invitedMemberships) {
+        await base44.entities.CompanyMember.update(m.id, {
+          status: 'active',
+          joined_at: new Date().toISOString()
+        });
+      }
+
+      const memberships = allMemberships
+        .filter(m => m.status === 'active' || m.status === 'invited')
+        .map(m => m.status === 'invited' ? { ...m, status: 'active' } : m);
       
       setUserMemberships(memberships);
       
