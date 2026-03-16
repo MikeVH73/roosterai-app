@@ -234,7 +234,7 @@ export default function Dashboard() {
                     {activeSchedules.slice(0, 3).map((schedule) => (
                       <Link 
                         key={schedule.id} 
-                        to={createPageUrl('ScheduleEditor') + `?id=${schedule.id}`}
+                        to={isEmployee ? createPageUrl('ScheduleOverview') : createPageUrl('ScheduleEditor') + `?id=${schedule.id}`}
                         className="flex items-center justify-between p-4 rounded-xl transition-colors"
                         style={{ backgroundColor: 'var(--color-surface-light)' }}
                       >
