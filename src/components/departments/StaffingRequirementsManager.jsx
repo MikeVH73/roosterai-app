@@ -124,6 +124,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
         targetHours: '',
         min_staff: 1,
         optimal_staff: '',
+        max_staff: '',
         priority: 'medium'
       });
     }
