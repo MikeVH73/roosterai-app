@@ -616,35 +616,56 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
             </div>
 
             <div>
-              <Label>Doeluren per dag *</Label>
+              <Label>Hoeveel diensten wilt u inplannen? *</Label>
+              <Input
+                type="number"
+                min="1"
+                value={bulkData.min_staff}
+                onChange={(e) => {
+                  const newMin = e.target.value;
+                  const newTarget = getAutoTargetHours(bulkData.daypartId, newMin);
+                  setBulkData({ ...bulkData, min_staff: newMin, targetHours: newTarget });
+                }}
+              />
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                Elke dienst duurt de volledige duur van het dagdeel. Bij 2 diensten worden er 2 medewerkers ingepland.
+              </p>
+            </div>
+
+            <div>
+              <Label>Totaal netto werkuren *</Label>
               <Input
                 type="number"
                 step="0.5"
                 min="0"
                 value={bulkData.targetHours}
                 onChange={(e) => setBulkData({ ...bulkData, targetHours: e.target.value })}
-                placeholder="bijv. 16"
                 required
               />
+              <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
+                Automatisch berekend op basis van netto werkuren per dienst × aantal diensten.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Min. medewerkers</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={bulkData.min_staff}
-                  onChange={(e) => setBulkData({ ...bulkData, min_staff: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label>Optimaal medewerkers</Label>
+                <Label>Met hoeveel medewerkers bij voorkeur?</Label>
                 <Input
                   type="number"
                   min="0"
                   value={bulkData.optimal_staff}
                   onChange={(e) => setBulkData({ ...bulkData, optimal_staff: e.target.value })}
+                  placeholder="bijv. 2"
+                />
+              </div>
+              <div>
+                <Label>Mogen het er meer zijn indien nodig?</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={bulkData.max_staff}
+                  onChange={(e) => setBulkData({ ...bulkData, max_staff: e.target.value })}
+                  placeholder="bijv. 4"
                 />
               </div>
             </div>
