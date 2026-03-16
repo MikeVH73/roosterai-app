@@ -47,8 +47,15 @@ const benefits = [
 ];
 
 export default function Landing() {
-  const handleLogin = () => {
-    base44.auth.redirectToLogin('/CompanySelect');
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    const isAuth = await base44.auth.isAuthenticated();
+    if (isAuth) {
+      navigate('/CompanySelect');
+    } else {
+      base44.auth.redirectToLogin('/CompanySelect');
+    }
   };
 
   return (
