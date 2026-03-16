@@ -1,6 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { Calendar, Sparkles, Users, Clock, ShieldCheck, BarChart3, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { base44 } from '@/api/base44Client';
