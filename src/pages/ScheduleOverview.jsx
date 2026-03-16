@@ -202,6 +202,7 @@ export default function ScheduleOverview() {
   };
 
   const handleCellClick = (employeeId, date, daypartId, scheduleId) => {
+    if (!hasPermission('manage_schedules')) return;
     setSelectedShift(null);
     setSelectedEmployeeId(employeeId);
     setSelectedDate(typeof date === 'string' ? date : format(date, 'yyyy-MM-dd'));
@@ -211,6 +212,7 @@ export default function ScheduleOverview() {
   };
 
   const handleShiftClick = (shift, scheduleId) => {
+    if (!hasPermission('manage_schedules')) return;
     setSelectedShift(shift);
     setSelectedEmployeeId(shift.employeeId);
     setSelectedDate(shift.date);
