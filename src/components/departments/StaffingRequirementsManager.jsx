@@ -113,6 +113,7 @@ export default function StaffingRequirementsManager({ departmentId, dayparts = [
         targetHours: req.targetHours?.toString() || '',
         min_staff: req.min_staff || 1,
         optimal_staff: req.optimal_staff?.toString() || '',
+        max_staff: req.max_staff?.toString() || '',
         priority: req.priority || 'medium'
       });
     } else {
