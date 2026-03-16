@@ -133,8 +133,8 @@ export default function Landing() {
           <section id="features">
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
               <div>
-                <h2 className="pl-6 text-4xl font-extrabold" style={{ borderLeft: '4px solid #39FF14', color: '#000000' }}>Krachtige Features</h2>
-                <p className="mt-4 max-w-xl" style={{ color: '#000000' }}>Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
+                <h2 style={{ borderLeft: '4px solid #39FF14', paddingLeft: '24px', fontSize: '2.25rem', fontWeight: 800, color: '#000000 !important', WebkitTextFillColor: '#000000' }}>Krachtige Features</h2>
+                <p style={{ marginTop: '16px', maxWidth: '36rem', color: '#000000 !important', WebkitTextFillColor: '#000000' }}>Ontdek hoe onze AI-gedreven tools uw workflow transformeren en uw team versterken.</p>
               </div>
               <button className="font-bold flex items-center gap-2" style={{ color: '#39FF14', transition: 'gap 0.2s' }}>
                 Alle Features →
