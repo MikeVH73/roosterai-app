@@ -16,20 +16,30 @@ export default function Landing() {
     }
   };
 
+  const timeData = [
+    { label: 'Ma', voor: 6, na: 1 },
+    { label: 'Di', voor: 5, na: 0.5 },
+    { label: 'Wo', voor: 7, na: 1 },
+    { label: 'Do', voor: 4, na: 0.5 },
+    { label: 'Vr', voor: 8, na: 1.5 },
+  ];
+
+  const steps = [
+    { num: '01', icon: <Users size={24} />, title: 'Voeg je team toe', desc: 'Importeer medewerkers met contracturen, functies en voorkeuren. Klaar in 5 minuten.' },
+    { num: '02', icon: <Calendar size={24} />, title: 'Stel je rooster in', desc: 'Definieer dagdelen, bezettingsnormen en afdelingen. Eenmalig instellen, altijd profijt.' },
+    { num: '03', icon: <Zap size={24} />, title: 'AI genereert het rooster', desc: 'Één klik en de AI plant iedereen in op basis van beschikbaarheid, vaardigheden en contracturen.' },
+    { num: '04', icon: <MessageSquare size={24} />, title: 'Automatisch communiceren', desc: 'Medewerkers ontvangen hun diensten via WhatsApp. Geen e-mails, geen gebel.' },
+  ];
+
   return (
-    <div className="font-sans min-h-screen" style={{ fontFamily: "'Public Sans', sans-serif" }}>
+    <div className="font-sans min-h-screen" style={{ fontFamily: "'Public Sans', sans-serif", background: '#1a0b16' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&display=swap');
-        .brand-accent { color: #39FF14; }
-        .bg-brand-accent { background-color: #39FF14; }
-        .bg-brand-deep { background-color: #1a0b16; }
-        .bg-brand-muted { background-color: #361728; }
-        .border-brand-accent { border-color: #39FF14; }
-        .text-brand-deep { color: #1a0b16; }
         .neon-ping { animation: ping 1s cubic-bezier(0,0,0.2,1) infinite; }
         @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
-        .feature-card:hover { background: rgba(54, 23, 40, 0.5) !important; }
-        .hover-gap:hover { gap: 1.25rem; }
+        .feature-card { transition: transform 0.2s, border-color 0.2s; }
+        .feature-card:hover { transform: translateY(-4px); border-color: rgba(57,255,20,0.3) !important; }
+        .step-card:hover { border-color: rgba(57,255,20,0.3) !important; }
       `}</style>
 
       {/* Navigation */}
