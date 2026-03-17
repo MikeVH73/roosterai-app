@@ -101,6 +101,15 @@ export default function PlanningTool() {
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState(new Set());
   const [requiredHours, setRequiredHours] = useState({});
+  const [currentWeekMonday, setCurrentWeekMonday] = useState(() => {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+  const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: loadingEmployees } = useQuery({
     queryKey: ['employees', companyId],
