@@ -101,7 +101,8 @@ export default function PlanningTool() {
           style={{ width: 260, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
         >
           <PlanningEmployeePanel
-            employees={filteredEmployees}
+            allEmployees={employees}
+            filteredEmployees={filteredEmployees}
             departments={departments}
             functions={functions}
             selectedEmployeeIds={selectedEmployeeIds}
