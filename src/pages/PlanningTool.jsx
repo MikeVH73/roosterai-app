@@ -130,10 +130,39 @@ export default function PlanningTool() {
 
   const isLoading = loadingEmployees || loadingDepts || loadingFunctions;
 
+  // Determine which day-indices (0=MA..6=ZO) have required hours filled in
+  const DAY_KEYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const activeDayIndices = (() => {
+    const indices = new Set();
+    Object.entries(requiredHours).forEach(([key, val]) => {
+      if (parseFloat(val) > 0) {
+        const dayIndex = parseInt(key.split('_').pop(), 10);
+        if (!isNaN(dayIndex)) indices.add(dayIndex);
+      }
+    });
+    return indices;
+  })();
+
   const filteredEmployees = employees.filter(emp => {
     const matchesDept = selectedDepartmentId === 'all' || emp.departmentIds?.includes(selectedDepartmentId);
     const matchesFunc = selectedFunctionId === 'all' || emp.functionId === selectedFunctionId;
-    return matchesDept && matchesFunc;
+    if (!matchesDept || !matchesFunc) return false;
+
+    // If hours are filled in for specific days, only match employees who prefer those days
+    if (activeDayIndices.size > 0) {
+      const preferredDays = emp.preferences?.preferred_days || [];
+      const prefIndices = new Set(
+        DAY_KEYS_ORDER.map((key, i) => preferredDays.includes(key) ? i : null).filter(i => i !== null)
+      );
+      // Employee matches if they have a preference for at least one of the active days
+      // (or if they have no preferences set at all — treat as available any day)
+      if (prefIndices.size > 0) {
+        const hasOverlap = [...activeDayIndices].some(i => prefIndices.has(i));
+        if (!hasOverlap) return false;
+      }
+    }
+
+    return true;
   });
 
   const toggleEmployee = (empId) => {
