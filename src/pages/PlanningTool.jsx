@@ -178,17 +178,7 @@ export default function PlanningTool() {
     return true;
   });
 
-  const { data: schedulesForDrag = [] } = useQuery({
-    queryKey: ['schedules', companyId],
-    queryFn: () => base44.entities.Schedule.filter({ companyId }),
-    enabled: !!companyId,
-  });
 
-  const { data: daypartsForDrag = [] } = useQuery({
-    queryKey: ['dayparts', companyId],
-    queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId, status: 'active' }),
-    enabled: !!companyId,
-  });
 
   const createShiftMutation = useMutation({
     mutationFn: (shiftData) => base44.entities.Shift.create(shiftData),
