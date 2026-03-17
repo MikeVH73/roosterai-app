@@ -98,7 +98,6 @@ export default function PlanningTool() {
 
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
-  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState(new Set());
   const [activeEmployee, setActiveEmployee] = useState(null);
   const [requiredHours, setRequiredHours] = useState({});
   const [currentWeekMonday, setCurrentWeekMonday] = useState(() => {
