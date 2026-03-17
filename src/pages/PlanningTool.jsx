@@ -4,10 +4,19 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel.jsx';
 import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel.jsx';
-import { Loader2, ChevronDown, Building2, Users, X } from 'lucide-react';
+import { Loader2, ChevronDown, Building2, Users, X, AlertCircle } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { getISOWeek } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // Compact dropdown filter component
 function FilterDropdown({ icon: Icon, label, value, options, onSelect, accentColor }) {
