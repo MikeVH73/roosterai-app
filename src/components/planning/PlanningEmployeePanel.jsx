@@ -158,25 +158,45 @@ export default function PlanningEmployeePanel({
                         {...dragProvided.draggableProps}
                         style={{
                           ...dragProvided.draggableProps.style,
-                          opacity: dragSnapshot.isDragging ? 0.9 : 1,
-                          width: dragSnapshot.isDragging ? '180px' : undefined,
-                          boxShadow: dragSnapshot.isDragging ? '0 4px 16px rgba(0,0,0,0.4)' : undefined,
-                          borderRadius: dragSnapshot.isDragging ? '8px' : undefined,
-                          overflow: dragSnapshot.isDragging ? 'hidden' : undefined,
                         }}
                       >
-                        <div className="flex items-center" {...dragProvided.dragHandleProps}>
-                          <GripVertical className="w-3 h-3 ml-1 flex-shrink-0 cursor-grab" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
-                        </div>
-                        <EmployeeRow
-                          emp={emp}
-                          isSelected={selectedEmployeeIds.has(emp.id)}
-                          isMatch={true}
-                          onToggle={onToggleEmployee}
-                          getFuncName={getFuncName}
-                          neonGreen={neonGreen}
-                          dragHandleProps={dragProvided.dragHandleProps}
-                        />
+                        {dragSnapshot.isDragging ? (
+                          <div
+                            {...dragProvided.dragHandleProps}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
+                            style={{
+                              width: '160px',
+                              backgroundColor: 'var(--color-surface)',
+                              border: '1px solid #6366f1',
+                              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+                            }}
+                          >
+                            <Avatar className="w-6 h-6 flex-shrink-0">
+                              <AvatarImage src={emp.avatar_url} />
+                              <AvatarFallback className="text-[10px] text-white" style={{ background: emp.color || '#38bdf8' }}>
+                                {getInitials(emp.first_name, emp.last_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                              {emp.first_name} {emp.last_name?.charAt(0)}.
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center" {...dragProvided.dragHandleProps}>
+                              <GripVertical className="w-3 h-3 ml-1 flex-shrink-0 cursor-grab" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
+                            </div>
+                            <EmployeeRow
+                              emp={emp}
+                              isSelected={selectedEmployeeIds.has(emp.id)}
+                              isMatch={true}
+                              onToggle={onToggleEmployee}
+                              getFuncName={getFuncName}
+                              neonGreen={neonGreen}
+                              dragHandleProps={dragProvided.dragHandleProps}
+                            />
+                          </>
+                        )}
                       </div>
                     )}
                   </Draggable>
