@@ -446,19 +446,18 @@ export default function PlanningDaypartsPanel({
                   Totaal uren/dag
                 </td>
                 {DAYS.map((_, dayIndex) => {
-                  const dayTotal = visibleDayparts.reduce((sum, dp) => sum + parseFloat(requiredHours[`${dp.id}_${dayIndex}`] || 0), 0);
-                  const actualHours = getDayTotalHours(weekDates[dayIndex]);
-                  return (
-                    <td key={dayIndex} className="px-1 py-2 text-center">
-                      {dayTotal > 0 && (
-                        <div className="font-bold font-mono" style={{ color: '#6366f1' }}>{dayTotal}u nodig</div>
-                      )}
-                      {actualHours > 0 && (
-                        <div className="font-mono" style={{ color: '#16a34a' }}>{actualHours.toFixed(1)}u gepland</div>
-                      )}
-                    </td>
-                  );
-                })}
+                   const actualHours = getDayTotalHours(weekDates[dayIndex]);
+                   return (
+                     <td key={dayIndex} className="px-1 py-2 text-center">
+                       {actualHours > 0 && (
+                         <div className="font-mono font-bold" style={{ color: '#16a34a' }}>{actualHours.toFixed(1)}u</div>
+                       )}
+                       {actualHours === 0 && (
+                         <div className="font-mono" style={{ color: 'var(--color-text-muted)' }}>—</div>
+                       )}
+                     </td>
+                   );
+                 })}
                 <td className="px-2 py-2 text-center font-mono font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   {weekTotalHours > 0 ? `${weekTotalHours.toFixed(1)}u` : '—'}
                 </td>
