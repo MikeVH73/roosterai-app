@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X, MousePointerClick } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import SaveTemplateDialog from '@/components/planning/SaveTemplateDialog';
 import { format, addDays, getISOWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { Droppable } from '@hello-pangea/dnd';
 
 const DAYS = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
 
