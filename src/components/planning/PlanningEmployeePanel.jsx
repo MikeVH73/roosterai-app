@@ -36,7 +36,7 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPrefe
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
             {isMatch && !isSelected && (
-              <Star className="w-3 h-3" style={{ color: '#16a34a' }} />
+              <Star className="w-3 h-3" style={{ color: neonGreen, filter: `drop-shadow(0 0 4px ${neonGreen})` }} />
             )}
             {isSelected && (
               <Check className="w-3.5 h-3.5" style={{ color: '#6366f1' }} />
