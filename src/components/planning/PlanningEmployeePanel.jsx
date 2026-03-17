@@ -15,7 +15,7 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPrefe
       className="w-full flex items-start gap-2 px-3 py-2.5 text-left transition-colors"
       style={{
         backgroundColor: isSelected ? 'rgba(99,102,241,0.08)' : 'transparent',
-        borderLeft: isSelected ? '3px solid #6366f1' : isMatch ? '3px solid #16a34a' : '3px solid transparent',
+        borderLeft: isSelected ? '3px solid #6366f1' : isMatch ? `3px solid ${neonGreen}` : '3px solid transparent',
         opacity: isMatch ? 1 : 0.5,
       }}
     >
