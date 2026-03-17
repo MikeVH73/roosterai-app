@@ -126,7 +126,10 @@ export default function PlanningGrid({
   const [addingEmployeeId, setAddingEmployeeId] = useState(null);
 
   const handleAssignEmployee = async (emp) => {
-    if (!selectedScheduleId) return;
+    if (!selectedScheduleId) {
+      toast.error('Selecteer eerst een rooster voordat je een medewerker inplant.');
+      return;
+    }
     setAddingEmployeeId(emp.id);
     try {
       // For each daypart + day that has required hours, create a shift
