@@ -214,6 +214,33 @@ export default function PlanningTool() {
     const weekDate = addDays(currentWeekMonday, dayIndex);
     const date = format(weekDate, 'yyyy-MM-dd');
 
+    // Check if employee has preferred days set
+    const preferredDays = activeEmployee.preferences?.preferred_days || [];
+    const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = DAY_NAMES[weekDate.getDay()];
+    
+    // If employee has preferred days AND this day is NOT in preferences, show warning
+    if (preferredDays.length > 0 && !preferredDays.includes(dayName)) {
+      setPendingShiftData({
+        companyId,
+        scheduleId: selectedSchedule.id,
+        employeeId: activeEmployee.id,
+        departmentId: dp.departmentId,
+        daypartId: dp.id,
+        functionId: activeEmployee.functionId,
+        date,
+        start_time: dp.startTime,
+        end_time: dp.endTime,
+        break_duration: dp.break_duration ?? 0,
+        shift_type: 'regular',
+        status: 'scheduled',
+        weekDate,
+      });
+      setWarningOpen(true);
+      return;
+    }
+
+    // No warning needed, proceed with shift creation
     await createShiftMutation.mutateAsync({
       companyId,
       scheduleId: selectedSchedule.id,
@@ -229,7 +256,15 @@ export default function PlanningTool() {
       status: 'scheduled',
     });
     toast.success(`${activeEmployee.first_name} ingepland op ${format(weekDate, 'd MMM')}`);
-    // Blijf actief zodat je snel meerdere cellen kunt klikken
+  };
+
+  const handleConfirmWarning = async () => {
+    if (!pendingShiftData) return;
+    const { weekDate, ...shiftData } = pendingShiftData;
+    await createShiftMutation.mutateAsync(shiftData);
+    toast.success(`${activeEmployee.first_name} ingepland op ${format(weekDate, 'd MMM')}`);
+    setWarningOpen(false);
+    setPendingShiftData(null);
   };
 
   // Escape key om actieve selectie te annuleren
