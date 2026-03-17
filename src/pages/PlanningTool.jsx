@@ -1,12 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import TopBar from '@/components/layout/TopBar';
-import PlanningFilterCards from '@/components/planning/PlanningFilterCards';
 import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel.jsx';
 import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel.jsx';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ChevronDown, Building2, Users, X } from 'lucide-react';
+
+// Compact dropdown filter component
+function FilterDropdown({ icon: Icon, label, value, options, onSelect, accentColor }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = options.find(o => o.id === value);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all"
+        style={{
+          backgroundColor: value !== 'all' ? `${accentColor}18` : 'var(--color-surface)',
+          borderColor: value !== 'all' ? accentColor : 'var(--color-border)',
+          color: value !== 'all' ? accentColor : 'var(--color-text-primary)',
+        }}
+      >
+        {selected?.color && (
+          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: selected.color }} />
+        )}
+        {!selected?.color && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
+        <span className="max-w-[140px] truncate">{selected?.name || label}</span>
+        {value !== 'all' ? (
+          <X
+            className="w-3.5 h-3.5 flex-shrink-0 ml-0.5 opacity-60 hover:opacity-100"
+            onClick={(e) => { e.stopPropagation(); onSelect('all'); setOpen(false); }}
+          />
+        ) : (
+          <ChevronDown className="w-3.5 h-3.5 flex-shrink-0 opacity-60" />
+        )}
+      </button>
+
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-1 rounded-xl border shadow-xl z-50 overflow-y-auto"
+          style={{
+            minWidth: 220,
+            maxHeight: 320,
+            backgroundColor: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
+          {options.map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => { onSelect(opt.id); setOpen(false); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left transition-colors hover:bg-white/5"
+              style={{
+                backgroundColor: value === opt.id ? `${accentColor}18` : 'transparent',
+                color: value === opt.id ? accentColor : 'var(--color-text-primary)',
+              }}
+            >
+              {opt.color && (
+                <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: opt.color }} />
+              )}
+              <span className="flex-1 truncate">{opt.name}</span>
+              <span
+                className="text-xs font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{
+                  backgroundColor: value === opt.id ? `${accentColor}33` : 'var(--color-surface-light)',
+                  color: value === opt.id ? accentColor : 'var(--color-text-muted)',
+                }}
+              >
+                {opt.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const DEPT_COLORS = ['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+const FUNC_COLORS = ['#f97316', '#84cc16', '#06b6d4', '#a855f7', '#f43f5e', '#22c55e', '#eab308', '#3b82f6'];
+const NEON_GREEN = '#39ff14';
 
 export default function PlanningTool() {
   const { currentCompany } = useCompany();
@@ -63,42 +144,94 @@ export default function PlanningTool() {
     });
   };
 
+  // Build dropdown options
+  const deptOptions = [
+    { id: 'all', name: 'Alle afdelingen', count: employees.length, color: null },
+    ...departments.map((d, i) => ({
+      id: d.id,
+      name: d.name,
+      count: employees.filter(e => e.departmentIds?.includes(d.id)).length,
+      color: d.color || DEPT_COLORS[i % DEPT_COLORS.length],
+    })),
+  ];
+
+  const funcOptions = [
+    { id: 'all', name: 'Alle functies', count: employees.length, color: null },
+    ...functions.map((f, i) => ({
+      id: f.id,
+      name: f.name,
+      count: employees.filter(e => e.functionId === f.id).length,
+      color: f.color || FUNC_COLORS[i % FUNC_COLORS.length],
+    })),
+  ];
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)' }}>
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-accent)' }} />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: NEON_GREEN }} />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-      <TopBar
-        title="Planningshulpmiddel"
-        subtitle="Stel een rooster samen en plan medewerkers in"
-      />
-      <div className="p-4 flex gap-4" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
 
-        {/* Kolom 1: Filters */}
-        <div
-          className="flex-shrink-0 rounded-xl border p-3 overflow-y-auto"
-          style={{ width: 220, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-        >
-          <PlanningFilterCards
-            departments={departments}
-            functions={functions}
-            employees={employees}
-            selectedDepartmentId={selectedDepartmentId}
-            selectedFunctionId={selectedFunctionId}
-            onSelectDepartment={(id) => { setSelectedDepartmentId(id); setSelectedEmployeeIds(new Set()); }}
-            onSelectFunction={(id) => { setSelectedFunctionId(id); setSelectedEmployeeIds(new Set()); }}
-          />
+      {/* Header balk */}
+      <header
+        className="px-6 h-14 border-b flex items-center justify-between sticky top-0 z-20"
+        style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          borderColor: `${NEON_GREEN}33`,
+          boxShadow: `0 1px 20px ${NEON_GREEN}18`,
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-base font-bold" style={{ color: NEON_GREEN, textShadow: `0 0 12px ${NEON_GREEN}88` }}>
+              Planningshulpmiddel
+            </h1>
+          </div>
+          {/* Filters inline in header */}
+          <div className="flex items-center gap-2 ml-4">
+            <FilterDropdown
+              icon={Building2}
+              label="Afdeling"
+              value={selectedDepartmentId}
+              options={deptOptions}
+              accentColor="#39ff14"
+              onSelect={(id) => { setSelectedDepartmentId(id); setSelectedEmployeeIds(new Set()); }}
+            />
+            <FilterDropdown
+              icon={Users}
+              label="Functie"
+              value={selectedFunctionId}
+              options={funcOptions}
+              accentColor="#38bdf8"
+              onSelect={(id) => { setSelectedFunctionId(id); setSelectedEmployeeIds(new Set()); }}
+            />
+          </div>
         </div>
 
-        {/* Kolom 2: Medewerkers */}
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+          {selectedEmployeeIds.size > 0 && (
+            <span
+              className="px-2 py-1 rounded font-semibold"
+              style={{ backgroundColor: `${NEON_GREEN}22`, color: NEON_GREEN }}
+            >
+              {selectedEmployeeIds.size} geselecteerd
+            </span>
+          )}
+          <span>{filteredEmployees.length} / {employees.length} medewerkers</span>
+        </div>
+      </header>
+
+      {/* Content: 2 kolommen */}
+      <div className="p-4 flex gap-4" style={{ height: 'calc(100vh - 56px)', overflow: 'hidden' }}>
+
+        {/* Kolom 1: Medewerkers */}
         <div
-          className="flex-shrink-0 rounded-xl border overflow-y-auto"
-          style={{ width: 260, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+          className="flex-shrink-0 rounded-xl border overflow-hidden flex flex-col"
+          style={{ width: 260, backgroundColor: 'var(--color-surface)', borderColor: `${NEON_GREEN}33` }}
         >
           <PlanningEmployeePanel
             allEmployees={employees}
@@ -107,10 +240,11 @@ export default function PlanningTool() {
             functions={functions}
             selectedEmployeeIds={selectedEmployeeIds}
             onToggleEmployee={toggleEmployee}
+            neonGreen={NEON_GREEN}
           />
         </div>
 
-        {/* Kolom 3: Dagdelen rooster */}
+        {/* Kolom 2: Dagdelen rooster */}
         <div className="flex-1 min-w-0 overflow-y-auto">
           <PlanningDaypartsPanel
             schedules={schedules}
