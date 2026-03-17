@@ -85,21 +85,38 @@ export default function Employees() {
     }
   });
 
-  // Filter employees
-  const filteredEmployees = employees.filter(emp => {
-    const matchesSearch = 
-      emp.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      emp.employee_number?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesDepartment = departmentFilter === 'all' || 
-      emp.departmentIds?.includes(departmentFilter);
-    
-    const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
-    
-    return matchesSearch && matchesDepartment && matchesStatus;
-  });
+  // Filter + sort employees
+  const filteredEmployees = employees
+    .filter(emp => {
+      const matchesSearch = 
+        emp.first_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.last_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.employee_number?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesDepartment = departmentFilter === 'all' || emp.departmentIds?.includes(departmentFilter);
+      const matchesStatus = statusFilter === 'all' || emp.status === statusFilter;
+      const matchesContractType = contractTypeFilter === 'all' || emp.contract_type === contractTypeFilter;
+      const matchesFunction = functionFilter === 'all' || emp.functionId === functionFilter;
+      return matchesSearch && matchesDepartment && matchesStatus && matchesContractType && matchesFunction;
+    })
+    .sort((a, b) => {
+      let aVal = '', bVal = '';
+      if (sortField === 'last_name') { aVal = `${a.last_name} ${a.first_name}`; bVal = `${b.last_name} ${b.first_name}`; }
+      else if (sortField === 'contract_hours') { aVal = a.contract_hours || 0; bVal = b.contract_hours || 0; return sortDir === 'asc' ? aVal - bVal : bVal - aVal; }
+      else if (sortField === 'status') { aVal = a.status || ''; bVal = b.status || ''; }
+      else if (sortField === 'contract_type') { aVal = a.contract_type || ''; bVal = b.contract_type || ''; }
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
+
+  const handleSort = (field) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir('asc'); }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortField !== field) return <ChevronsUpDown className="w-3 h-3 ml-1 text-slate-400" />;
+    return sortDir === 'asc' ? <ChevronUp className="w-3 h-3 ml-1 text-blue-500" /> : <ChevronDown className="w-3 h-3 ml-1 text-blue-500" />;
+  };
 
   const getInitials = (first, last) => {
     return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
