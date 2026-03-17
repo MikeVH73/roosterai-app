@@ -444,8 +444,8 @@ export default function PlanningDaypartsPanel({
                   const weekHrs = getWeekHoursForEmployee(empId);
                   const monthHrs = getMonthHoursForEmployee(empId);
                   const contractWk = emp.contract_hours || 0;
-                  // Rough monthly capacity = contract hours * 4.33 weeks
-                  const monthCapacity = contractWk * 4.33;
+                  // Monthly capacity rounded to 1 decimal to avoid floating point weirdness
+                  const monthCapacity = Math.round(contractWk * 4.33 * 10) / 10;
                   const remaining = Math.round(Math.max(0, monthCapacity - monthHrs) * 10) / 10;
                   const isOver = monthHrs > monthCapacity;
 
