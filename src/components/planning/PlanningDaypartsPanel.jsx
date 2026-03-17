@@ -41,7 +41,6 @@ export default function PlanningDaypartsPanel({
   functions,
   employees,
   filteredEmployees,
-  selectedEmployeeIds,
   selectedDepartmentId,
   companyId,
   requiredHours,
