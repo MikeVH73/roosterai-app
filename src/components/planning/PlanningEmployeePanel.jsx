@@ -6,8 +6,16 @@ function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 }
 
-function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPreferredDepts, neonGreen = '#39ff14' }) {
-  const preferredDepts = getPreferredDepts(emp);
+const DAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGreen = '#39ff14' }) {
+  const preferredDays = emp.preferences?.preferred_days || [];
+
+  // Map day strings to day indices
+  const activeDayIndices = DAY_KEYS
+    .map((key, i) => preferredDays.includes(key) ? i : null)
+    .filter(i => i !== null);
 
   return (
     <button
@@ -45,19 +53,30 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPrefe
         </div>
         <div className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
           {getFuncName(emp.functionId) || '—'}
+          {emp.contract_hours ? ` · ${emp.contract_hours}u/wk` : ''}
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span
-            className="text-xs px-1.5 py-0.5 rounded font-medium"
-            style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-secondary)' }}
-          >
-            {emp.contract_hours ? `${emp.contract_hours}u/wk` : '—'}
-          </span>
-          {preferredDepts.length > 0 && (
-            <span className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
-              {preferredDepts[0]}
-            </span>
-          )}
+        {/* Preferred days pills */}
+        <div className="flex items-center gap-0.5 mt-1 flex-wrap">
+          {DAY_LABELS.map((label, i) => {
+            const isPreferred = activeDayIndices.includes(i);
+            return (
+              <span
+                key={i}
+                className="text-[9px] font-bold px-1 py-0.5 rounded"
+                style={{
+                  backgroundColor: isPreferred
+                    ? (isMatch ? `${neonGreen}25` : 'rgba(99,102,241,0.15)')
+                    : 'var(--color-surface-light)',
+                  color: isPreferred
+                    ? (isMatch ? neonGreen : '#a5b4fc')
+                    : 'var(--color-text-muted)',
+                  opacity: isPreferred ? 1 : 0.4,
+                }}
+              >
+                {label}
+              </span>
+            );
+          })}
         </div>
       </div>
     </button>
