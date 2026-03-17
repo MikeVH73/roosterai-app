@@ -168,7 +168,7 @@ export default function PlanningDaypartsPanel({
               date,
               start_time: dp.startTime,
               end_time: dp.endTime,
-              break_duration: dp.break_duration || 30,
+              break_duration: dp.break_duration ?? 0,
               shift_type: 'regular',
               status: 'scheduled',
             }));
