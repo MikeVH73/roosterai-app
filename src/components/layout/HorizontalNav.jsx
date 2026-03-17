@@ -43,6 +43,7 @@ const allNavItems = [
   { id: 'vacation-requests', label: 'Verlofaanvragen', icon: Calendar, page: 'VacationRequests', permission: null },
   { id: 'swap-requests', label: 'Ruilverzoeken', icon: Calendar, page: 'SwapRequests', permission: null },
   { id: 'settings', label: 'Instellingen', icon: Settings, page: 'CompanySettings', permission: 'manage_company' },
+  { id: 'ai-test-suite', label: 'AI Test Suite', icon: Sparkles, page: 'AITestSuite', permission: 'manage_company' },
 ];
 
 export default function HorizontalNav({ currentPage }) {
