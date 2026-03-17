@@ -337,7 +337,7 @@ export default function PlanningDaypartsPanel({
                   {DAYS.map((_, dayIndex) => {
                     const key = `${dp.id}_${dayIndex}`;
                     const cellShifts = getShiftsForCell(dp.id, weekDates[dayIndex]);
-                    const droppableId = `cell_${dp.id}_${dayIndex}`;
+                    const droppableId = `cell_${dayIndex}_${dp.id}`;
                     return (
                       <Droppable key={dayIndex} droppableId={droppableId} isDropDisabled={!selectedScheduleId}>
                         {(provided, snapshot) => (
