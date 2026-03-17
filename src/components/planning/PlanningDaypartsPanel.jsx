@@ -446,7 +446,7 @@ export default function PlanningDaypartsPanel({
                   const contractWk = emp.contract_hours || 0;
                   // Rough monthly capacity = contract hours * 4.33 weeks
                   const monthCapacity = contractWk * 4.33;
-                  const remaining = Math.max(0, monthCapacity - monthHrs);
+                  const remaining = Math.round(Math.max(0, monthCapacity - monthHrs) * 10) / 10;
                   const isOver = monthHrs > monthCapacity;
 
                   return (
