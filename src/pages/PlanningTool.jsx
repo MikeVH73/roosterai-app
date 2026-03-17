@@ -178,6 +178,66 @@ export default function PlanningTool() {
     return true;
   });
 
+  const { data: schedulesForDrag = [] } = useQuery({
+    queryKey: ['schedules', companyId],
+    queryFn: () => base44.entities.Schedule.filter({ companyId }),
+    enabled: !!companyId,
+  });
+
+  const { data: daypartsForDrag = [] } = useQuery({
+    queryKey: ['dayparts', companyId],
+    queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId, status: 'active' }),
+    enabled: !!companyId,
+  });
+
+  const createShiftMutation = useMutation({
+    mutationFn: (shiftData) => base44.entities.Shift.create(shiftData),
+    onSuccess: (_, variables) => {
+      const sched = schedulesForDrag.find(s => s.id === variables.scheduleId);
+      if (sched) queryClient.invalidateQueries({ queryKey: ['shifts-all', variables.scheduleId] });
+    },
+  });
+
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+    const { droppableId } = result.destination;
+    if (!droppableId.startsWith('cell_')) return;
+
+    const parts = droppableId.split('_');
+    const dayIndex = parseInt(parts[parts.length - 1], 10);
+    const dpId = parts.slice(1, parts.length - 1).join('_');
+    const empId = result.draggableId;
+
+    const selectedSchedule = schedulesForDrag.find(s => s.departmentIds?.includes(selectedDepartmentId));
+    if (!selectedSchedule) {
+      toast.error('Geen rooster gekoppeld aan deze afdeling.');
+      return;
+    }
+
+    const dp = daypartsForDrag.find(d => d.id === dpId);
+    const emp = employees.find(e => e.id === empId);
+    if (!dp || !emp) return;
+
+    const weekDate = addDays(currentWeekMonday, dayIndex);
+    const date = format(weekDate, 'yyyy-MM-dd');
+
+    await createShiftMutation.mutateAsync({
+      companyId,
+      scheduleId: selectedSchedule.id,
+      employeeId: empId,
+      departmentId: dp.departmentId,
+      daypartId: dp.id,
+      functionId: emp.functionId,
+      date,
+      start_time: dp.startTime,
+      end_time: dp.endTime,
+      break_duration: dp.break_duration ?? 0,
+      shift_type: 'regular',
+      status: 'scheduled',
+    });
+    toast.success(`${emp.first_name} ingepland`);
+  };
+
   const toggleEmployee = (empId) => {
     setSelectedEmployeeIds(prev => {
       const next = new Set(prev);
