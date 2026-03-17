@@ -291,7 +291,7 @@ export default function PlanningTool() {
               value={selectedFunctionId}
               options={funcOptions}
               accentColor="#38bdf8"
-              onSelect={(id) => { setSelectedFunctionId(id); setSelectedEmployeeIds(new Set()); }}
+              onSelect={(id) => { setSelectedFunctionId(id); setActiveEmployee(null); }}
             />
           </div>
         </div>
