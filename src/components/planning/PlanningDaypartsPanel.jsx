@@ -563,5 +563,6 @@ export default function PlanningDaypartsPanel({
         }}
       />
     </div>
+    </DragDropContext>
   );
 }
