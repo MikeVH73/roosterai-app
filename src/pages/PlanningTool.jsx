@@ -231,6 +231,13 @@ export default function PlanningTool() {
     });
   };
 
+  // Escape key om actieve selectie te annuleren
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setActiveEmployee(null); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
   // Build dropdown options
   const deptOptions = [
     { id: 'all', name: 'Alle afdelingen', count: employees.length, color: null },
