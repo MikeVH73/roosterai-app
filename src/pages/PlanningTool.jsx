@@ -183,8 +183,7 @@ export default function PlanningTool() {
   const createShiftMutation = useMutation({
     mutationFn: (shiftData) => base44.entities.Shift.create(shiftData),
     onSuccess: (_, variables) => {
-      const sched = schedulesForDrag.find(s => s.id === variables.scheduleId);
-      if (sched) queryClient.invalidateQueries({ queryKey: ['shifts-all', variables.scheduleId] });
+      queryClient.invalidateQueries({ queryKey: ['shifts-all', variables.scheduleId] });
     },
   });
 
@@ -198,13 +197,13 @@ export default function PlanningTool() {
     const dpId = parts.slice(1, parts.length - 1).join('_');
     const empId = result.draggableId;
 
-    const selectedSchedule = schedulesForDrag.find(s => s.departmentIds?.includes(selectedDepartmentId));
+    const selectedSchedule = schedules.find(s => s.departmentIds?.includes(selectedDepartmentId));
     if (!selectedSchedule) {
       toast.error('Geen rooster gekoppeld aan deze afdeling.');
       return;
     }
 
-    const dp = daypartsForDrag.find(d => d.id === dpId);
+    const dp = dayparts.find(d => d.id === dpId);
     const emp = employees.find(e => e.id === empId);
     if (!dp || !emp) return;
 
