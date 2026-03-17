@@ -9,13 +9,15 @@ import {
   Plus,
   Search,
   MoreHorizontal,
-  Mail,
-  Phone,
   Edit,
   Trash2,
   UserCircle,
   Filter,
-  Building2
+  Building2,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +38,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { GlowCard } from "@/components/ui/glow-card";
 import { useTheme } from '@/components/providers/ThemeProvider';
 
 export default function Employees() {
