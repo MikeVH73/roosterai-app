@@ -1,8 +1,6 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Star, GripVertical } from 'lucide-react';
-import { Draggable, Droppable } from '@hello-pangea/dnd';
-
+import { Check, Star, UserCheck } from 'lucide-react';
 
 function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
@@ -11,28 +9,32 @@ function getInitials(first, last) {
 const DAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGreen = '#39ff14', dragHandleProps }) {
+function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen = '#39ff14' }) {
   const preferredDays = emp.preferences?.preferred_days || [];
-
-  // Map day strings to day indices
   const activeDayIndices = DAY_KEYS
     .map((key, i) => preferredDays.includes(key) ? i : null)
     .filter(i => i !== null);
 
   return (
     <button
-      onClick={() => onToggle(emp.id)}
-      className="w-full flex items-start gap-2 px-3 py-2.5 text-left transition-colors"
+      onClick={() => onSelect(emp)}
+      className="w-full flex items-start gap-2 px-3 py-2.5 text-left transition-all"
       style={{
-        backgroundColor: isSelected ? 'rgba(99,102,241,0.08)' : 'transparent',
-        borderLeft: isSelected ? '3px solid #6366f1' : isMatch ? `3px solid ${neonGreen}` : '3px solid transparent',
+        backgroundColor: isActive
+          ? 'rgba(99,102,241,0.18)'
+          : 'transparent',
+        borderLeft: isActive
+          ? '3px solid #6366f1'
+          : isMatch
+          ? `3px solid ${neonGreen}`
+          : '3px solid transparent',
         opacity: isMatch ? 1 : 0.5,
+        cursor: 'pointer',
       }}
     >
-      <div {...dragHandleProps} onClick={e => e.stopPropagation()} className="mt-1 flex-shrink-0 cursor-grab">
-        <GripVertical className="w-3 h-3" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
-      </div>
-      <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5">
+      <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5" style={{
+        boxShadow: isActive ? '0 0 0 2px #6366f1' : 'none',
+      }}>
         <AvatarImage src={emp.avatar_url} />
         <AvatarFallback
           className="text-xs text-white"
@@ -48,11 +50,13 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGree
             {emp.first_name} {emp.last_name}
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {isMatch && !isSelected && (
-              <Star className="w-3 h-3" style={{ color: neonGreen, filter: `drop-shadow(0 0 4px ${neonGreen})` }} />
+            {isActive && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: '#6366f1', color: 'white' }}>
+                ACTIEF
+              </span>
             )}
-            {isSelected && (
-              <Check className="w-3.5 h-3.5" style={{ color: '#6366f1' }} />
+            {!isActive && isMatch && (
+              <Star className="w-3 h-3" style={{ color: neonGreen, filter: `drop-shadow(0 0 4px ${neonGreen})` }} />
             )}
           </div>
         </div>
@@ -60,7 +64,6 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGree
           {getFuncName(emp.functionId) || '—'}
           {emp.contract_hours ? ` · ${emp.contract_hours}u/wk` : ''}
         </div>
-        {/* Preferred days pills */}
         <div className="flex items-center gap-0.5 mt-1 flex-wrap">
           {DAY_LABELS.map((label, i) => {
             const isPreferred = activeDayIndices.includes(i);
@@ -91,10 +94,9 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGree
 export default function PlanningEmployeePanel({
   allEmployees,
   filteredEmployees,
-  departments,
   functions,
-  selectedEmployeeIds,
-  onToggleEmployee,
+  activeEmployee,
+  onSelectEmployee,
   neonGreen = '#39ff14',
 }) {
   const getFuncName = (id) => functions.find(f => f.id === id)?.name || '';
@@ -120,159 +122,90 @@ export default function PlanningEmployeePanel({
           {matchingEmployees.length}
           {showSections && ` / ${allEmployees.length}`}
         </span>
-        {selectedEmployeeIds.size > 0 && (
-          <span className="ml-2 text-xs" style={{ color: '#6366f1' }}>
-            {selectedEmployeeIds.size} geselecteerd
-          </span>
+      </div>
+
+      {/* Instructie banner */}
+      <div
+        className="px-3 py-2 text-xs flex items-center gap-2 flex-shrink-0"
+        style={{
+          backgroundColor: activeEmployee ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--color-border)',
+          color: activeEmployee ? '#a5b4fc' : 'var(--color-text-muted)',
+        }}
+      >
+        {activeEmployee ? (
+          <>
+            <UserCheck className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#6366f1' }} />
+            <span>
+              <strong style={{ color: '#6366f1' }}>{activeEmployee.first_name}</strong> geselecteerd — klik op een cel om in te plannen
+            </span>
+          </>
+        ) : (
+          <>
+            <span>👆</span>
+            <span>Klik op een medewerker, daarna op een dag/cel</span>
+          </>
         )}
       </div>
 
-      <Droppable droppableId="employee-list" isDropDisabled={true}>
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            className="flex-1 overflow-y-auto divide-y"
-            style={{ borderColor: 'var(--color-border)' }}
-          >
-            {allEmployees.length === 0 ? (
-              <div className="p-4 text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
-                Geen medewerkers gevonden
-              </div>
-            ) : (
-              <>
-                {/* Matching employees */}
-                {showSections && matchingEmployees.length > 0 && (
-                  <div
-                    className="px-3 py-1 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"
-                    style={{ backgroundColor: `${neonGreen}15`, color: neonGreen, textShadow: `0 0 8px ${neonGreen}66` }}
-                  >
-                    <Star className="w-3 h-3" /> Match ({matchingEmployees.length})
-                  </div>
-                )}
-                {matchingEmployees.map((emp, index) => (
-                  <Draggable key={emp.id} draggableId={emp.id} index={index}>
-                    {(dragProvided, dragSnapshot) => (
-                      <div
-                        ref={dragProvided.innerRef}
-                        {...dragProvided.draggableProps}
-                        {...dragProvided.dragHandleProps}
-                        style={{
-                          ...dragProvided.draggableProps.style,
-                          ...(dragSnapshot.isDragging ? {
-                            width: 120,
-                            height: 'auto',
-                            backgroundColor: 'var(--color-surface)',
-                            border: '1px solid #6366f1',
-                            borderRadius: 8,
-                            boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-                            padding: '4px 8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                          } : {}),
-                        }}
-                      >
-                        {dragSnapshot.isDragging ? (
-                          <>
-                            <Avatar className="w-5 h-5 flex-shrink-0">
-                              <AvatarImage src={emp.avatar_url} />
-                              <AvatarFallback className="text-[9px] text-white" style={{ background: emp.color || '#38bdf8' }}>
-                                {getInitials(emp.first_name, emp.last_name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                              {emp.first_name} {emp.last_name?.charAt(0)}.
-                            </span>
-                          </>
-                        ) : (
-                          <EmployeeRow
-                            emp={emp}
-                            isSelected={selectedEmployeeIds.has(emp.id)}
-                            isMatch={true}
-                            onToggle={onToggleEmployee}
-                            getFuncName={getFuncName}
-                            neonGreen={neonGreen}
-                            dragHandleProps={dragProvided.dragHandleProps}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-
-                {/* Other employees (dimmed) */}
-                {showSections && otherEmployees.length > 0 && (
-                  <div
-                    className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                    style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)' }}
-                  >
-                    Overige ({otherEmployees.length})
-                  </div>
-                )}
-                {otherEmployees.map((emp, index) => (
-                  <Draggable key={emp.id} draggableId={emp.id} index={matchingEmployees.length + index}>
-                    {(dragProvided, dragSnapshot) => (
-                      <div
-                        ref={dragProvided.innerRef}
-                        {...dragProvided.draggableProps}
-                        {...dragProvided.dragHandleProps}
-                        style={{
-                          ...dragProvided.draggableProps.style,
-                          ...(dragSnapshot.isDragging ? {
-                            width: 120,
-                            height: 'auto',
-                            backgroundColor: 'var(--color-surface)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: 8,
-                            boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-                            padding: '4px 8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6,
-                          } : {}),
-                        }}
-                      >
-                        {dragSnapshot.isDragging ? (
-                          <>
-                            <Avatar className="w-5 h-5 flex-shrink-0">
-                              <AvatarImage src={emp.avatar_url} />
-                              <AvatarFallback className="text-[9px] text-white" style={{ background: emp.color || '#94a3b8' }}>
-                                {getInitials(emp.first_name, emp.last_name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
-                              {emp.first_name} {emp.last_name?.charAt(0)}.
-                            </span>
-                          </>
-                        ) : (
-                          <EmployeeRow
-                            emp={emp}
-                            isSelected={selectedEmployeeIds.has(emp.id)}
-                            isMatch={false}
-                            onToggle={onToggleEmployee}
-                            getFuncName={getFuncName}
-                            neonGreen={neonGreen}
-                            dragHandleProps={dragProvided.dragHandleProps}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-              </>
-            )}
-            {provided.placeholder}
+      <div className="flex-1 overflow-y-auto divide-y" style={{ borderColor: 'var(--color-border)' }}>
+        {allEmployees.length === 0 ? (
+          <div className="p-4 text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
+            Geen medewerkers gevonden
           </div>
+        ) : (
+          <>
+            {showSections && matchingEmployees.length > 0 && (
+              <div
+                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"
+                style={{ backgroundColor: `${neonGreen}15`, color: neonGreen, textShadow: `0 0 8px ${neonGreen}66` }}
+              >
+                <Star className="w-3 h-3" /> Match ({matchingEmployees.length})
+              </div>
+            )}
+            {matchingEmployees.map((emp) => (
+              <EmployeeRow
+                key={emp.id}
+                emp={emp}
+                isActive={activeEmployee?.id === emp.id}
+                isMatch={true}
+                onSelect={onSelectEmployee}
+                getFuncName={getFuncName}
+                neonGreen={neonGreen}
+              />
+            ))}
+
+            {showSections && otherEmployees.length > 0 && (
+              <div
+                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)' }}
+              >
+                Overige ({otherEmployees.length})
+              </div>
+            )}
+            {otherEmployees.map((emp) => (
+              <EmployeeRow
+                key={emp.id}
+                emp={emp}
+                isActive={activeEmployee?.id === emp.id}
+                isMatch={false}
+                onSelect={onSelectEmployee}
+                getFuncName={getFuncName}
+                neonGreen={neonGreen}
+              />
+            ))}
+          </>
         )}
-      </Droppable>
+      </div>
 
       {allEmployees.length > 0 && (
         <div
           className="px-3 py-2 border-t text-xs flex-shrink-0"
           style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
         >
-          Klik op een medewerker om te selecteren
+          {activeEmployee
+            ? `Klik op een cel om ${activeEmployee.first_name} in te plannen · Klik nogmaals om te deselecteren`
+            : 'Klik op een medewerker om te selecteren'}
         </div>
       )}
     </div>
