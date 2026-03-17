@@ -370,8 +370,8 @@ export default function PlanningGrid({
                         <td className="px-4 py-3 text-center">
                           {score !== 'neutral' && (
                             <span
-                              className="text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap"
-                              style={scoreLabelStyles[score]}
+                              className="text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap"
+                              style={scoreBadgeStyles[score]}
                             >
                               {scoreLabels[score]}
                             </span>
