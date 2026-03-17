@@ -5,6 +5,12 @@ import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X, MousePoi
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SaveTemplateDialog from '@/components/planning/SaveTemplateDialog';
 import { format, addDays, getISOWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { nl } from 'date-fns/locale';
