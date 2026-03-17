@@ -28,6 +28,9 @@ function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGree
         opacity: isMatch ? 1 : 0.5,
       }}
     >
+      <div {...dragHandleProps} onClick={e => e.stopPropagation()} className="mt-1 flex-shrink-0 cursor-grab">
+        <GripVertical className="w-3 h-3" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
+      </div>
       <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5">
         <AvatarImage src={emp.avatar_url} />
         <AvatarFallback
