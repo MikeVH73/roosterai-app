@@ -451,7 +451,7 @@ export default function PlanningGrid({
                           )}
                         </td>
                       )}
-                      {hasAnyHours && selectedScheduleId && (
+                      {hasAnyHours && (
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleAssignEmployee(emp)}
