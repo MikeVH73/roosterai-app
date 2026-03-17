@@ -351,17 +351,19 @@ export default function PlanningTool() {
         {/* Kolom 2: Dagdelen rooster */}
         <div className="flex-1 min-w-0 overflow-y-auto">
           <PlanningDaypartsPanel
-            schedules={schedules}
-            dayparts={dayparts}
-            departments={departments}
-            functions={functions}
-            employees={employees}
-            filteredEmployees={filteredEmployees}
-            selectedEmployeeIds={selectedEmployeeIds}
-            selectedDepartmentId={selectedDepartmentId}
-            companyId={companyId}
-            requiredHours={requiredHours}
-            onRequiredHoursChange={setRequiredHours}
+           schedules={schedules}
+           dayparts={dayparts}
+           departments={departments}
+           functions={functions}
+           employees={employees}
+           filteredEmployees={filteredEmployees}
+           selectedEmployeeIds={selectedEmployeeIds}
+           selectedDepartmentId={selectedDepartmentId}
+           companyId={companyId}
+           requiredHours={requiredHours}
+           onRequiredHoursChange={setRequiredHours}
+           currentWeekMonday={currentWeekMonday}
+           onWeekChange={setCurrentWeekMonday}
           />
         </div>
 
