@@ -291,6 +291,21 @@ export default function PlanningDaypartsPanel({
               Dagdelen — vul benodigde uren in
             </span>
             <div className="flex items-center gap-2">
+              {weekShifts.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleClearAllShifts} className="text-orange-600">
+                      <Eraser className="w-4 h-4 mr-2" />
+                      Rooster leegmaken
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               {activeEmployee && hasAnyHours && (
                 <button
                   onClick={handleAssignSelected}
