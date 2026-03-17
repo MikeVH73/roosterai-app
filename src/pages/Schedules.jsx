@@ -15,7 +15,8 @@ import {
   Send,
   Archive,
   Loader2,
-  Eye
+  Eye,
+  Eraser
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
