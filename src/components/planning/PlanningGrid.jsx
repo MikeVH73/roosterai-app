@@ -116,6 +116,72 @@ export default function PlanningGrid({
   };
   const scoreLabels = { perfect: '✓ Perfecte match', good: '✓ Goede match', partial: '~ Gedeeltelijke match', neutral: '' };
 
+  // Mutation to create shifts
+  const createShiftMutation = useMutation({
+    mutationFn: (shiftData) => base44.entities.Shift.create(shiftData),
+    onSuccess: () => queryClient.invalidateQueries(['shifts', selectedScheduleId]),
+  });
+
+  const [addingEmployeeId, setAddingEmployeeId] = useState(null);
+
+  const handleAssignEmployee = async (emp) => {
+    if (!selectedScheduleId) return;
+    setAddingEmployeeId(emp.id);
+    try {
+      // For each daypart + day that has required hours, create a shift
+      const promises = [];
+      visibleDayparts.forEach(dp => {
+        DAYS.forEach((_, dayIndex) => {
+          const key = `${dp.id}_${dayIndex}`;
+          if (parseFloat(requiredHours[key] || 0) > 0) {
+            // Calculate the actual date: find the week of the schedule start_date
+            const scheduleStart = selectedSchedule?.start_date;
+            let date;
+            if (scheduleStart) {
+              // Find the date in the schedule week that matches dayIndex (0=Mon based on DAYS)
+              const start = new Date(scheduleStart);
+              // Find the monday of that week
+              const dayOfWeek = start.getDay(); // 0=Sun
+              const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+              const monday = new Date(start);
+              monday.setDate(start.getDate() + mondayOffset);
+              const targetDate = new Date(monday);
+              targetDate.setDate(monday.getDate() + dayIndex);
+              date = targetDate.toISOString().split('T')[0];
+            } else {
+              // Fallback: use current week's monday + dayIndex
+              const today = new Date();
+              const dayOfWeek = today.getDay();
+              const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+              const monday = new Date(today);
+              monday.setDate(today.getDate() + mondayOffset);
+              const targetDate = new Date(monday);
+              targetDate.setDate(monday.getDate() + dayIndex);
+              date = targetDate.toISOString().split('T')[0];
+            }
+            promises.push(createShiftMutation.mutateAsync({
+              companyId,
+              scheduleId: selectedScheduleId,
+              employeeId: emp.id,
+              departmentId: dp.departmentId,
+              daypartId: dp.id,
+              functionId: emp.functionId,
+              date,
+              start_time: dp.startTime,
+              end_time: dp.endTime,
+              break_duration: dp.break_duration || 30,
+              shift_type: 'regular',
+              status: 'scheduled',
+            }));
+          }
+        });
+      });
+      await Promise.all(promises);
+    } finally {
+      setAddingEmployeeId(null);
+    }
+  };
+
   const hasAnyHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
 
   return (
