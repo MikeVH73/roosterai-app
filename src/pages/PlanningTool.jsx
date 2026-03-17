@@ -307,12 +307,12 @@ export default function PlanningTool() {
         </div>
 
         <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-          {selectedEmployeeIds.size > 0 && (
+          {activeEmployee && (
             <span
               className="px-2 py-1 rounded font-semibold"
-              style={{ backgroundColor: `${NEON_GREEN}22`, color: NEON_GREEN }}
+              style={{ backgroundColor: 'rgba(99,102,241,0.25)', color: '#a5b4fc', border: '1px solid #6366f1' }}
             >
-              {selectedEmployeeIds.size} geselecteerd
+              ✦ {activeEmployee.first_name} {activeEmployee.last_name} — klik op een cel
             </span>
           )}
           <span>{filteredEmployees.length} / {employees.length} medewerkers</span>
