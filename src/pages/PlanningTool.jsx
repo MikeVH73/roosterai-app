@@ -394,6 +394,56 @@ export default function PlanningTool() {
         </div>
 
       </div>
+
+      {/* Warning dialog */}
+      <Dialog open={warningOpen} onOpenChange={setWarningOpen}>
+        <DialogContent style={{
+          backgroundColor: 'var(--color-surface)',
+          borderColor: 'var(--color-border)',
+          color: 'var(--color-text-primary)'
+        }}>
+          <DialogHeader>
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 text-orange-500 mt-0.5" />
+              <div>
+                <DialogTitle>Medewerker buiten voorkeursdagen</DialogTitle>
+                <DialogDescription className="mt-1.5">
+                  {activeEmployee && pendingShiftData && (
+                    <>
+                      {activeEmployee.first_name} heeft voorkeursdagen ingesteld, maar de geselecteerde dag staat daar niet in.
+                      <br />
+                      <br />
+                      <span className="font-medium text-orange-500">Wil je toch doorgaan?</span>
+                    </>
+                  )}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setWarningOpen(false);
+                setPendingShiftData(null);
+              }}
+              style={{
+                backgroundColor: 'var(--color-surface)',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-text-primary)'
+              }}
+            >
+              Annuleren
+            </Button>
+            <Button 
+              onClick={handleConfirmWarning}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Toch inplannen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
