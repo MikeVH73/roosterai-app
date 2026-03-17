@@ -477,7 +477,7 @@ export default function PlanningDaypartsPanel({
                         {monthHrs.toFixed(1)}u
                         {contractWk > 0 && (
                           <span className="ml-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                            / {monthCapacity.toFixed(0)}u
+                            / {monthCapacity.toFixed(1)}u
                           </span>
                         )}
                       </td>
@@ -510,7 +510,7 @@ export default function PlanningDaypartsPanel({
         companyId={companyId}
         onSaved={() => {
           setSaveTemplateOpen(false);
-          queryClient.invalidateQueries(['planning-templates', companyId]);
+          queryClient.invalidateQueries({ queryKey: ['planning-templates', companyId] });
         }}
       />
     </div>
