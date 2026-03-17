@@ -10,7 +10,7 @@ function getInitials(first, last) {
 const DAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGreen = '#39ff14' }) {
+function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, neonGreen = '#39ff14', dragHandleProps }) {
   const preferredDays = emp.preferences?.preferred_days || [];
 
   // Map day strings to day indices
