@@ -123,57 +123,96 @@ export default function PlanningEmployeePanel({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto divide-y" style={{ borderColor: 'var(--color-border)' }}>
-        {allEmployees.length === 0 ? (
-          <div className="p-4 text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
-            Geen medewerkers gevonden
-          </div>
-        ) : (
-          <>
-            {/* Matching employees */}
-            {showSections && matchingEmployees.length > 0 && (
-              <div
-                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"
-                style={{ backgroundColor: `${neonGreen}15`, color: neonGreen, textShadow: `0 0 8px ${neonGreen}66` }}
-              >
-                <Star className="w-3 h-3" /> Match ({matchingEmployees.length})
+      <Droppable droppableId="employee-list" isDropDisabled={true}>
+        {(provided) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className="flex-1 overflow-y-auto divide-y"
+            style={{ borderColor: 'var(--color-border)' }}
+          >
+            {allEmployees.length === 0 ? (
+              <div className="p-4 text-xs text-center" style={{ color: 'var(--color-text-muted)' }}>
+                Geen medewerkers gevonden
               </div>
-            )}
-            {matchingEmployees.map(emp => (
-              <EmployeeRow
-                key={emp.id}
-                emp={emp}
-                isSelected={selectedEmployeeIds.has(emp.id)}
-                isMatch={true}
-                onToggle={onToggleEmployee}
-                getFuncName={getFuncName}
-                neonGreen={neonGreen}
-              />
-            ))}
+            ) : (
+              <>
+                {/* Matching employees */}
+                {showSections && matchingEmployees.length > 0 && (
+                  <div
+                    className="px-3 py-1 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"
+                    style={{ backgroundColor: `${neonGreen}15`, color: neonGreen, textShadow: `0 0 8px ${neonGreen}66` }}
+                  >
+                    <Star className="w-3 h-3" /> Match ({matchingEmployees.length})
+                  </div>
+                )}
+                {matchingEmployees.map((emp, index) => (
+                  <Draggable key={emp.id} draggableId={emp.id} index={index}>
+                    {(dragProvided, dragSnapshot) => (
+                      <div
+                        ref={dragProvided.innerRef}
+                        {...dragProvided.draggableProps}
+                        style={{
+                          ...dragProvided.draggableProps.style,
+                          opacity: dragSnapshot.isDragging ? 0.85 : 1,
+                        }}
+                      >
+                        <div className="flex items-center" {...dragProvided.dragHandleProps}>
+                          <GripVertical className="w-3 h-3 ml-1 flex-shrink-0 cursor-grab" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
+                        </div>
+                        <EmployeeRow
+                          emp={emp}
+                          isSelected={selectedEmployeeIds.has(emp.id)}
+                          isMatch={true}
+                          onToggle={onToggleEmployee}
+                          getFuncName={getFuncName}
+                          neonGreen={neonGreen}
+                          dragHandleProps={dragProvided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
 
-            {/* Other employees (dimmed) */}
-            {showSections && otherEmployees.length > 0 && (
-              <div
-                className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)' }}
-              >
-                Overige ({otherEmployees.length})
-              </div>
+                {/* Other employees (dimmed) */}
+                {showSections && otherEmployees.length > 0 && (
+                  <div
+                    className="px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                    style={{ backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)' }}
+                  >
+                    Overige ({otherEmployees.length})
+                  </div>
+                )}
+                {otherEmployees.map((emp, index) => (
+                  <Draggable key={emp.id} draggableId={emp.id} index={matchingEmployees.length + index}>
+                    {(dragProvided, dragSnapshot) => (
+                      <div
+                        ref={dragProvided.innerRef}
+                        {...dragProvided.draggableProps}
+                        style={{
+                          ...dragProvided.draggableProps.style,
+                          opacity: dragSnapshot.isDragging ? 0.85 : 1,
+                        }}
+                      >
+                        <EmployeeRow
+                          emp={emp}
+                          isSelected={selectedEmployeeIds.has(emp.id)}
+                          isMatch={false}
+                          onToggle={onToggleEmployee}
+                          getFuncName={getFuncName}
+                          neonGreen={neonGreen}
+                          dragHandleProps={dragProvided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+              </>
             )}
-            {otherEmployees.map(emp => (
-              <EmployeeRow
-                key={emp.id}
-                emp={emp}
-                isSelected={selectedEmployeeIds.has(emp.id)}
-                isMatch={false}
-                onToggle={onToggleEmployee}
-                getFuncName={getFuncName}
-                neonGreen={neonGreen}
-              />
-            ))}
-          </>
+            {provided.placeholder}
+          </div>
         )}
-      </div>
+      </Droppable>
 
       {allEmployees.length > 0 && (
         <div
