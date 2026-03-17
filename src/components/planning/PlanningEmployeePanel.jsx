@@ -6,7 +6,7 @@ function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 }
 
-function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPreferredDepts }) {
+function EmployeeRow({ emp, isSelected, isMatch, onToggle, getFuncName, getPreferredDepts, neonGreen = '#39ff14' }) {
   const preferredDepts = getPreferredDepts(emp);
 
   return (
