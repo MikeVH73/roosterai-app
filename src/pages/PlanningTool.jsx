@@ -367,5 +367,6 @@ export default function PlanningTool() {
 
       </div>
     </div>
+    </DragDropContext>
   );
 }
