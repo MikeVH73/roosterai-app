@@ -1,6 +1,7 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, GripVertical } from 'lucide-react';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 
 function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
