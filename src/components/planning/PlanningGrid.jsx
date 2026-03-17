@@ -447,6 +447,28 @@ export default function PlanningGrid({
                           )}
                         </td>
                       )}
+                      {hasAnyHours && selectedScheduleId && (
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => handleAssignEmployee(emp)}
+                            disabled={addingEmployeeId === emp.id}
+                            className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                            style={{
+                              backgroundColor: 'rgba(99,102,241,0.1)',
+                              color: '#6366f1',
+                              border: '1px solid rgba(99,102,241,0.3)',
+                              cursor: addingEmployeeId === emp.id ? 'not-allowed' : 'pointer',
+                              opacity: addingEmployeeId === emp.id ? 0.6 : 1,
+                            }}
+                          >
+                            {addingEmployeeId === emp.id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <PlusCircle className="w-3 h-3" />
+                            }
+                            Inplannen
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
