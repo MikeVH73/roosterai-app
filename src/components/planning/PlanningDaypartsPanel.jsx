@@ -197,6 +197,17 @@ export default function PlanningDaypartsPanel({
     }
   };
 
+  const handleClearAllShifts = async () => {
+    if (!selectedScheduleId) {
+      toast.error('Geen rooster gekoppeld aan deze afdeling.');
+      return;
+    }
+    const count = weekShifts.length;
+    if (!window.confirm(`Weet je zeker dat je alle ${count} diensten deze week wilt verwijderen?`)) return;
+    await Promise.all(weekShifts.map(s => deleteShiftMutation.mutateAsync(s.id)));
+    toast.success(`${count} diensten verwijderd`);
+  };
+
   const hasAnyHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
   const selectedDept = departments.find(d => d.id === selectedDepartmentId);
 
