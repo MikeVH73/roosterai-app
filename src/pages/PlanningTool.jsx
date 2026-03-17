@@ -231,7 +231,7 @@ export default function PlanningTool() {
         {/* Kolom 1: Medewerkers */}
         <div
           className="flex-shrink-0 rounded-xl border overflow-hidden flex flex-col"
-          style={{ width: 260, backgroundColor: 'var(--color-surface)', borderColor: `${NEON_GREEN}33` }}
+          style={{ width: 300, backgroundColor: 'var(--color-surface)', borderColor: `${NEON_GREEN}33` }}
         >
           <PlanningEmployeePanel
             allEmployees={employees}
