@@ -144,8 +144,8 @@ export default function PlanningDaypartsPanel({
       toast.error('Geen rooster gekoppeld aan deze afdeling.');
       return;
     }
-    if (selectedEmployeeIds.size === 0) {
-      toast.error('Selecteer eerst een medewerker in de middelste kolom.');
+    if (!activeEmployee) {
+      toast.error('Selecteer eerst een medewerker.');
       return;
     }
     const hasHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
@@ -154,37 +154,34 @@ export default function PlanningDaypartsPanel({
       return;
     }
 
-    for (const empId of selectedEmployeeIds) {
-      const emp = employees.find(e => e.id === empId);
-      if (!emp) continue;
-      setAddingEmployeeId(empId);
-      const promises = [];
-      visibleDayparts.forEach(dp => {
-        DAYS.forEach((_, dayIndex) => {
-          const key = `${dp.id}_${dayIndex}`;
-          if (parseFloat(requiredHours[key] || 0) > 0) {
-            const date = format(weekDates[dayIndex], 'yyyy-MM-dd');
-            promises.push(createShiftMutation.mutateAsync({
-              companyId,
-              scheduleId: selectedScheduleId,
-              employeeId: empId,
-              departmentId: dp.departmentId,
-              daypartId: dp.id,
-              functionId: emp.functionId,
-              date,
-              start_time: dp.startTime,
-              end_time: dp.endTime,
-              break_duration: dp.break_duration ?? 0,
-              shift_type: 'regular',
-              status: 'scheduled',
-            }));
-          }
-        });
+    const emp = activeEmployee;
+    setAddingEmployeeId(emp.id);
+    const promises = [];
+    visibleDayparts.forEach(dp => {
+      DAYS.forEach((_, dayIndex) => {
+        const key = `${dp.id}_${dayIndex}`;
+        if (parseFloat(requiredHours[key] || 0) > 0) {
+          const date = format(weekDates[dayIndex], 'yyyy-MM-dd');
+          promises.push(createShiftMutation.mutateAsync({
+            companyId,
+            scheduleId: selectedScheduleId,
+            employeeId: emp.id,
+            departmentId: dp.departmentId,
+            daypartId: dp.id,
+            functionId: emp.functionId,
+            date,
+            start_time: dp.startTime,
+            end_time: dp.endTime,
+            break_duration: dp.break_duration ?? 0,
+            shift_type: 'regular',
+            status: 'scheduled',
+          }));
+        }
       });
-      await Promise.all(promises);
-    }
+    });
+    await Promise.all(promises);
     setAddingEmployeeId(null);
-    toast.success(`${selectedEmployeeIds.size} medewerker(s) ingepland voor week ${weekNumber}`);
+    toast.success(`${emp.first_name} ingepland voor week ${weekNumber}`);
   };
 
   const handleRemoveShift = async (shiftId) => {
