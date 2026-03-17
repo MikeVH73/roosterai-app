@@ -71,6 +71,7 @@ export default function PlanningEmployeePanel({
   functions,
   selectedEmployeeIds,
   onToggleEmployee,
+  neonGreen = '#39ff14',
 }) {
   const getFuncName = (id) => functions.find(f => f.id === id)?.name || '';
   const getPreferredDepts = (emp) =>
