@@ -330,10 +330,9 @@ export default function PlanningTool() {
           <PlanningEmployeePanel
             allEmployees={employees}
             filteredEmployees={filteredEmployees}
-            departments={departments}
             functions={functions}
-            selectedEmployeeIds={selectedEmployeeIds}
-            onToggleEmployee={toggleEmployee}
+            activeEmployee={activeEmployee}
+            onSelectEmployee={handleSelectEmployee}
             neonGreen={NEON_GREEN}
           />
         </div>
