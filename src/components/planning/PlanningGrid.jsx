@@ -101,16 +101,17 @@ export default function PlanningGrid({
     return 'neutral';
   };
 
+  // Row styles: subtle left-border accent only, no background color change
   const scoreStyles = {
-    perfect: { backgroundColor: '#dcfce7', color: '#166534', border: '2px solid #16a34a' },
-    good: { backgroundColor: '#d1fae5', color: '#065f46', border: '1px solid #34d399' },
-    partial: { backgroundColor: '#fef9c3', color: '#854d0e', border: '1px solid #facc15' },
-    neutral: { backgroundColor: 'var(--color-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)' },
+    perfect: { borderLeft: '4px solid #16a34a' },
+    good:    { borderLeft: '4px solid #34d399' },
+    partial: { borderLeft: '4px solid #f59e0b' },
+    neutral: { borderLeft: '4px solid transparent' },
   };
-  const scoreLabelStyles = {
-    perfect: { backgroundColor: '#16a34a', color: 'white' },
-    good: { backgroundColor: '#059669', color: 'white' },
-    partial: { backgroundColor: '#d97706', color: 'white' },
+  const scoreBadgeStyles = {
+    perfect: { backgroundColor: 'rgba(22,163,74,0.12)', color: '#16a34a', border: '1px solid #16a34a' },
+    good:    { backgroundColor: 'rgba(52,211,153,0.12)', color: '#059669', border: '1px solid #34d399' },
+    partial: { backgroundColor: 'rgba(245,158,11,0.12)', color: '#b45309', border: '1px solid #f59e0b' },
     neutral: {},
   };
   const scoreLabels = { perfect: '✓ Perfecte match', good: '✓ Goede match', partial: '~ Gedeeltelijke match', neutral: '' };
