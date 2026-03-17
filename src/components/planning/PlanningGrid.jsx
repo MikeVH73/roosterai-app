@@ -5,6 +5,7 @@ import { Save, BookTemplate, ChevronDown, Info, PlusCircle, Loader2 } from 'luci
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import SaveTemplateDialog from '@/components/planning/SaveTemplateDialog';
 
