@@ -187,17 +187,13 @@ export default function PlanningTool() {
     },
   });
 
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
-    const { droppableId } = result.destination;
-    if (!droppableId.startsWith('cell_')) return;
+  const handleSelectEmployee = (emp) => {
+    // Toggle: klik nogmaals om te deselecteren
+    setActiveEmployee(prev => prev?.id === emp.id ? null : emp);
+  };
 
-    // Format: "cell_{dayIndex}_{dpId}" — dayIndex is always second segment
-    const withoutPrefix = droppableId.slice('cell_'.length);
-    const separatorIdx = withoutPrefix.indexOf('_');
-    const dayIndex = parseInt(withoutPrefix.slice(0, separatorIdx), 10);
-    const dpId = withoutPrefix.slice(separatorIdx + 1);
-    const empId = result.draggableId;
+  const handleCellClick = async (dp, dayIndex) => {
+    if (!activeEmployee) return;
 
     const selectedSchedule = schedules.find(s => s.departmentIds?.includes(selectedDepartmentId));
     if (!selectedSchedule) {
@@ -205,20 +201,16 @@ export default function PlanningTool() {
       return;
     }
 
-    const dp = dayparts.find(d => d.id === dpId);
-    const emp = employees.find(e => e.id === empId);
-    if (!dp || !emp) return;
-
     const weekDate = addDays(currentWeekMonday, dayIndex);
     const date = format(weekDate, 'yyyy-MM-dd');
 
     await createShiftMutation.mutateAsync({
       companyId,
       scheduleId: selectedSchedule.id,
-      employeeId: empId,
+      employeeId: activeEmployee.id,
       departmentId: dp.departmentId,
       daypartId: dp.id,
-      functionId: emp.functionId,
+      functionId: activeEmployee.functionId,
       date,
       start_time: dp.startTime,
       end_time: dp.endTime,
@@ -226,7 +218,8 @@ export default function PlanningTool() {
       shift_type: 'regular',
       status: 'scheduled',
     });
-    toast.success(`${emp.first_name} ingepland`);
+    toast.success(`${activeEmployee.first_name} ingepland op ${format(weekDate, 'd MMM')}`);
+    // Blijf actief zodat je snel meerdere cellen kunt klikken
   };
 
   const toggleEmployee = (empId) => {
