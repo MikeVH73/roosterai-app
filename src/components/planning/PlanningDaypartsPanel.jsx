@@ -46,7 +46,8 @@ export default function PlanningDaypartsPanel({
   companyId,
   requiredHours,
   onRequiredHoursChange,
-  onDragEnd,
+  activeEmployee,
+  onCellClick,
   currentWeekMonday: currentWeekMondayProp,
   onWeekChange,
 }) {
