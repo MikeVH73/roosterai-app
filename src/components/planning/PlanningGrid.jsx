@@ -244,6 +244,15 @@ export default function PlanningGrid({
         )}
       </div>
 
+      {/* Waarschuwing als er geen rooster geselecteerd is */}
+      {!selectedScheduleId && (
+        <div className="p-3 rounded-lg border text-sm flex items-center gap-2"
+          style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderColor: '#f59e0b', color: '#b45309' }}>
+          <Info className="w-4 h-4 flex-shrink-0" />
+          <span><strong>Stap 1:</strong> Kies eerst een rooster hierboven, daarna kun je uren invullen en medewerkers inplannen.</span>
+        </div>
+      )}
+
       {/* Dagdelen / uren invoer raster */}
       {visibleDayparts.length > 0 ? (
         <div className="rounded-xl border overflow-x-auto" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
