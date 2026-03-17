@@ -357,7 +357,7 @@ export default function PlanningGrid({
                   {hasAnyHours && (
                     <th className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Match</th>
                   )}
-                  {hasAnyHours && selectedScheduleId && (
+                  {hasAnyHours && (
                     <th className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Inplannen</th>
                   )}
                 </tr>
