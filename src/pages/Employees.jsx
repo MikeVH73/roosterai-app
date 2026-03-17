@@ -49,6 +49,10 @@ export default function Employees() {
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('active');
+  const [contractTypeFilter, setContractTypeFilter] = useState('all');
+  const [functionFilter, setFunctionFilter] = useState('all');
+  const [sortField, setSortField] = useState('last_name');
+  const [sortDir, setSortDir] = useState('asc');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
