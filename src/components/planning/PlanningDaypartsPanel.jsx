@@ -380,51 +380,68 @@ export default function PlanningDaypartsPanel({
                   {DAYS.map((_, dayIndex) => {
                     const key = `${dp.id}_${dayIndex}`;
                     const cellShifts = getShiftsForCell(dp.id, weekDates[dayIndex]);
+                    const droppableId = `cell_${dp.id}_${dayIndex}`;
                     return (
-                      <td key={dayIndex} className="px-1 py-1 align-top" style={{ minWidth: 100 }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="24"
-                          step="0.5"
-                          value={requiredHours[key] || ''}
-                          onChange={(e) => setRequiredHours(prev => ({ ...prev, [key]: e.target.value }))}
-                          placeholder="—"
-                          className="w-full text-center rounded border px-1 py-1 text-xs font-mono focus:outline-none focus:ring-1 mb-1"
-                          style={{
-                            backgroundColor: requiredHours[key] ? 'rgba(99,102,241,0.08)' : 'var(--color-surface-light)',
-                            borderColor: requiredHours[key] ? '#6366f1' : 'var(--color-border)',
-                            color: 'var(--color-text-primary)',
-                          }}
-                        />
-                        {/* Ingeplande medewerkers */}
-                        <div className="space-y-0.5">
-                          {cellShifts.map(shift => {
-                            const shiftEmp = employees.find(e => e.id === shift.employeeId);
-                            return (
-                              <div
-                                key={shift.id}
-                                className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded"
-                                style={{
-                                  backgroundColor: shiftEmp?.color ? `${shiftEmp.color}22` : 'rgba(99,102,241,0.12)',
-                                  border: `1px solid ${shiftEmp?.color || '#6366f1'}44`,
-                                }}
-                              >
-                                <span className="truncate font-medium" style={{ color: 'var(--color-text-primary)', maxWidth: 60 }}>
-                                  {shiftEmp ? `${shiftEmp.first_name} ${shiftEmp.last_name?.charAt(0)}.` : '?'}
-                                </span>
-                                <button
-                                  onClick={() => handleRemoveShift(shift.id)}
-                                  className="flex-shrink-0 hover:text-red-500 transition-colors"
-                                  style={{ color: 'var(--color-text-muted)' }}
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </td>
+                      <Droppable key={dayIndex} droppableId={droppableId} isDropDisabled={!selectedScheduleId}>
+                        {(provided, snapshot) => (
+                          <td
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="px-1 py-1 align-top"
+                            style={{
+                              minWidth: 100,
+                              backgroundColor: snapshot.isDraggingOver ? 'rgba(99,102,241,0.12)' : 'transparent',
+                              outline: snapshot.isDraggingOver ? '2px dashed #6366f1' : 'none',
+                              borderRadius: 6,
+                              transition: 'background 0.15s',
+                            }}
+                          >
+                            <input
+                              type="number"
+                              min="0"
+                              max="24"
+                              step="0.5"
+                              value={requiredHours[key] || ''}
+                              onChange={(e) => setRequiredHours(prev => ({ ...prev, [key]: e.target.value }))}
+                              placeholder="—"
+                              className="w-full text-center rounded border px-1 py-1 text-xs font-mono focus:outline-none focus:ring-1 mb-1"
+                              style={{
+                                backgroundColor: requiredHours[key] ? 'rgba(99,102,241,0.08)' : 'var(--color-surface-light)',
+                                borderColor: requiredHours[key] ? '#6366f1' : 'var(--color-border)',
+                                color: 'var(--color-text-primary)',
+                              }}
+                            />
+                            {/* Ingeplande medewerkers */}
+                            <div className="space-y-0.5">
+                              {cellShifts.map(shift => {
+                                const shiftEmp = employees.find(e => e.id === shift.employeeId);
+                                return (
+                                  <div
+                                    key={shift.id}
+                                    className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded"
+                                    style={{
+                                      backgroundColor: shiftEmp?.color ? `${shiftEmp.color}22` : 'rgba(99,102,241,0.12)',
+                                      border: `1px solid ${shiftEmp?.color || '#6366f1'}44`,
+                                    }}
+                                  >
+                                    <span className="truncate font-medium" style={{ color: 'var(--color-text-primary)', maxWidth: 60 }}>
+                                      {shiftEmp ? `${shiftEmp.first_name} ${shiftEmp.last_name?.charAt(0)}.` : '?'}
+                                    </span>
+                                    <button
+                                      onClick={() => handleRemoveShift(shift.id)}
+                                      className="flex-shrink-0 hover:text-red-500 transition-colors"
+                                      style={{ color: 'var(--color-text-muted)' }}
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            {provided.placeholder}
+                          </td>
+                        )}
+                      </Droppable>
                     );
                   })}
                   {/* Totaal uren voor dit dagdeel */}
