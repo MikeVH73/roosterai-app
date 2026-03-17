@@ -48,11 +48,15 @@ export default function PlanningDaypartsPanel({
   requiredHours,
   onRequiredHoursChange,
   onDragEnd,
+  currentWeekMonday: currentWeekMondayProp,
+  onWeekChange,
 }) {
   const queryClient = useQueryClient();
   const setRequiredHours = onRequiredHoursChange;
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
-  const [currentWeekMonday, setCurrentWeekMonday] = useState(() => getMondayOfWeek(new Date()));
+  const [localWeekMonday, setLocalWeekMonday] = useState(() => getMondayOfWeek(new Date()));
+  const currentWeekMonday = currentWeekMondayProp || localWeekMonday;
+  const setCurrentWeekMonday = onWeekChange || setLocalWeekMonday;
   const [addingEmployeeId, setAddingEmployeeId] = useState(null);
 
   const weekNumber = getISOWeek(currentWeekMonday);
