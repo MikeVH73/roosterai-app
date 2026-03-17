@@ -4,7 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import PlanningFilterCards from '@/components/planning/PlanningFilterCards';
-import PlanningGrid from '@/components/planning/PlanningGrid';
+import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel';
+import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel';
 import { Loader2 } from 'lucide-react';
 
 export default function PlanningTool() {
@@ -13,6 +14,7 @@ export default function PlanningTool() {
 
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState(new Set());
 
   const { data: employees = [], isLoading: loadingEmployees } = useQuery({
     queryKey: ['employees', companyId],
@@ -46,12 +48,20 @@ export default function PlanningTool() {
 
   const isLoading = loadingEmployees || loadingDepts || loadingFunctions;
 
-  // Filter employees based on selected department and function
   const filteredEmployees = employees.filter(emp => {
     const matchesDept = selectedDepartmentId === 'all' || emp.departmentIds?.includes(selectedDepartmentId);
     const matchesFunc = selectedFunctionId === 'all' || emp.functionId === selectedFunctionId;
     return matchesDept && matchesFunc;
   });
+
+  const toggleEmployee = (empId) => {
+    setSelectedEmployeeIds(prev => {
+      const next = new Set(prev);
+      if (next.has(empId)) next.delete(empId);
+      else next.add(empId);
+      return next;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -67,26 +77,53 @@ export default function PlanningTool() {
         title="Planningshulpmiddel"
         subtitle="Stel een rooster samen en plan medewerkers in"
       />
-      <div className="p-6 space-y-6">
-        <PlanningFilterCards
-          departments={departments}
-          functions={functions}
-          employees={employees}
-          selectedDepartmentId={selectedDepartmentId}
-          selectedFunctionId={selectedFunctionId}
-          onSelectDepartment={setSelectedDepartmentId}
-          onSelectFunction={setSelectedFunctionId}
-        />
-        <PlanningGrid
-          schedules={schedules}
-          dayparts={dayparts}
-          departments={departments}
-          functions={functions}
-          employees={filteredEmployees}
-          allEmployees={employees}
-          selectedDepartmentId={selectedDepartmentId}
-          companyId={companyId}
-        />
+      <div className="p-4 flex gap-4" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+
+        {/* Kolom 1: Filters */}
+        <div
+          className="flex-shrink-0 rounded-xl border p-3 overflow-y-auto"
+          style={{ width: 220, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <PlanningFilterCards
+            departments={departments}
+            functions={functions}
+            employees={employees}
+            selectedDepartmentId={selectedDepartmentId}
+            selectedFunctionId={selectedFunctionId}
+            onSelectDepartment={(id) => { setSelectedDepartmentId(id); setSelectedEmployeeIds(new Set()); }}
+            onSelectFunction={(id) => { setSelectedFunctionId(id); setSelectedEmployeeIds(new Set()); }}
+          />
+        </div>
+
+        {/* Kolom 2: Medewerkers */}
+        <div
+          className="flex-shrink-0 rounded-xl border overflow-y-auto"
+          style={{ width: 260, backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
+        >
+          <PlanningEmployeePanel
+            employees={filteredEmployees}
+            departments={departments}
+            functions={functions}
+            selectedEmployeeIds={selectedEmployeeIds}
+            onToggleEmployee={toggleEmployee}
+          />
+        </div>
+
+        {/* Kolom 3: Dagdelen rooster */}
+        <div className="flex-1 min-w-0 overflow-y-auto">
+          <PlanningDaypartsPanel
+            schedules={schedules}
+            dayparts={dayparts}
+            departments={departments}
+            functions={functions}
+            employees={employees}
+            filteredEmployees={filteredEmployees}
+            selectedEmployeeIds={selectedEmployeeIds}
+            selectedDepartmentId={selectedDepartmentId}
+            companyId={companyId}
+          />
+        </div>
+
       </div>
     </div>
   );
