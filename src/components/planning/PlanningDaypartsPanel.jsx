@@ -221,7 +221,7 @@ export default function PlanningDaypartsPanel({
         <div className="p-3 rounded-lg border text-sm flex items-center gap-2"
           style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderColor: '#f59e0b', color: '#b45309' }}>
           <Info className="w-4 h-4 flex-shrink-0" />
-          <span>Kies een afdeling in de linker kolom om te beginnen.</span>
+          <span>Kies een afdeling via het filter bovenin om te beginnen.</span>
         </div>
       ) : (
         <div className="flex items-center gap-3 px-3 py-2 rounded-lg border text-xs"
