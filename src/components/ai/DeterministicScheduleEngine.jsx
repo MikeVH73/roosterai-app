@@ -341,7 +341,6 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
     // Check for TIME OVERLAP on same date (prevents double-booking with actual conflicting times)
     const hasTimeConflict = existingAssignments.some(a => {
       if (a.employeeId !== c.employeeId || a.date !== slot.date) return false;
-      // Check if times overlap
       const aStart = a.start_time || '00:00';
       const aEnd = a.end_time || '23:59';
       const slotDp = slot.startTime;
@@ -349,6 +348,21 @@ function rankCandidates(candidates, slot, budgets, existingAssignments) {
       return aStart < slotEnd && aEnd > slotDp;
     });
     if (hasTimeConflict) continue;
+
+    // Check daily hours cap: don't assign more hours on a single day than the daypart duration
+    // An employee can only work ONE shift per day (prevents maandag ochtend + hele dag stacking)
+    const hoursAlreadyThisDay = existingAssignments
+      .filter(a => a.employeeId === c.employeeId && a.date === slot.date)
+      .reduce((sum, a) => {
+        const start = a.start_time || '00:00';
+        const end = a.end_time || '00:00';
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        return sum + ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+      }, 0);
+    // Max per day = daypart netto hours (no stacking of overlapping or full-day + partial-day)
+    const dailyContractMax = budget.weeklyContract > 0 ? budget.weeklyContract / 5 : 8;
+    if (hoursAlreadyThisDay + slot.nettoHours > dailyContractMax * 1.05) continue;
     
     // Score calculation
     let score = 0;
