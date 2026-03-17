@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import SaveTemplateDialog from '@/components/planning/SaveTemplateDialog';
 import { format, addDays, getISOWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Droppable } from '@hello-pangea/dnd';
 
 const DAYS = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
 
