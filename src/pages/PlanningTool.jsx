@@ -96,6 +96,7 @@ export default function PlanningTool() {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState(new Set());
+  const [requiredHours, setRequiredHours] = useState({});
 
   const { data: employees = [], isLoading: loadingEmployees } = useQuery({
     queryKey: ['employees', companyId],
