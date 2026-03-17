@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X, MousePointerClick } from 'lucide-react';
+import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X, MousePointerClick, MoreVertical, Eraser } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
