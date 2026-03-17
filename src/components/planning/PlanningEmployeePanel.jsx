@@ -93,10 +93,6 @@ export default function PlanningEmployeePanel({
   neonGreen = '#39ff14',
 }) {
   const getFuncName = (id) => functions.find(f => f.id === id)?.name || '';
-  const getPreferredDepts = (emp) =>
-    (emp.preferred_departmentIds || [])
-      .map(id => departments.find(d => d.id === id)?.name)
-      .filter(Boolean);
 
   const matchIds = new Set(filteredEmployees.map(e => e.id));
   const matchingEmployees = allEmployees.filter(e => matchIds.has(e.id));
