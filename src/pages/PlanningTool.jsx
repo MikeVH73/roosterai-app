@@ -336,7 +336,6 @@ export default function PlanningTool() {
            functions={functions}
            employees={employees}
            filteredEmployees={filteredEmployees}
-           selectedEmployeeIds={selectedEmployeeIds}
            selectedDepartmentId={selectedDepartmentId}
            companyId={companyId}
            requiredHours={requiredHours}
