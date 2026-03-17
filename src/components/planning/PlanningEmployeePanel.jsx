@@ -158,7 +158,11 @@ export default function PlanningEmployeePanel({
                         {...dragProvided.draggableProps}
                         style={{
                           ...dragProvided.draggableProps.style,
-                          opacity: dragSnapshot.isDragging ? 0.85 : 1,
+                          opacity: dragSnapshot.isDragging ? 0.9 : 1,
+                          width: dragSnapshot.isDragging ? '180px' : undefined,
+                          boxShadow: dragSnapshot.isDragging ? '0 4px 16px rgba(0,0,0,0.4)' : undefined,
+                          borderRadius: dragSnapshot.isDragging ? '8px' : undefined,
+                          overflow: dragSnapshot.isDragging ? 'hidden' : undefined,
                         }}
                       >
                         <div className="flex items-center" {...dragProvided.dragHandleProps}>
