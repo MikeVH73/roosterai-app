@@ -194,7 +194,12 @@ export default function PlanningGrid({
   };
 
   const handleRemoveShift = async (shiftId) => {
-    await deleteShiftMutation.mutateAsync(shiftId);
+    try {
+      await deleteShiftMutation.mutateAsync(shiftId);
+    } catch {
+      // Shift was already removed, just refresh
+      queryClient.invalidateQueries({ queryKey: ['shifts', selectedScheduleId] });
+    }
   };
 
   const hasAnyHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
