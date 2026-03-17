@@ -80,6 +80,11 @@ const AuthenticatedApp = () => {
           <Abonnementen />
         </LayoutWrapper>
       } />
+      <Route path="/PlanningTool" element={
+        <LayoutWrapper currentPageName="PlanningTool">
+          <PlanningTool />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
