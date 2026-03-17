@@ -195,7 +195,6 @@ export default function PlanningDaypartsPanel({
   const selectedDept = departments.find(d => d.id === selectedDepartmentId);
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
     <div className="space-y-3">
 
       {/* Week navigator */}
@@ -534,6 +533,5 @@ export default function PlanningDaypartsPanel({
         }}
       />
     </div>
-    </DragDropContext>
   );
 }
