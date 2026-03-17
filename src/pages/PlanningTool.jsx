@@ -351,6 +351,8 @@ export default function PlanningTool() {
            companyId={companyId}
            requiredHours={requiredHours}
            onRequiredHoursChange={setRequiredHours}
+           activeEmployee={activeEmployee}
+           onCellClick={handleCellClick}
            currentWeekMonday={currentWeekMonday}
            onWeekChange={setCurrentWeekMonday}
           />
