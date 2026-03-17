@@ -166,11 +166,18 @@ export default function Employees() {
     setSelectedEmployee(null);
   };
 
+  const activeFilters = [
+    departmentFilter !== 'all' && { label: departments.find(d => d.id === departmentFilter)?.name, clear: () => setDepartmentFilter('all') },
+    statusFilter !== 'all' && { label: statusFilter === 'active' ? 'Actief' : statusFilter === 'inactive' ? 'Inactief' : 'Afwezig', clear: () => setStatusFilter('all') },
+    contractTypeFilter !== 'all' && { label: contractTypeLabels[contractTypeFilter], clear: () => setContractTypeFilter('all') },
+    functionFilter !== 'all' && { label: functions.find(f => f.id === functionFilter)?.name, clear: () => setFunctionFilter('all') },
+  ].filter(Boolean);
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Medewerkers" 
-        subtitle={`${employees.length} medewerkers`}
+        subtitle={`${filteredEmployees.length} van ${employees.length} medewerkers`}
         actions={
           hasPermission('manage_schedules') && (
             <div className="flex gap-2">
@@ -184,12 +191,12 @@ export default function Employees() {
         }
       />
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6" style={{ maxWidth: '100%' }}>
         {/* Filters */}
-        <Card className="mb-6 border-0 shadow-sm">
+        <Card className="mb-4 border-0 shadow-sm">
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-wrap gap-3">
+              <div className="relative flex-1 min-w-60">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   placeholder="Zoek op naam, e-mail of personeelsnummer..."
@@ -198,151 +205,188 @@ export default function Employees() {
                   className="pl-9"
                 />
               </div>
-              <div className="flex gap-3">
-                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                  <SelectTrigger className="w-48">
-                    <Building2 className="w-4 h-4 mr-2 text-slate-400" />
-                    <SelectValue placeholder="Afdeling" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle afdelingen</SelectItem>
-                    {departments.map(dept => (
-                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
-                    <Filter className="w-4 h-4 mr-2 text-slate-400" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle statussen</SelectItem>
-                    <SelectItem value="active">Actief</SelectItem>
-                    <SelectItem value="inactive">Inactief</SelectItem>
-                    <SelectItem value="on_leave">Afwezig</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                <SelectTrigger className="w-48">
+                  <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+                  <SelectValue placeholder="Afdeling" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle afdelingen</SelectItem>
+                  {departments.map(dept => (
+                    <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={functionFilter} onValueChange={setFunctionFilter}>
+                <SelectTrigger className="w-44">
+                  <SelectValue placeholder="Functie" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle functies</SelectItem>
+                  {functions.map(fn => (
+                    <SelectItem key={fn.id} value={fn.id}>{fn.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={contractTypeFilter} onValueChange={setContractTypeFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Contract" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle contracten</SelectItem>
+                  {Object.entries(contractTypeLabels).map(([val, label]) => (
+                    <SelectItem key={val} value={val}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-36">
+                  <Filter className="w-4 h-4 mr-2 text-slate-400" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle statussen</SelectItem>
+                  <SelectItem value="active">Actief</SelectItem>
+                  <SelectItem value="inactive">Inactief</SelectItem>
+                  <SelectItem value="on_leave">Afwezig</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            {activeFilters.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {activeFilters.map((f, i) => (
+                  <Badge key={i} variant="secondary" className="gap-1 cursor-pointer" onClick={f.clear}>
+                    {f.label}
+                    <X className="w-3 h-3" />
+                  </Badge>
+                ))}
+                <button className="text-xs text-blue-500 hover:underline" onClick={() => { setDepartmentFilter('all'); setStatusFilter('all'); setContractTypeFilter('all'); setFunctionFilter('all'); setSearchQuery(''); }}>
+                  Alles wissen
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Employee Grid */}
+        {/* Table */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="border-0 shadow-sm animate-pulse">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-slate-200" />
-                    <div className="flex-1">
-                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
-                      <div className="h-3 bg-slate-200 rounded w-1/2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="space-y-2">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-12 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--color-surface)' }} />
             ))}
           </div>
         ) : filteredEmployees.length === 0 ? (
           <Card className="border-0 shadow-sm">
             <CardContent className="p-12 text-center">
               <UserCircle className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">Geen medewerkers gevonden</h3>
-              <p className="text-slate-500 text-sm mb-6">
-                {searchQuery || departmentFilter !== 'all' || statusFilter !== 'all'
-                  ? 'Pas je filters aan om medewerkers te vinden.'
-                  : 'Voeg je eerste medewerker toe om te beginnen.'}
+              <h3 className="font-medium mb-2">Geen medewerkers gevonden</h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
+                {searchQuery || activeFilters.length > 0 ? 'Pas je filters aan.' : 'Voeg je eerste medewerker toe.'}
               </p>
               {hasPermission('manage_schedules') && (
                 <Button onClick={() => setDialogOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Medewerker toevoegen
+                  <Plus className="w-4 h-4 mr-2" />Medewerker toevoegen
                 </Button>
               )}
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredEmployees.map((employee) => (
-              <GlowCard key={employee.id} glowColor="cyan">
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-                  <CardContent className="p-6" style={{ backgroundColor: 'transparent' }}>
-                    <div className="flex items-start justify-between mb-4">
+          <div className="rounded-lg border overflow-x-auto" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ backgroundColor: 'var(--color-surface-light)', borderBottom: '1px solid var(--color-border)' }}>
+                  <th className="px-4 py-3 text-left font-semibold cursor-pointer select-none" onClick={() => handleSort('last_name')}>
+                    <span className="flex items-center" style={{ color: 'var(--color-text-secondary)' }}>Naam <SortIcon field="last_name" /></span>
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Personeelsnr.</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>E-mail</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Telefoon</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Functie</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Afdelingen</th>
+                  <th className="px-4 py-3 text-left font-semibold cursor-pointer select-none" onClick={() => handleSort('contract_type')}>
+                    <span className="flex items-center" style={{ color: 'var(--color-text-secondary)' }}>Contract <SortIcon field="contract_type" /></span>
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold cursor-pointer select-none" onClick={() => handleSort('contract_hours')}>
+                    <span className="flex items-center" style={{ color: 'var(--color-text-secondary)' }}>Uren/wk <SortIcon field="contract_hours" /></span>
+                  </th>
+                  <th className="px-4 py-3 text-left font-semibold cursor-pointer select-none" onClick={() => handleSort('status')}>
+                    <span className="flex items-center" style={{ color: 'var(--color-text-secondary)' }}>Status <SortIcon field="status" /></span>
+                  </th>
+                  {hasPermission('manage_schedules') && (
+                    <th className="px-4 py-3 text-right font-semibold" style={{ color: 'var(--color-text-secondary)' }}></th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEmployees.map((employee, idx) => (
+                  <tr
+                    key={employee.id}
+                    className="hover:bg-opacity-50 transition-colors"
+                    style={{
+                      borderBottom: idx < filteredEmployees.length - 1 ? '1px solid var(--color-border)' : 'none',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-surface-light)'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-12 h-12">
+                        <Avatar className="w-8 h-8 flex-shrink-0">
                           <AvatarImage src={employee.avatar_url} />
-                          <AvatarFallback className="font-medium text-white" style={{ background: 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}>
+                          <AvatarFallback className="text-xs font-medium text-white" style={{ background: 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}>
                             {getInitials(employee.first_name, employee.last_name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                            {employee.first_name} {employee.last_name}
-                          </h3>
-                          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{getFunctionName(employee.functionId)}</p>
+                        <span className="font-medium whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
+                          {employee.last_name}, {employee.first_name}
+                        </span>
                       </div>
-                    </div>
-                    {hasPermission('manage_schedules') && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-slate-400">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(employee)}>
-                            <Edit className="w-4 h-4 mr-2" />
-                            Bewerken
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(employee)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Verwijderen
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </div>
-
-                    <div className="space-y-2 mb-4">
-                      {employee.email && (
-                        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                          <Mail className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
-                          <span className="truncate">{employee.email}</span>
-                        </div>
-                      )}
-                      {employee.phone && (
-                        <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                          <Phone className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
-                          <span>{employee.phone}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                        <Building2 className="w-4 h-4" style={{ color: 'var(--color-text-muted)' }} />
-                        <span className="truncate">{getDepartmentNames(employee.departmentIds)}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
+                    </td>
+                    <td className="px-4 py-3" style={{ color: 'var(--color-text-muted)' }}>{employee.employee_number || '—'}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--color-text-secondary)' }}>{employee.email || '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{employee.phone || '—'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>{getFunctionName(employee.functionId)}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--color-text-secondary)', maxWidth: '220px' }}>
+                      <span className="truncate block" title={getDepartmentNames(employee.departmentIds)}>
+                        {getDepartmentNames(employee.departmentIds)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
+                        {contractTypeLabels[employee.contract_type] || '—'}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                      {employee.contract_hours ? `${employee.contract_hours}u` : '—'}
+                    </td>
+                    <td className="px-4 py-3">
                       <Badge style={theme === 'dark' ? statusStyles[employee.status] : statusStylesLight[employee.status]}>
                         {employee.status === 'active' ? 'Actief' : employee.status === 'inactive' ? 'Inactief' : 'Afwezig'}
                       </Badge>
-                      <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>
-                        {contractTypeLabels[employee.contract_type]}
-                      </Badge>
-                      {employee.contract_hours && (
-                        <Badge variant="outline" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>{employee.contract_hours}u/week</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </GlowCard>
-            ))}
+                    </td>
+                    {hasPermission('manage_schedules') && (
+                      <td className="px-4 py-3 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="w-8 h-8 text-slate-400">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(employee)}>
+                              <Edit className="w-4 h-4 mr-2" />Bewerken
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDelete(employee)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />Verwijderen
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
