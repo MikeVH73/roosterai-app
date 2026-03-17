@@ -1,17 +1,27 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, BookTemplate, ChevronDown, Info, PlusCircle, Loader2 } from 'lucide-react';
+import { Save, Info, PlusCircle, Loader2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import SaveTemplateDialog from '@/components/planning/SaveTemplateDialog';
+import { format, startOfWeek, addDays, getISOWeek } from 'date-fns';
+import { nl } from 'date-fns/locale';
 
 const DAYS = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
-const DAY_LABELS = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
 const PREFERRED_DAYS_MAP = { 'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6 };
+
+// Get the Monday of a given week
+function getMondayOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 export default function PlanningGrid({
   schedules,
@@ -19,20 +29,36 @@ export default function PlanningGrid({
   departments,
   functions,
   employees,
-  allEmployees,
   selectedDepartmentId,
   companyId,
 }) {
   const queryClient = useQueryClient();
-  const [selectedScheduleId, setSelectedScheduleId] = useState('');
-  const [requiredHours, setRequiredHours] = useState({}); // { "daypartId_dayIndex": hours }
+  const [requiredHours, setRequiredHours] = useState({});
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [currentWeekMonday, setCurrentWeekMonday] = useState(() => getMondayOfWeek(new Date()));
 
-  const selectedSchedule = schedules.find(s => s.id === selectedScheduleId);
+  // Auto-select the schedule based on selected department
+  const selectedSchedule = (() => {
+    if (!selectedDepartmentId || selectedDepartmentId === 'all') return null;
+    // Find a schedule that includes this department
+    return schedules.find(s => s.departmentIds?.includes(selectedDepartmentId)) || null;
+  })();
+  const selectedScheduleId = selectedSchedule?.id || '';
 
-  // Fetch existing shifts for the selected schedule
+  // Week navigation
+  const weekNumber = getISOWeek(currentWeekMonday);
+  const weekYear = currentWeekMonday.getFullYear();
+  const weekDates = DAYS.map((_, i) => addDays(currentWeekMonday, i));
+
+  const goToPrevWeek = () => setCurrentWeekMonday(prev => addDays(prev, -7));
+  const goToNextWeek = () => setCurrentWeekMonday(prev => addDays(prev, 7));
+
+  // Fetch existing shifts for the selected schedule + week
+  const weekStart = format(currentWeekMonday, 'yyyy-MM-dd');
+  const weekEnd = format(addDays(currentWeekMonday, 6), 'yyyy-MM-dd');
+
   const { data: shifts = [] } = useQuery({
-    queryKey: ['shifts', selectedScheduleId],
+    queryKey: ['shifts', selectedScheduleId, weekStart],
     queryFn: () => base44.entities.Shift.filter({ companyId, scheduleId: selectedScheduleId }),
     enabled: !!selectedScheduleId,
   });
@@ -54,16 +80,17 @@ export default function PlanningGrid({
   const getInitials = (first, last) =>
     `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 
-  // Calculate total hours per employee from requiredHours cells
-  const getEmployeeHoursForDay = useCallback((employee, dayIndex) => {
-    let total = 0;
-    visibleDayparts.forEach(dp => {
-      const key = `${dp.id}_${dayIndex}`;
-      const hrs = parseFloat(requiredHours[key] || 0);
-      total += hrs;
-    });
-    return total;
-  }, [visibleDayparts, requiredHours]);
+  // Get shifts for a specific daypart + date (from already-fetched shifts)
+  const getShiftsForCell = (daypartId, date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return shifts.filter(s => s.daypartId === daypartId && s.date === dateStr);
+  };
+
+  // Get employee name by id
+  const getEmployeeName = (empId) => {
+    const emp = employees.find(e => e.id === empId);
+    return emp ? `${emp.first_name} ${emp.last_name}` : '';
+  };
 
   // Check if employee has preferred day
   const hasPreferredDay = (employee, dayIndex) => {
@@ -74,26 +101,24 @@ export default function PlanningGrid({
   // Score employee match for the whole planning
   const getEmployeeScore = (employee) => {
     let totalRequired = 0;
-    let matchedHours = 0;
     let preferredDayBonus = 0;
 
     DAYS.forEach((_, dayIndex) => {
-      let dayRequired = 0;
       visibleDayparts.forEach(dp => {
         const key = `${dp.id}_${dayIndex}`;
-        dayRequired += parseFloat(requiredHours[key] || 0);
+        const hrs = parseFloat(requiredHours[key] || 0);
+        totalRequired += hrs;
+        if (hrs > 0 && hasPreferredDay(employee, dayIndex)) {
+          preferredDayBonus += hrs;
+        }
       });
-      totalRequired += dayRequired;
-      if (dayRequired > 0 && hasPreferredDay(employee, dayIndex)) {
-        preferredDayBonus += dayRequired;
-      }
     });
 
     if (totalRequired === 0) return 'neutral';
 
     const contractHrs = employee.contract_hours || 0;
     const diff = Math.abs(contractHrs - totalRequired);
-    const hourMatch = diff <= 2; // within 2 hours tolerance
+    const hourMatch = diff <= 2;
     const hasPreference = preferredDayBonus > 0;
 
     if (hourMatch && hasPreference) return 'perfect';
@@ -102,7 +127,6 @@ export default function PlanningGrid({
     return 'neutral';
   };
 
-  // Row styles: subtle left-border accent only, no background color change
   const scoreStyles = {
     perfect: { borderLeft: '4px solid #16a34a' },
     good:    { borderLeft: '4px solid #34d399' },
@@ -120,49 +144,31 @@ export default function PlanningGrid({
   // Mutation to create shifts
   const createShiftMutation = useMutation({
     mutationFn: (shiftData) => base44.entities.Shift.create(shiftData),
-    onSuccess: () => queryClient.invalidateQueries(['shifts', selectedScheduleId]),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shifts', selectedScheduleId] }),
+  });
+
+  // Mutation to delete a shift
+  const deleteShiftMutation = useMutation({
+    mutationFn: (shiftId) => base44.entities.Shift.delete(shiftId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shifts', selectedScheduleId] }),
   });
 
   const [addingEmployeeId, setAddingEmployeeId] = useState(null);
 
   const handleAssignEmployee = async (emp) => {
     if (!selectedScheduleId) {
-      toast.error('Selecteer eerst een rooster voordat je een medewerker inplant.');
+      toast.error('Selecteer eerst een afdeling met een gekoppeld rooster.');
       return;
     }
+
     setAddingEmployeeId(emp.id);
     try {
-      // For each daypart + day that has required hours, create a shift
       const promises = [];
       visibleDayparts.forEach(dp => {
         DAYS.forEach((_, dayIndex) => {
           const key = `${dp.id}_${dayIndex}`;
           if (parseFloat(requiredHours[key] || 0) > 0) {
-            // Calculate the actual date: find the week of the schedule start_date
-            const scheduleStart = selectedSchedule?.start_date;
-            let date;
-            if (scheduleStart) {
-              // Find the date in the schedule week that matches dayIndex (0=Mon based on DAYS)
-              const start = new Date(scheduleStart);
-              // Find the monday of that week
-              const dayOfWeek = start.getDay(); // 0=Sun
-              const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-              const monday = new Date(start);
-              monday.setDate(start.getDate() + mondayOffset);
-              const targetDate = new Date(monday);
-              targetDate.setDate(monday.getDate() + dayIndex);
-              date = targetDate.toISOString().split('T')[0];
-            } else {
-              // Fallback: use current week's monday + dayIndex
-              const today = new Date();
-              const dayOfWeek = today.getDay();
-              const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-              const monday = new Date(today);
-              monday.setDate(today.getDate() + mondayOffset);
-              const targetDate = new Date(monday);
-              targetDate.setDate(monday.getDate() + dayIndex);
-              date = targetDate.toISOString().split('T')[0];
-            }
+            const date = format(weekDates[dayIndex], 'yyyy-MM-dd');
             promises.push(createShiftMutation.mutateAsync({
               companyId,
               scheduleId: selectedScheduleId,
@@ -181,96 +187,120 @@ export default function PlanningGrid({
         });
       });
       await Promise.all(promises);
+      toast.success(`${emp.first_name} ${emp.last_name} ingepland voor week ${weekNumber}`);
     } finally {
       setAddingEmployeeId(null);
     }
   };
 
+  const handleRemoveShift = async (shiftId) => {
+    await deleteShiftMutation.mutateAsync(shiftId);
+  };
+
   const hasAnyHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
+  const selectedDept = departments.find(d => d.id === selectedDepartmentId);
 
   return (
     <div className="space-y-4">
-      {/* Schedule selector + actions */}
-      <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Rooster:</span>
-          <Select value={selectedScheduleId} onValueChange={setSelectedScheduleId}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Kies een rooster..." />
-            </SelectTrigger>
-            <SelectContent>
-              {schedules.map(s => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name} {s.status === 'published' ? '✓' : '(concept)'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        {templates.length > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Template:</span>
-            <Select onValueChange={(id) => {
-              const tpl = templates.find(t => t.id === id);
-              if (tpl?.suggested_patch?.requiredHours) {
-                setRequiredHours(tpl.suggested_patch.requiredHours);
-              }
-            }}>
-              <SelectTrigger className="w-52">
-                <SelectValue placeholder="Laad template..." />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map(t => (
-                  <SelectItem key={t.id} value={t.id}>{t.description}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      {/* Week navigator */}
+      <div className="flex items-center justify-between p-3 rounded-xl border"
+        style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
+        <Button variant="ghost" size="sm" onClick={goToPrevWeek} className="gap-1">
+          <ChevronLeft className="w-4 h-4" /> Vorige week
+        </Button>
+        <div className="text-center">
+          <div className="font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>
+            Week {weekNumber} · {weekYear}
           </div>
-        )}
-
-        <div className="flex-1" />
-
-        {hasAnyHours && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSaveTemplateOpen(true)}
-            className="gap-2"
-          >
-            <Save className="w-4 h-4" />
-            Opslaan als template
-          </Button>
-        )}
+          <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            {format(currentWeekMonday, 'd MMM', { locale: nl })} – {format(addDays(currentWeekMonday, 6), 'd MMM yyyy', { locale: nl })}
+          </div>
+        </div>
+        <Button variant="ghost" size="sm" onClick={goToNextWeek} className="gap-1">
+          Volgende week <ChevronRight className="w-4 h-4" />
+        </Button>
       </div>
 
-      {/* Waarschuwing als er geen rooster geselecteerd is */}
-      {!selectedScheduleId && (
+      {/* No department selected warning */}
+      {(!selectedDepartmentId || selectedDepartmentId === 'all') && (
         <div className="p-3 rounded-lg border text-sm flex items-center gap-2"
           style={{ backgroundColor: 'rgba(245,158,11,0.08)', borderColor: '#f59e0b', color: '#b45309' }}>
           <Info className="w-4 h-4 flex-shrink-0" />
-          <span><strong>Stap 1:</strong> Kies eerst een rooster hierboven, daarna kun je uren invullen en medewerkers inplannen.</span>
+          <span><strong>Stap 1:</strong> Kies een afdeling (rooster) via de kaarten hierboven.</span>
         </div>
       )}
 
-      {/* Dagdelen / uren invoer raster */}
+      {/* Schedule info */}
+      {selectedDept && (
+        <div className="flex items-center gap-3 px-4 py-2 rounded-lg border text-sm"
+          style={{ backgroundColor: 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}>
+          <div
+            className="w-3 h-3 rounded-full flex-shrink-0"
+            style={{ backgroundColor: selectedDept.color || '#6366f1' }}
+          />
+          <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{selectedDept.name}</span>
+          {selectedSchedule ? (
+            <span style={{ color: 'var(--color-text-muted)' }}>
+              → Rooster: <strong>{selectedSchedule.name}</strong>
+              {selectedSchedule.status === 'published' ? ' ✓' : ' (concept)'}
+            </span>
+          ) : (
+            <span style={{ color: '#b45309' }}>
+              — Geen rooster gekoppeld aan deze afdeling
+            </span>
+          )}
+
+          {/* Template loader */}
+          {templates.length > 0 && (
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Template laden:</span>
+              <select
+                className="text-xs px-2 py-1 rounded border"
+                style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                defaultValue=""
+                onChange={(e) => {
+                  const tpl = templates.find(t => t.id === e.target.value);
+                  if (tpl?.suggested_patch?.requiredHours) {
+                    setRequiredHours(tpl.suggested_patch.requiredHours);
+                    toast.success('Template geladen');
+                  }
+                }}
+              >
+                <option value="">Kies template...</option>
+                {templates.map(t => (
+                  <option key={t.id} value={t.id}>{t.description}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Dagdelen raster met ingevulde namen */}
       {visibleDayparts.length > 0 ? (
         <div className="rounded-xl border overflow-x-auto" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
-          <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-light)' }}>
-            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Dagdelen — vul benodigde uren in per dag</span>
-            <div className="flex items-center gap-1 ml-2">
-              <Info className="w-3.5 h-3.5" style={{ color: 'var(--color-text-muted)' }} />
-              <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Medewerkers kleuren groen zodra ze overeenkomen met de uren en voorkeur</span>
-            </div>
+          <div className="p-3 border-b flex items-center justify-between"
+            style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-light)' }}>
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Dagdelen — vul benodigde uren in en plan medewerkers in
+            </span>
+            {hasAnyHours && (
+              <Button variant="outline" size="sm" onClick={() => setSaveTemplateOpen(true)} className="gap-2">
+                <Save className="w-3 h-3" /> Opslaan als template
+              </Button>
+            )}
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ backgroundColor: 'var(--color-surface-light)', borderBottom: '1px solid var(--color-border)' }}>
-                <th className="px-4 py-3 text-left font-semibold w-64" style={{ color: 'var(--color-text-secondary)' }}>Dagdeel</th>
+                <th className="px-4 py-3 text-left font-semibold w-56" style={{ color: 'var(--color-text-secondary)' }}>Dagdeel</th>
                 {DAYS.map((d, i) => (
-                  <th key={d} className="px-2 py-3 text-center font-semibold w-20" style={{ color: 'var(--color-text-secondary)' }}>
-                    <div>{d}</div>
-                    <div className="text-xs font-normal" style={{ color: 'var(--color-text-muted)' }}>{DAY_LABELS[i].slice(0, 3)}</div>
+                  <th key={d} className="px-2 py-2 text-center font-semibold min-w-[110px]" style={{ color: 'var(--color-text-secondary)' }}>
+                    <div className="font-bold">{d}</div>
+                    <div className="text-xs font-normal" style={{ color: 'var(--color-text-muted)' }}>
+                      {format(weekDates[i], 'd MMM', { locale: nl })}
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -281,41 +311,66 @@ export default function PlanningGrid({
                   key={dp.id}
                   style={{ borderBottom: idx < visibleDayparts.length - 1 ? '1px solid var(--color-border)' : 'none' }}
                 >
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: dp.color || '#6366f1' }}
-                      />
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: dp.color || '#6366f1' }} />
                       <div>
-                        <div className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{dp.name}</div>
+                        <div className="font-medium text-xs" style={{ color: 'var(--color-text-primary)' }}>{dp.name}</div>
                         <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                          {dp.startTime} – {dp.endTime} · {getDeptName(dp.departmentId)}
+                          {dp.startTime} – {dp.endTime}
                         </div>
                       </div>
                     </div>
                   </td>
                   {DAYS.map((_, dayIndex) => {
                     const key = `${dp.id}_${dayIndex}`;
+                    const cellShifts = getShiftsForCell(dp.id, weekDates[dayIndex]);
                     return (
-                      <td key={dayIndex} className="px-2 py-2 text-center">
+                      <td key={dayIndex} className="px-1 py-1 align-top" style={{ verticalAlign: 'top', minWidth: 110 }}>
+                        {/* Uren invoer */}
                         <input
                           type="number"
                           min="0"
                           max="24"
                           step="0.5"
                           value={requiredHours[key] || ''}
-                          onChange={(e) =>
-                            setRequiredHours(prev => ({ ...prev, [key]: e.target.value }))
-                          }
+                          onChange={(e) => setRequiredHours(prev => ({ ...prev, [key]: e.target.value }))}
                           placeholder="—"
-                          className="w-16 text-center rounded-lg border px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2"
+                          className="w-full text-center rounded border px-1 py-1 text-xs font-mono focus:outline-none focus:ring-1 mb-1"
                           style={{
                             backgroundColor: requiredHours[key] ? 'rgba(99,102,241,0.08)' : 'var(--color-surface-light)',
                             borderColor: requiredHours[key] ? '#6366f1' : 'var(--color-border)',
                             color: 'var(--color-text-primary)',
                           }}
                         />
+                        {/* Ingeplande medewerkers in deze cel */}
+                        <div className="space-y-0.5">
+                          {cellShifts.map(shift => {
+                            const shiftEmp = employees.find(e => e.id === shift.employeeId);
+                            return (
+                              <div
+                                key={shift.id}
+                                className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-xs"
+                                style={{
+                                  backgroundColor: shiftEmp?.color ? `${shiftEmp.color}22` : 'rgba(99,102,241,0.12)',
+                                  border: `1px solid ${shiftEmp?.color || '#6366f1'}44`,
+                                  color: 'var(--color-text-primary)',
+                                }}
+                              >
+                                <span className="truncate font-medium" style={{ maxWidth: 72 }}>
+                                  {shiftEmp ? `${shiftEmp.first_name} ${shiftEmp.last_name?.charAt(0)}.` : '?'}
+                                </span>
+                                <button
+                                  onClick={() => handleRemoveShift(shift.id)}
+                                  className="flex-shrink-0 hover:text-red-500 transition-colors"
+                                  title="Verwijder"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </td>
                     );
                   })}
@@ -325,7 +380,8 @@ export default function PlanningGrid({
           </table>
         </div>
       ) : (
-        <div className="p-6 rounded-xl border text-center text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
+        <div className="p-6 rounded-xl border text-center text-sm"
+          style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
           {selectedDepartmentId === 'all'
             ? 'Kies een afdeling om de bijbehorende dagdelen te tonen.'
             : 'Geen dagdelen gevonden voor deze afdeling.'}
@@ -333,24 +389,20 @@ export default function PlanningGrid({
       )}
 
       {/* Medewerkers tabel */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
-            Beschikbare medewerkers
-          </span>
-          <Badge variant="secondary">{employees.length}</Badge>
-          {hasAnyHours && (
-            <span className="text-xs ml-2" style={{ color: 'var(--color-text-muted)' }}>
-              Groen = goed passend op uren & voorkeur
+      {employees.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              Beschikbare medewerkers
             </span>
-          )}
-        </div>
-
-        {employees.length === 0 ? (
-          <div className="p-8 rounded-xl border text-center text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
-            Geen medewerkers gevonden voor de geselecteerde filters.
+            <Badge variant="secondary">{employees.length}</Badge>
+            {hasAnyHours && (
+              <span className="text-xs ml-2" style={{ color: 'var(--color-text-muted)' }}>
+                Klik op "Inplannen" om een medewerker toe te voegen aan het rooster
+              </span>
+            )}
           </div>
-        ) : (
+
           <div className="rounded-xl border overflow-x-auto" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
             <table className="w-full text-sm">
               <thead>
@@ -358,11 +410,10 @@ export default function PlanningGrid({
                   <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Medewerker</th>
                   <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Functie</th>
                   {DAYS.map((d) => (
-                    <th key={d} className="px-2 py-3 text-center font-semibold w-14" style={{ color: 'var(--color-text-secondary)' }}>{d}</th>
+                    <th key={d} className="px-2 py-3 text-center font-semibold w-12" style={{ color: 'var(--color-text-secondary)' }}>{d}</th>
                   ))}
-                  <th className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Contract/wk</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Voorkeur shifts</th>
-                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Voorkeur afdelingen</th>
+                  <th className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Contract</th>
+                  <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Voorkeur afdeling</th>
                   {hasAnyHours && (
                     <th className="px-4 py-3 text-center font-semibold" style={{ color: 'var(--color-text-secondary)' }}>Match</th>
                   )}
@@ -374,11 +425,9 @@ export default function PlanningGrid({
               <tbody>
                 {employees.map((emp, idx) => {
                   const score = hasAnyHours ? getEmployeeScore(emp) : 'neutral';
-                  const style = scoreStyles[score];
                   const preferredDepts = (emp.preferred_departmentIds || [])
                     .map(id => departments.find(d => d.id === id)?.name)
                     .filter(Boolean);
-                  const preferredShifts = emp.preferences?.preferred_shifts || [];
 
                   return (
                     <tr
@@ -396,7 +445,7 @@ export default function PlanningGrid({
                         <div className="flex items-center gap-2">
                           <Avatar className="w-7 h-7 flex-shrink-0">
                             <AvatarImage src={emp.avatar_url} />
-                            <AvatarFallback className="text-xs text-white" style={{ background: 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}>
+                            <AvatarFallback className="text-xs text-white" style={{ background: emp.color || 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}>
                               {getInitials(emp.first_name, emp.last_name)}
                             </AvatarFallback>
                           </Avatar>
@@ -410,24 +459,18 @@ export default function PlanningGrid({
                       </td>
                       {DAYS.map((_, dayIndex) => {
                         const isPref = hasPreferredDay(emp, dayIndex);
-                        const hrs = getEmployeeHoursForDay(emp, dayIndex);
                         const hasHrsRequired = Object.entries(requiredHours).some(
                           ([k, v]) => k.endsWith(`_${dayIndex}`) && parseFloat(v) > 0
                         );
                         return (
                           <td key={dayIndex} className="px-1 py-3 text-center">
                             <div
-                              className="w-10 h-8 mx-auto rounded-lg flex items-center justify-center text-xs font-medium"
+                              className="w-8 h-7 mx-auto rounded flex items-center justify-center text-xs font-bold"
                               title={isPref ? 'Voorkeur voor deze dag' : ''}
                               style={{
-                                backgroundColor: isPref && hasHrsRequired
-                                  ? '#bbf7d0'
-                                  : hasHrsRequired
-                                  ? 'var(--color-surface-light)'
-                                  : 'transparent',
+                                backgroundColor: isPref && hasHrsRequired ? '#bbf7d0' : hasHrsRequired ? 'var(--color-surface-light)' : 'transparent',
                                 color: isPref && hasHrsRequired ? '#166534' : 'var(--color-text-muted)',
                                 border: isPref && hasHrsRequired ? '1px solid #86efac' : 'none',
-                                fontWeight: isPref ? 700 : 400,
                               }}
                             >
                               {isPref ? '★' : ''}
@@ -440,21 +483,13 @@ export default function PlanningGrid({
                       </td>
                       <td className="px-4 py-3" style={{ color: 'var(--color-text-secondary)', maxWidth: '180px' }}>
                         <span className="truncate block text-xs">
-                          {preferredShifts.length > 0 ? preferredShifts.join(', ') : '—'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3" style={{ color: 'var(--color-text-secondary)', maxWidth: '200px' }}>
-                        <span className="truncate block text-xs">
                           {preferredDepts.length > 0 ? preferredDepts.join(', ') : '—'}
                         </span>
                       </td>
                       {hasAnyHours && (
                         <td className="px-4 py-3 text-center">
                           {score !== 'neutral' && (
-                            <span
-                              className="text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap"
-                              style={scoreBadgeStyles[score]}
-                            >
+                            <span className="text-xs px-2 py-1 rounded-md font-medium whitespace-nowrap" style={scoreBadgeStyles[score]}>
                               {scoreLabels[score]}
                             </span>
                           )}
@@ -488,8 +523,8 @@ export default function PlanningGrid({
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <SaveTemplateDialog
         open={saveTemplateOpen}
