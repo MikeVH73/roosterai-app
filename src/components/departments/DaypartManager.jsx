@@ -215,15 +215,28 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="daypart-name">Naam *</Label>
-              <Input
-                id="daypart-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="bijv. Ochtend, Middag, Avond"
-                required
-              />
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="daypart-name">Naam *</Label>
+                <Input
+                  id="daypart-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="bijv. Ochtend, Middag, Avond"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="daypart-sortorder">Positie</Label>
+                <Input
+                  id="daypart-sortorder"
+                  type="number"
+                  min={1}
+                  value={formData.sortOrder}
+                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 1 })}
+                />
+                <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>Volgorde in rooster</p>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
