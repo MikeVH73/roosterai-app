@@ -47,6 +47,7 @@ export default function PlanningDaypartsPanel({
   companyId,
   requiredHours,
   onRequiredHoursChange,
+  onDragEnd,
 }) {
   const queryClient = useQueryClient();
   const setRequiredHours = onRequiredHoursChange;
@@ -188,53 +189,6 @@ export default function PlanningDaypartsPanel({
     } catch {
       queryClient.invalidateQueries({ queryKey: ['shifts-all', selectedScheduleId] });
     }
-  };
-
-  // Handle drag end: employee dragged onto a daypart-day cell
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
-    const { droppableId } = result.destination;
-    // droppableId format: "cell_{daypartId}_{dayIndex}"
-    if (!droppableId.startsWith('cell_')) return;
-    const parts = droppableId.split('_');
-    // daypartId may contain underscores, dayIndex is always last
-    const dayIndex = parseInt(parts[parts.length - 1], 10);
-    const dpId = parts.slice(1, parts.length - 1).join('_');
-    const empId = result.draggableId;
-
-    if (!selectedScheduleId) {
-      toast.error('Geen rooster gekoppeld aan deze afdeling.');
-      return;
-    }
-
-    const dp = visibleDayparts.find(d => d.id === dpId);
-    const emp = employees.find(e => e.id === empId);
-    if (!dp || !emp) return;
-
-    const date = format(weekDates[dayIndex], 'yyyy-MM-dd');
-
-    // Check if shift already exists for this employee on this daypart+date
-    const exists = weekShifts.find(s => s.employeeId === empId && s.daypartId === dpId && s.date === date);
-    if (exists) {
-      toast.info(`${emp.first_name} staat al ingepland op dit dagdeel.`);
-      return;
-    }
-
-    await createShiftMutation.mutateAsync({
-      companyId,
-      scheduleId: selectedScheduleId,
-      employeeId: empId,
-      departmentId: dp.departmentId,
-      daypartId: dp.id,
-      functionId: emp.functionId,
-      date,
-      start_time: dp.startTime,
-      end_time: dp.endTime,
-      break_duration: dp.break_duration ?? 0,
-      shift_type: 'regular',
-      status: 'scheduled',
-    });
-    toast.success(`${emp.first_name} ingepland`);
   };
 
   const hasAnyHours = Object.values(requiredHours).some(v => parseFloat(v) > 0);
