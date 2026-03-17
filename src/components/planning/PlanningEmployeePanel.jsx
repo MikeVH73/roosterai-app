@@ -182,20 +182,15 @@ export default function PlanningEmployeePanel({
                             </span>
                           </div>
                         ) : (
-                          <>
-                            <div className="flex items-center" {...dragProvided.dragHandleProps}>
-                              <GripVertical className="w-3 h-3 ml-1 flex-shrink-0 cursor-grab" style={{ color: 'var(--color-text-muted)', opacity: 0.5 }} />
-                            </div>
-                            <EmployeeRow
-                              emp={emp}
-                              isSelected={selectedEmployeeIds.has(emp.id)}
-                              isMatch={true}
-                              onToggle={onToggleEmployee}
-                              getFuncName={getFuncName}
-                              neonGreen={neonGreen}
-                              dragHandleProps={dragProvided.dragHandleProps}
-                            />
-                          </>
+                          <EmployeeRow
+                            emp={emp}
+                            isSelected={selectedEmployeeIds.has(emp.id)}
+                            isMatch={true}
+                            onToggle={onToggleEmployee}
+                            getFuncName={getFuncName}
+                            neonGreen={neonGreen}
+                            dragHandleProps={dragProvided.dragHandleProps}
+                          />
                         )}
                       </div>
                     )}
