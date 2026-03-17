@@ -221,15 +221,6 @@ export default function PlanningTool() {
     // Blijf actief zodat je snel meerdere cellen kunt klikken
   };
 
-  const toggleEmployee = (empId) => {
-    setSelectedEmployeeIds(prev => {
-      const next = new Set(prev);
-      if (next.has(empId)) next.delete(empId);
-      else next.add(empId);
-      return next;
-    });
-  };
-
   // Escape key om actieve selectie te annuleren
   React.useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') setActiveEmployee(null); };
