@@ -166,7 +166,12 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
                 className="flex items-center gap-3 p-3 rounded-lg border transition-colors"
                 style={{ backgroundColor: daypart.color || 'var(--color-surface-light)', borderColor: 'var(--color-border)' }}
               >
-                <GripVertical className="w-4 h-4 cursor-grab" style={{ color: '#64748b' }} />
+                <span
+                  className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)' }}
+                >
+                  {daypart.sortOrder ?? '—'}
+                </span>
                 <div className="flex-1">
                   <p className="font-medium" style={{ color: '#1e293b' }}>{daypart.name}</p>
                   <p className="text-sm" style={{ color: '#475569' }}>
