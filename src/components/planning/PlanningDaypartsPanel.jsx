@@ -275,7 +275,7 @@ export default function PlanningDaypartsPanel({
               Dagdelen — vul benodigde uren in
             </span>
             <div className="flex items-center gap-2">
-              {selectedEmployeeIds.size > 0 && hasAnyHours && (
+              {activeEmployee && hasAnyHours && (
                 <button
                   onClick={handleAssignSelected}
                   disabled={!!addingEmployeeId}
@@ -292,7 +292,7 @@ export default function PlanningDaypartsPanel({
                     ? <Loader2 className="w-3 h-3 animate-spin" />
                     : <PlusCircle className="w-3 h-3" />
                   }
-                  Inplannen ({selectedEmployeeIds.size})
+                  Inplannen ({activeEmployee.first_name})
                 </button>
               )}
               {hasAnyHours && (
