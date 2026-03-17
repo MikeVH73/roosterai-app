@@ -118,7 +118,7 @@ export default function PlanningEmployeePanel({
             {showSections && matchingEmployees.length > 0 && (
               <div
                 className="px-3 py-1 text-xs font-semibold uppercase tracking-wide flex items-center gap-1"
-                style={{ backgroundColor: 'rgba(22,163,74,0.08)', color: '#16a34a' }}
+                style={{ backgroundColor: `${neonGreen}15`, color: neonGreen, textShadow: `0 0 8px ${neonGreen}66` }}
               >
                 <Star className="w-3 h-3" /> Match ({matchingEmployees.length})
               </div>
