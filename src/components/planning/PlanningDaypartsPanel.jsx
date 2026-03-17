@@ -202,9 +202,15 @@ export default function PlanningDaypartsPanel({
       toast.error('Geen rooster gekoppeld aan deze afdeling.');
       return;
     }
-    const count = weekShifts.length;
-    if (!window.confirm(`Weet je zeker dat je alle ${count} diensten deze week wilt verwijderen?`)) return;
-    await Promise.all(weekShifts.map(s => deleteShiftMutation.mutateAsync(s.id)));
+    // Only delete shifts from the selected department in this week
+    const shiftsToDelete = weekShifts.filter(s => s.departmentId === selectedDepartmentId);
+    const count = shiftsToDelete.length;
+    if (count === 0) {
+      toast.info('Geen diensten om te verwijderen.');
+      return;
+    }
+    if (!window.confirm(`Weet je zeker dat je alle ${count} diensten van deze afdeling deze week wilt verwijderen?`)) return;
+    await Promise.all(shiftsToDelete.map(s => deleteShiftMutation.mutateAsync(s.id)));
     toast.success(`${count} diensten verwijderd`);
   };
 
