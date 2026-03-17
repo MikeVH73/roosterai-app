@@ -196,6 +196,14 @@ export default function Schedules() {
     });
   };
 
+  const handleClearShifts = async (schedule) => {
+    const shiftCount = getShiftCount(schedule.id);
+    if (!window.confirm(`Weet je zeker dat je alle ${shiftCount} diensten van "${schedule.name}" wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+    const scheduleShifts = shifts.filter(s => s.scheduleId === schedule.id);
+    await Promise.all(scheduleShifts.map(s => base44.entities.Shift.delete(s.id)));
+    queryClient.invalidateQueries(['shifts', companyId]);
+  };
+
   const handleDuplicate = async (schedule) => {
     const today = new Date();
     const nextMonday = new Date(today);
