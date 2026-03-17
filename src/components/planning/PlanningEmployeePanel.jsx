@@ -216,31 +216,35 @@ export default function PlanningEmployeePanel({
                       <div
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
+                        {...dragProvided.dragHandleProps}
                         style={{
                           ...dragProvided.draggableProps.style,
+                          ...(dragSnapshot.isDragging ? {
+                            width: 120,
+                            height: 'auto',
+                            backgroundColor: 'var(--color-surface)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: 8,
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
+                            padding: '4px 8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                          } : {}),
                         }}
                       >
                         {dragSnapshot.isDragging ? (
-                          <div
-                            {...dragProvided.dragHandleProps}
-                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg"
-                            style={{
-                              width: '160px',
-                              backgroundColor: 'var(--color-surface)',
-                              border: '1px solid var(--color-border)',
-                              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
-                            }}
-                          >
-                            <Avatar className="w-6 h-6 flex-shrink-0">
+                          <>
+                            <Avatar className="w-5 h-5 flex-shrink-0">
                               <AvatarImage src={emp.avatar_url} />
-                              <AvatarFallback className="text-[10px] text-white" style={{ background: emp.color || '#94a3b8' }}>
+                              <AvatarFallback className="text-[9px] text-white" style={{ background: emp.color || '#94a3b8' }}>
                                 {getInitials(emp.first_name, emp.last_name)}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-xs font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                            <span className="text-[11px] font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                               {emp.first_name} {emp.last_name?.charAt(0)}.
                             </span>
-                          </div>
+                          </>
                         ) : (
                           <EmployeeRow
                             emp={emp}
