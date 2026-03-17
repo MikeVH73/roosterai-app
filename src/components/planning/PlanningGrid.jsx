@@ -302,10 +302,13 @@ export default function PlanningGrid({
                     <tr
                       key={emp.id}
                       style={{
-                        ...style,
+                        ...scoreStyles[score],
                         borderBottom: idx < employees.length - 1 ? '1px solid var(--color-border)' : 'none',
-                        transition: 'background-color 300ms',
+                        backgroundColor: 'var(--color-surface)',
+                        transition: 'background-color 150ms',
                       }}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--color-surface-light)'}
+                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-surface)'}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
