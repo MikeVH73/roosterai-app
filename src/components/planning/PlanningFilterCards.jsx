@@ -5,6 +5,7 @@ function FilterCard({ label, count, color, isActive, onClick }) {
   return (
     <button
       onClick={onClick}
+      title={label}
       className="flex items-center gap-2 px-3 py-2 rounded-lg border transition-all cursor-pointer text-left w-full"
       style={{
         backgroundColor: isActive ? color + '22' : 'var(--color-surface)',
