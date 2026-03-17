@@ -286,6 +286,8 @@ export default function PlanningTool() {
             selectedEmployeeIds={selectedEmployeeIds}
             selectedDepartmentId={selectedDepartmentId}
             companyId={companyId}
+            requiredHours={requiredHours}
+            onRequiredHoursChange={setRequiredHours}
           />
         </div>
 
