@@ -36,6 +36,7 @@ const allNavItems = [
   { id: 'schedule-overview', label: 'Roosters Overzicht', icon: CalendarCheck, page: 'ScheduleOverview', permission: null },
   { id: 'schedules', label: 'Alle Roosters', icon: Calendar, page: 'Schedules', permission: 'manage_schedules' },
   { id: 'employees', label: 'Medewerkers', icon: Users, page: 'Employees', permission: 'manage_schedules' },
+  { id: 'planning-tool', label: 'Planningshulpmiddel', icon: Calendar, page: 'PlanningTool', permission: 'manage_schedules' },
   { id: 'ai-assistant', label: 'AI Assistent', icon: Sparkles, page: 'AIAssistant', permission: 'use_ai' },
   { id: 'departments', label: 'Afdelingen', icon: Building2, page: 'Departments', permission: 'manage_schedules' },
   { id: 'locations', label: 'Locaties', icon: MapPin, page: 'Locations', permission: 'manage_schedules' },

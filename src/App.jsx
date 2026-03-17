@@ -10,6 +10,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AITestSuite from './pages/AITestSuite';
 import Landing from './pages/Landing';
 import Abonnementen from './pages/Abonnementen';
+import PlanningTool from './pages/PlanningTool';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
