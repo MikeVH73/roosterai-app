@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel.jsx';
 import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel.jsx';
 import { Loader2, ChevronDown, Building2, Users, X } from 'lucide-react';
-import { DragDropContext } from '@hello-pangea/dnd';
 import { format, addDays } from 'date-fns';
 import { getISOWeek } from 'date-fns';
 import { toast } from 'sonner';
