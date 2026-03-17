@@ -4,8 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import PlanningFilterCards from '@/components/planning/PlanningFilterCards';
-import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel';
-import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel';
+import PlanningEmployeePanel from '@/components/planning/PlanningEmployeePanel.jsx';
+import PlanningDaypartsPanel from '@/components/planning/PlanningDaypartsPanel.jsx';
 import { Loader2 } from 'lucide-react';
 
 export default function PlanningTool() {
