@@ -277,6 +277,7 @@ export default function PlanningTool() {
   }
 
   return (
+    <DragDropContext onDragEnd={handleDragEnd}>
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
 
       {/* Header balk */}
