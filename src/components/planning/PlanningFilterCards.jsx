@@ -5,21 +5,29 @@ function FilterCard({ label, count, color, isActive, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-start p-4 rounded-xl border transition-all cursor-pointer text-left"
+      className="flex items-center gap-2 px-3 py-2 rounded-lg border transition-all cursor-pointer text-left w-full"
       style={{
         backgroundColor: isActive ? color + '22' : 'var(--color-surface)',
         borderColor: isActive ? color : 'var(--color-border)',
         borderWidth: isActive ? '2px' : '1px',
-        minWidth: '130px',
       }}
     >
-      <span className="text-xs font-medium mb-1 truncate w-full" style={{ color: isActive ? color : 'var(--color-text-muted)' }}>
+      <div
+        className="w-2 h-2 rounded-full flex-shrink-0"
+        style={{ backgroundColor: color }}
+      />
+      <span className="text-xs font-medium flex-1 truncate" style={{ color: isActive ? color : 'var(--color-text-primary)' }}>
         {label}
       </span>
-      <span className="text-2xl font-bold" style={{ color: isActive ? color : 'var(--color-text-primary)' }}>
+      <span
+        className="text-xs font-bold flex-shrink-0 px-1.5 py-0.5 rounded"
+        style={{
+          backgroundColor: isActive ? color + '33' : 'var(--color-surface-light)',
+          color: isActive ? color : 'var(--color-text-muted)',
+        }}
+      >
         {count}
       </span>
-      <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>medewerkers</span>
     </button>
   );
 }
@@ -47,16 +55,16 @@ export default function PlanningFilterCards({
       : employees.filter(e => e.functionId === funcId).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full">
       {/* Department filter */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Building2 className="w-4 h-4" style={{ color: 'var(--color-accent)' }} />
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
-            Filter op Afdeling
+        <div className="flex items-center gap-2 mb-2">
+          <Building2 className="w-3.5 h-3.5" style={{ color: 'var(--color-accent)' }} />
+          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
+            Afdeling
           </span>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="space-y-1">
           <FilterCard
             label="Alle afdelingen"
             count={employees.length}
@@ -77,18 +85,17 @@ export default function PlanningFilterCards({
         </div>
       </div>
 
-      {/* Divider */}
       <div style={{ borderTop: '1px solid var(--color-border)' }} />
 
       {/* Function filter */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Users className="w-4 h-4" style={{ color: 'var(--color-accent)' }} />
-          <span className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
-            Filter op Functie
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="w-3.5 h-3.5" style={{ color: 'var(--color-accent)' }} />
+          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--color-text-muted)' }}>
+            Functie
           </span>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="space-y-1">
           <FilterCard
             label="Alle functies"
             count={employees.length}
