@@ -192,9 +192,11 @@ export default function PlanningTool() {
     const { droppableId } = result.destination;
     if (!droppableId.startsWith('cell_')) return;
 
-    const parts = droppableId.split('_');
-    const dayIndex = parseInt(parts[parts.length - 1], 10);
-    const dpId = parts.slice(1, parts.length - 1).join('_');
+    // Format: "cell_{dayIndex}_{dpId}" — dayIndex is always second segment
+    const withoutPrefix = droppableId.slice('cell_'.length);
+    const separatorIdx = withoutPrefix.indexOf('_');
+    const dayIndex = parseInt(withoutPrefix.slice(0, separatorIdx), 10);
+    const dpId = withoutPrefix.slice(separatorIdx + 1);
     const empId = result.draggableId;
 
     const selectedSchedule = schedules.find(s => s.departmentIds?.includes(selectedDepartmentId));
