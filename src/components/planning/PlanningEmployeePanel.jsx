@@ -167,7 +167,6 @@ export default function PlanningEmployeePanel({
                 isMatch={false}
                 onToggle={onToggleEmployee}
                 getFuncName={getFuncName}
-                getPreferredDepts={getPreferredDepts}
                 neonGreen={neonGreen}
               />
             ))}
