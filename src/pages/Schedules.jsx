@@ -367,6 +367,13 @@ export default function Schedules() {
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleClearShifts(schedule)}
+                              className="text-orange-600"
+                            >
+                              <Eraser className="w-4 h-4 mr-2" />
+                              Rooster leegmaken
+                            </DropdownMenuItem>
                             <DropdownMenuItem 
                               onClick={() => handleDelete(schedule)}
                               className="text-red-600"
