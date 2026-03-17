@@ -132,6 +132,7 @@ export default function PlanningEmployeePanel({
                 onToggle={onToggleEmployee}
                 getFuncName={getFuncName}
                 getPreferredDepts={getPreferredDepts}
+                neonGreen={neonGreen}
               />
             ))}
 
@@ -153,6 +154,7 @@ export default function PlanningEmployeePanel({
                 onToggle={onToggleEmployee}
                 getFuncName={getFuncName}
                 getPreferredDepts={getPreferredDepts}
+                neonGreen={neonGreen}
               />
             ))}
           </>
