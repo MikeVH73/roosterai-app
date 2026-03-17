@@ -283,7 +283,7 @@ export default function PlanningTool() {
               value={selectedDepartmentId}
               options={deptOptions}
               accentColor="#39ff14"
-              onSelect={(id) => { setSelectedDepartmentId(id); setSelectedEmployeeIds(new Set()); }}
+              onSelect={(id) => { setSelectedDepartmentId(id); setActiveEmployee(null); }}
             />
             <FilterDropdown
               icon={Users}
