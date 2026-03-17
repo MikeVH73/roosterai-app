@@ -44,9 +44,11 @@ export default function PlanningDaypartsPanel({
   selectedEmployeeIds,
   selectedDepartmentId,
   companyId,
+  requiredHours,
+  onRequiredHoursChange,
 }) {
   const queryClient = useQueryClient();
-  const [requiredHours, setRequiredHours] = useState({});
+  const setRequiredHours = onRequiredHoursChange;
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [currentWeekMonday, setCurrentWeekMonday] = useState(() => getMondayOfWeek(new Date()));
   const [addingEmployeeId, setAddingEmployeeId] = useState(null);
