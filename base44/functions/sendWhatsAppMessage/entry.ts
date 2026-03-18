@@ -69,12 +69,17 @@ Deno.serve(async (req) => {
 
     // Check if employee has opted in to WhatsApp notifications
     if (employeeId) {
-      const employee = await base44.asServiceRole.entities.EmployeeProfile.filter({ id: employeeId });
-      if (employee.length > 0 && !employee[0].whatsapp_opt_in) {
-        return Response.json(
-          { error: 'Employee has not opted in to WhatsApp notifications' },
-          { status: 403 }
-        );
+      try {
+        const employees = await base44.asServiceRole.entities.EmployeeProfile.filter({ companyId, status: 'active' });
+        const employee = employees.find(e => e.id === employeeId);
+        if (employee && !employee.whatsapp_opt_in) {
+          return Response.json(
+            { error: 'Employee has not opted in to WhatsApp notifications' },
+            { status: 403 }
+          );
+        }
+      } catch (err) {
+        console.warn('Could not verify opt-in, proceeding:', err.message);
       }
     }
 
