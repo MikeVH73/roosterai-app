@@ -140,11 +140,13 @@ Deno.serve(async (req) => {
       if (companyId) {
         await base44.asServiceRole.entities.WhatsAppMessageLog.create({
           companyId,
+          employee_id: employeeId || undefined,
           scheduleId: scheduleId || null,
           aiSuggestionId: aiSuggestionId || null,
+          message: `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`,
           recipient_name: employeeName || 'Onbekend',
           recipient_phone: formattedPhone,
-          subject: subject || periodLabel || 'WhatsApp template',
+          direction: 'outbound',
           status: 'failed',
           error_message: JSON.stringify(responseData),
           sent_by: user.email,
@@ -157,15 +159,18 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Log successful message
+    // Log successful message (with employee_id and message for visibility in MijnBerichten)
     if (companyId) {
+      const logMessage = `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`;
       await base44.asServiceRole.entities.WhatsAppMessageLog.create({
         companyId,
+        employee_id: employeeId || undefined,
         scheduleId: scheduleId || null,
         aiSuggestionId: aiSuggestionId || null,
+        message: logMessage,
         recipient_name: employeeName || 'Onbekend',
         recipient_phone: formattedPhone,
-        subject: subject || periodLabel || 'WhatsApp template',
+        direction: 'outbound',
         status: 'sent',
         sent_by: user.email,
       });
