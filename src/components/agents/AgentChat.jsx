@@ -269,20 +269,25 @@ INSTRUCTIES:
         <div className="p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
           <Button 
             onClick={createNewConversation}
+            disabled={creatingConversation}
             style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}
             size="sm"
             className="w-full"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            {creatingConversation ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4 mr-2" />
+            )}
             Nieuw gesprek
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto p-2">
           {conversations.map((convo) => (
-            <button
+            <div
               key={convo.id}
               onClick={() => loadConversation(convo.id)}
-              className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
+              className={`group w-full text-left p-3 rounded-lg mb-2 transition-colors cursor-pointer relative ${
                 currentConversation?.id === convo.id
                   ? 'border border-blue-400'
                   : 'border border-transparent'
@@ -301,18 +306,28 @@ INSTRUCTIES:
                 }
               }}
             >
-              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                {convo.metadata?.name || 'Gesprek'}
-              </p>
+              <div className="flex items-start justify-between gap-1">
+                <p className="text-sm font-medium truncate flex-1" style={{ color: 'var(--color-text-primary)' }}>
+                  {convo.metadata?.name || 'Gesprek'}
+                </p>
+                <button
+                  onClick={(e) => deleteConversation(convo.id, e)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-100"
+                  title="Verwijder gesprek"
+                >
+                  <Trash2 className="w-3 h-3" style={{ color: '#ef4444' }} />
+                </button>
+              </div>
               <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
                 {new Date(convo.created_date).toLocaleDateString('nl-NL', { 
                   day: 'numeric', 
                   month: 'short',
                   hour: '2-digit',
-                  minute: '2-digit'
+                  minute: '2-digit',
+                  timeZone: 'Europe/Amsterdam'
                 })}
               </p>
-            </button>
+            </div>
           ))}
         </div>
       </div>
