@@ -79,16 +79,56 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
       }
     } catch {}
 
+    // Calculate current date and week info
+    const now = new Date();
+    const currentDate = now.toISOString().split('T')[0];
+    const dayNames = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+    const currentDay = dayNames[now.getDay()];
+    
+    // Calculate ISO week number
+    const tempDate = new Date(now.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
+    const week1 = new Date(tempDate.getFullYear(), 0, 4);
+    const weekNumber = 1 + Math.round(((tempDate.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+
+    // Calculate next week's date range (Monday to Sunday)
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon, ...
+    const daysUntilNextMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
+    const nextMonday = new Date(now);
+    nextMonday.setDate(now.getDate() + daysUntilNextMonday);
+    const nextSunday = new Date(nextMonday);
+    nextSunday.setDate(nextMonday.getDate() + 6);
+    const nextWeekStart = nextMonday.toISOString().split('T')[0];
+    const nextWeekEnd = nextSunday.toISOString().split('T')[0];
+
+    // This week range
+    const thisMonday = new Date(now);
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    thisMonday.setDate(now.getDate() + diffToMonday);
+    const thisSunday = new Date(thisMonday);
+    thisSunday.setDate(thisMonday.getDate() + 6);
+    const thisWeekStart = thisMonday.toISOString().split('T')[0];
+    const thisWeekEnd = thisSunday.toISOString().split('T')[0];
+
     return `[SYSTEEMCONTEXT - GEBRUIK DEZE INFO DIRECT, VRAAG NOOIT OPNIEUW]
 Bedrijf: ${currentCompany?.name || 'Onbekend'} (companyId: ${currentCompany?.id || 'Onbekend'})
 Ingelogde gebruiker: ${user?.full_name || user?.email || 'Onbekend'} (email: ${user?.email || ''})
 Medewerker: ${employeeInfo} (employeeId: ${employeeId})
 
+DATUM CONTEXT (BELANGRIJK):
+- Vandaag is: ${currentDay} ${currentDate}
+- Huidige week: week ${weekNumber}
+- Deze week: ${thisWeekStart} t/m ${thisWeekEnd}
+- Volgende week (week ${weekNumber + 1}): ${nextWeekStart} t/m ${nextWeekEnd}
+
 INSTRUCTIES:
 - Gebruik companyId "${currentCompany?.id}" bij ALLE database queries.
 - De gebruiker heet "${user?.full_name || employeeInfo}". VRAAG NOOIT naar hun naam of bedrijf.
 - Als de gebruiker vraagt over "mijn" diensten/rooster, filter op employeeId "${employeeId}".
-- Begroet de gebruiker bij naam en beantwoord direct hun vraag.`;
+- Begroet de gebruiker bij naam en beantwoord direct hun vraag.
+- DATUM FILTERING: Als de gebruiker vraagt over "volgende week", zoek shifts met date TUSSEN ${nextWeekStart} EN ${nextWeekEnd}. Gebruik GEEN scheduleId filter - zoek ALLE shifts voor de companyId en filter op datum. Haal ruim voldoende resultaten op.
+- Zoek altijd in ALLE roosters/schedules van het bedrijf, niet alleen in één specifiek rooster.`;
   };
 
   const createNewConversation = async () => {
