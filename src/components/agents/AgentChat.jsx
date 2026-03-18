@@ -165,7 +165,9 @@ INSTRUCTIES:
   const deleteConversation = async (conversationId, e) => {
     e.stopPropagation();
     try {
-      await base44.agents.updateConversation(conversationId, { is_deleted: true });
+      await base44.agents.updateConversation(conversationId, {
+        metadata: { name: '__deleted__', deleted: true }
+      });
       setConversations(prev => prev.filter(c => c.id !== conversationId));
       if (currentConversation?.id === conversationId) {
         setCurrentConversation(null);
@@ -173,6 +175,12 @@ INSTRUCTIES:
       }
     } catch (error) {
       console.error('Failed to delete conversation:', error);
+      // Still remove from UI even if API fails
+      setConversations(prev => prev.filter(c => c.id !== conversationId));
+      if (currentConversation?.id === conversationId) {
+        setCurrentConversation(null);
+        setMessages([]);
+      }
     }
   };
 
