@@ -58,17 +58,19 @@ export default function EmployeeWeekSchedule({ shifts = [], locations = [], depa
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(w => w - 1)}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <span className="text-sm font-medium min-w-[80px] text-center" style={{ color: 'var(--color-text-primary)' }}>
+            <button
+              onClick={() => setWeekOffset(0)}
+              className="text-sm font-medium min-w-[80px] text-center rounded px-2 py-1 transition-colors"
+              style={{ 
+                color: weekOffset === 0 ? 'var(--color-text-primary)' : 'var(--color-accent)',
+                cursor: weekOffset === 0 ? 'default' : 'pointer'
+              }}
+            >
               Week {weekNumber}
-            </span>
+            </button>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setWeekOffset(w => w + 1)}>
               <ChevronRight className="w-4 h-4" />
             </Button>
-            {weekOffset !== 0 && (
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => setWeekOffset(0)}>
-                Vandaag
-              </Button>
-            )}
           </div>
         </div>
         <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
