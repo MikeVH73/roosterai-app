@@ -29,6 +29,7 @@ import { nl } from 'date-fns/locale';
 import WeekChart from '@/components/dashboard/WeekChart';
 import DepartmentDistribution from '@/components/dashboard/DepartmentDistribution';
 import ActionItems from '@/components/dashboard/ActionItems';
+import EmployeeWeekSchedule from '@/components/dashboard/EmployeeWeekSchedule';
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   const iconColors = {
@@ -129,6 +130,27 @@ export default function Dashboard() {
     enabled: !!companyId
   });
 
+  // Fetch locations for employee week schedule
+  const { data: locations = [] } = useQuery({
+    queryKey: ['locations', companyId],
+    queryFn: () => base44.entities.Location.filter({ companyId }),
+    enabled: !!companyId && isEmployee
+  });
+
+  // Fetch dayparts for employee week schedule
+  const { data: dayparts = [] } = useQuery({
+    queryKey: ['dayparts', companyId],
+    queryFn: () => base44.entities.DepartmentDaypart.filter({ companyId }),
+    enabled: !!companyId && isEmployee
+  });
+
+  // All shifts for the employee (not just this week, for the week navigator)
+  const { data: allMyShifts = [] } = useQuery({
+    queryKey: ['my-all-shifts', companyId, myProfile?.id],
+    queryFn: () => base44.entities.Shift.filter({ companyId, employeeId: myProfile.id }),
+    enabled: !!companyId && !!myProfile?.id && isEmployee
+  });
+
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
@@ -215,6 +237,15 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Quick Actions */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Employee Week Schedule */}
+            {isEmployee && (
+              <EmployeeWeekSchedule 
+                shifts={allMyShifts} 
+                locations={locations} 
+                departments={departments}
+                dayparts={dayparts}
+              />
+            )}
             {/* Week Chart */}
             <WeekChart shifts={myShiftsThisWeek} weekStart={weekStart} />
             {/* Active Schedules */}
