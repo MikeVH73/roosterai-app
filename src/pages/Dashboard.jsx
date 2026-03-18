@@ -289,6 +289,22 @@ export default function Dashboard() {
               <DepartmentDistribution employees={employees} departments={departments} />
             )}
 
+            {/* AI Assistent voor medewerkers */}
+            {isEmployee && (
+              <Link to={createPageUrl('MijnBerichten')}>
+                <div className="rounded-xl p-5 flex items-center gap-4 cursor-pointer hover:opacity-90 transition-opacity" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)' }}>
+                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white text-sm">Planning Assistent</h3>
+                    <p className="text-xs text-white/80">Stel vragen over je rooster of diensten</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/60 ml-auto" />
+                </div>
+              </Link>
+            )}
+
             {/* WhatsApp AI Koppelen - alleen voor medewerkers */}
             {isEmployee && (
               <Card className="border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' }}>
@@ -306,9 +322,22 @@ export default function Dashboard() {
                     Koppel WhatsApp om je rooster op te vragen, diensten te ruilen of verlof aan te vragen — direct via je telefoon.
                   </p>
                   {myProfile?.whatsapp_opt_in ? (
-                    <div className="flex items-center gap-2 p-3 rounded-lg bg-white/20">
-                      <CheckCircle2 className="w-4 h-4 text-white" />
-                      <span className="text-sm text-white font-medium">WhatsApp is gekoppeld</span>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-white/20">
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                        <span className="text-sm text-white font-medium flex-1">WhatsApp is gekoppeld</span>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (myProfile) {
+                            await base44.entities.EmployeeProfile.update(myProfile.id, { whatsapp_opt_in: false });
+                            window.location.reload();
+                          }
+                        }}
+                        className="w-full text-xs text-white/70 hover:text-white underline text-center py-1"
+                      >
+                        WhatsApp ontkoppelen
+                      </button>
                     </div>
                   ) : (
                     <a

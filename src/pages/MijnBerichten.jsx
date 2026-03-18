@@ -17,6 +17,7 @@ export default function MijnBerichten() {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [activeTab, setActiveTab] = useState('berichten');
   const bottomRef = useRef(null);
 
   const { data: myProfile } = useQuery({
@@ -61,7 +62,41 @@ export default function MijnBerichten() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar title="Mijn Berichten" subtitle="Communicatie met de planner" />
 
-      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full p-4" style={{ height: 'calc(100vh - 64px)' }}>
+      {/* Tabs */}
+      <div className="border-b px-4" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)' }}>
+        <div className="flex max-w-2xl mx-auto">
+          <button
+            onClick={() => setActiveTab('berichten')}
+            className="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2"
+            style={{
+              borderColor: activeTab === 'berichten' ? 'var(--color-accent)' : 'transparent',
+              color: activeTab === 'berichten' ? 'var(--color-accent)' : 'var(--color-text-muted)'
+            }}
+          >
+            <MessageCircle className="w-4 h-4" />
+            Berichten van planner
+          </button>
+          <button
+            onClick={() => setActiveTab('assistent')}
+            className="px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2"
+            style={{
+              borderColor: activeTab === 'assistent' ? 'var(--color-accent)' : 'transparent',
+              color: activeTab === 'assistent' ? 'var(--color-accent)' : 'var(--color-text-muted)'
+            }}
+          >
+            <Bot className="w-4 h-4" />
+            Planning Assistent
+          </button>
+        </div>
+      </div>
+
+      {activeTab === 'assistent' ? (
+        <div className="flex-1 p-4 max-w-5xl mx-auto w-full">
+          <AgentChat agentName="planning_assistent" />
+        </div>
+      ) : (
+
+      <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full p-4" style={{ height: 'calc(100vh - 120px)' }}>
         {isLoading ? (
           <div className="flex-1 flex items-center justify-center">
             <Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--color-accent)' }} />
@@ -128,6 +163,7 @@ export default function MijnBerichten() {
           </Button>
         </div>
       </div>
+      )}
     </div>
   );
 }

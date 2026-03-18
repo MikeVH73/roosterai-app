@@ -53,6 +53,7 @@ import {
 import { nl } from 'date-fns/locale';
 import WhatsAppInviteDialog from '@/components/whatsapp/WhatsAppInviteDialog';
 import PublishWithNotifyDialog from '@/components/schedules/PublishWithNotifyDialog';
+import SendNotifyDialog from '@/components/schedules/SendNotifyDialog';
 
 export default function ScheduleEditor() {
   const navigate = useNavigate();
