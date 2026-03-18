@@ -368,7 +368,7 @@ export default function ScheduleEditor() {
               onClick={() => setWhatsappInboxOpen(true)}
             >
               <MessageSquare className="w-4 h-4 mr-2 text-green-600" />
-              WhatsApp
+              WhatsApp Uitnodigingen
             </Button>
             {canUseAI() && (
               <Button 
