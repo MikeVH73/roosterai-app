@@ -7,6 +7,9 @@ import { Loader2 } from 'lucide-react';
 // Pages that don't need company context
 const publicPages = ['CompanySelect', 'CompanyOnboarding', 'Landing'];
 
+// Pages with their own navigation (no HorizontalNav)
+const selfNavigatingPages = ['MedewerkerApp'];
+
 function LayoutContent({ children, currentPageName }) {
   const { currentCompany, loading } = useCompany();
 
@@ -26,6 +29,15 @@ function LayoutContent({ children, currentPageName }) {
   if (publicPages.includes(currentPageName) || !currentCompany) {
     return (
       <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #1e1b2e 0%, #262344 50%, #2d2a3e 100%)' }}>
+        {children}
+      </div>
+    );
+  }
+
+  // Self-navigating pages (like mobile app) - no HorizontalNav
+  if (selfNavigatingPages.includes(currentPageName)) {
+    return (
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
         {children}
       </div>
     );
