@@ -78,12 +78,11 @@ export default function HorizontalNav({ currentPage }) {
 
   // Get user's preferred menu items from their profile, or use defaults
   const userPreferences = user?.preferences || {};
-  const preferredMenuIds = userPreferences.horizontal_menu_items || [
-    'dashboard',
-    'rooster-dashboard',
-    'employees',
-    'ai-assistant'
-  ];
+  const isEmployee = !hasPermission('manage_schedules');
+  const defaultMenuIds = isEmployee
+    ? ['dashboard', 'schedule-overview', 'vacation-requests', 'swap-requests', 'mijn-berichten']
+    : ['dashboard', 'rooster-dashboard', 'employees', 'ai-assistant'];
+  const preferredMenuIds = userPreferences.horizontal_menu_items || defaultMenuIds;
 
   // Filter items based on permissions
   const accessibleItems = allNavItems.filter(item => 
