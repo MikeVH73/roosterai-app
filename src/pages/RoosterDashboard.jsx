@@ -488,9 +488,9 @@ export default function RoosterDashboard() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
-                              <DropdownMenuItem onClick={() => navigate(createPageUrl('ScheduleEditor') + `?id=${schedule.id}`)}>
-                                <Eye className="w-4 h-4 mr-2" /> Openen in editor
-                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/PlanningTool?scheduleId=${schedule.id}&returnTo=RoosterDashboard`)}>
+                                 <LayoutGrid className="w-4 h-4 mr-2" /> Openen in Planner
+                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleOpenEdit(schedule)}>
                                 <Edit className="w-4 h-4 mr-2" /> Bewerken
                               </DropdownMenuItem>
