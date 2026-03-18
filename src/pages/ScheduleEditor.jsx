@@ -51,7 +51,8 @@ import {
   subWeeks
 } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import WhatsAppInbox from '@/components/whatsapp/WhatsAppInbox';
+import WhatsAppInviteDialog from '@/components/whatsapp/WhatsAppInviteDialog';
+import PublishWithNotifyDialog from '@/components/schedules/PublishWithNotifyDialog';
 
 export default function ScheduleEditor() {
   const navigate = useNavigate();
