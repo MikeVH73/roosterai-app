@@ -12,6 +12,7 @@ import Landing from './pages/Landing';
 import Abonnementen from './pages/Abonnementen';
 import PlanningTool from './pages/PlanningTool';
 import PlanningTemplates from './pages/PlanningTemplates';
+import RoosterDashboard from './pages/RoosterDashboard';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
