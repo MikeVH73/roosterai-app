@@ -270,10 +270,36 @@ export default function PlanningDaypartsPanel({
                 className="text-xs px-2 py-1 rounded border"
                 style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                 defaultValue=""
-                onChange={(e) => {
+                onChange={async (e) => {
                   const tpl = templates.find(t => t.id === e.target.value);
-                  if (tpl?.suggested_patch?.requiredHours) {
+                  if (!tpl?.suggested_patch) return;
+                  // Load required hours
+                  if (tpl.suggested_patch.requiredHours) {
                     setRequiredHours(tpl.suggested_patch.requiredHours);
+                  }
+                  // Re-create saved shifts for this week
+                  const savedShifts = tpl.suggested_patch.shifts || [];
+                  if (savedShifts.length > 0 && selectedScheduleId) {
+                    const promises = savedShifts.map(s => {
+                      const date = format(weekDates[s.dayOfWeek], 'yyyy-MM-dd');
+                      return createShiftMutation.mutateAsync({
+                        companyId,
+                        scheduleId: selectedScheduleId,
+                        employeeId: s.employeeId,
+                        departmentId: s.departmentId,
+                        daypartId: s.daypartId,
+                        functionId: s.functionId,
+                        date,
+                        start_time: s.start_time,
+                        end_time: s.end_time,
+                        break_duration: s.break_duration ?? 0,
+                        shift_type: s.shift_type || 'regular',
+                        status: 'scheduled',
+                      });
+                    });
+                    await Promise.all(promises);
+                    toast.success(`Template geladen — ${savedShifts.length} diensten aangemaakt`);
+                  } else {
                     toast.success('Template geladen');
                   }
                 }}
