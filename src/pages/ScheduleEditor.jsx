@@ -645,6 +645,15 @@ export default function ScheduleEditor() {
         employees={employees}
       />
 
+      <SendNotifyDialog
+        open={sendNotifyOpen}
+        onOpenChange={setSendNotifyOpen}
+        employees={employees}
+        scheduleId={scheduleId}
+        scheduleName={schedule?.name || 'dit rooster'}
+        companyId={companyId}
+      />
+
       <PublishWithNotifyDialog
         open={publishDialogOpen}
         onOpenChange={setPublishDialogOpen}
