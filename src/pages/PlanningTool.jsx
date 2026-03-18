@@ -105,11 +105,13 @@ const NEON_GREEN = '#39ff14';
 export default function PlanningTool() {
   const { currentCompany } = useCompany();
   const companyId = currentCompany?.id;
+  const navigate = useNavigate();
 
   // Lees URL-parameters bij laden (vanuit RoosterDashboard)
   const urlParams = new URLSearchParams(window.location.search);
   const urlDeptId = urlParams.get('departmentId');
   const urlWeekStart = urlParams.get('weekStart');
+  const returnTo = urlParams.get('returnTo');
 
   const [selectedDepartmentId, setSelectedDepartmentId] = useState(urlDeptId || 'all');
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
