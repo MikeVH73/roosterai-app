@@ -55,6 +55,7 @@ export default function PlanningTemplates() {
     setEditingId(tpl.id);
     setEditName(tpl.description || '');
     setEditWeeks(tpl.suggested_patch?.repeatWeeks || 1);
+    setEditHours(tpl.suggested_patch?.requiredHours || {});
   };
 
   const saveEdit = (tpl) => {
@@ -65,6 +66,7 @@ export default function PlanningTemplates() {
         suggested_patch: {
           ...tpl.suggested_patch,
           repeatWeeks: editWeeks,
+          requiredHours: editHours,
         },
       },
     });
