@@ -472,10 +472,12 @@ export default function PlanningDaypartsPanel({
                                 style={{
                                   backgroundColor: shiftEmp?.color ? `${shiftEmp.color}22` : 'rgba(99,102,241,0.12)',
                                   border: `1px solid ${shiftEmp?.color || '#6366f1'}44`,
+                                  opacity: !shift.daypartId ? 0.75 : 1,
                                 }}
                               >
                                 <span className="truncate font-medium" style={{ color: 'var(--color-text-primary)', maxWidth: 60 }}>
                                   {shiftEmp ? `${shiftEmp.first_name} ${shiftEmp.last_name?.charAt(0)}.` : '?'}
+                                  {!shift.daypartId && <span className="ml-0.5 text-[9px]" style={{ color: 'var(--color-text-muted)' }}>({shift.start_time}–{shift.end_time})</span>}
                                 </span>
                                 <button
                                   onClick={(e) => { e.stopPropagation(); handleRemoveShift(shift.id); }}
