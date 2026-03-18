@@ -409,9 +409,8 @@ export default function Employees() {
 
       <WhatsAppInviteDialog
         open={whatsAppInviteOpen}
-        onClose={() => setWhatsAppInviteOpen(false)}
+        onOpenChange={setWhatsAppInviteOpen}
         employees={employees}
-        companyId={companyId}
       />
     </div>
   );
