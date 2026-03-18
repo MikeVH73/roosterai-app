@@ -55,6 +55,7 @@ export default function PlanningDaypartsPanel({
   onCellClick,
   currentWeekMonday: currentWeekMondayProp,
   onWeekChange,
+  onWeekShiftsChange,
 }) {
   const queryClient = useQueryClient();
   const setRequiredHours = onRequiredHoursChange;
