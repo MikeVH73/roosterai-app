@@ -367,6 +367,14 @@ export default function ScheduleEditor() {
             </Badge>
             <Button 
               variant="outline" 
+              onClick={() => setSendNotifyOpen(true)}
+              style={{ borderColor: '#16a34a', color: '#16a34a' }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              WhatsApp Bericht
+            </Button>
+            <Button 
+              variant="outline" 
               onClick={() => setWhatsappInboxOpen(true)}
             >
               <MessageSquare className="w-4 h-4 mr-2 text-green-600" />
