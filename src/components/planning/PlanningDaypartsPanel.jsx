@@ -112,7 +112,22 @@ export default function PlanningDaypartsPanel({
 
   const getShiftsForCell = (daypartId, date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
-    return weekShifts.filter(s => s.daypartId === daypartId && s.date === dateStr);
+    const dp = dayparts.find(d => d.id === daypartId);
+    return weekShifts.filter(s => {
+      if (s.date !== dateStr) return false;
+      // Exact daypart match
+      if (s.daypartId === daypartId) return true;
+      // Shift without daypart: match if shift time overlaps with this daypart
+      if (!s.daypartId && dp && s.start_time && s.end_time) {
+        const sStart = s.start_time.replace(':', '');
+        const sEnd = s.end_time.replace(':', '');
+        const dpStart = dp.startTime.replace(':', '');
+        const dpEnd = dp.endTime.replace(':', '');
+        // Overlap check: shift starts before daypart ends AND shift ends after daypart starts
+        return sStart < dpEnd && sEnd > dpStart;
+      }
+      return false;
+    });
   };
 
   // Hours this week per employee
