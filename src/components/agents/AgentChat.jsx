@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Send, Plus, MessageCircle } from 'lucide-react';
+import { Loader2, Send, Plus, MessageCircle, Trash2 } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 
 export default function AgentChat({ agentName = 'planning_assistent' }) {
@@ -14,6 +14,7 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
+  const [creatingConversation, setCreatingConversation] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -132,6 +133,8 @@ INSTRUCTIES:
   };
 
   const createNewConversation = async () => {
+    if (creatingConversation) return;
+    setCreatingConversation(true);
     try {
       const conversationTitle = `Nieuw gesprek`;
       const contextMessage = await buildContextMessage();
@@ -154,6 +157,22 @@ INSTRUCTIES:
       setConversations(prev => [conversation, ...prev]);
     } catch (error) {
       console.error('Failed to create conversation:', error);
+    } finally {
+      setCreatingConversation(false);
+    }
+  };
+
+  const deleteConversation = async (conversationId, e) => {
+    e.stopPropagation();
+    try {
+      await base44.agents.updateConversation(conversationId, { is_deleted: true });
+      setConversations(prev => prev.filter(c => c.id !== conversationId));
+      if (currentConversation?.id === conversationId) {
+        setCurrentConversation(null);
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
     }
   };
 

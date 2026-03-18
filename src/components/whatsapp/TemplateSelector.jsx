@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ChevronDown, ChevronUp, Eye, Send, Loader2 } from 'lucide-react';
+import { Eye, Send, Loader2 } from 'lucide-react';
 
 const TEMPLATES = [
   {
