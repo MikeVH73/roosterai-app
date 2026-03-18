@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { useCompany } from '@/components/providers/CompanyProvider';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Send, Plus, MessageCircle } from 'lucide-react';
 import MessageBubble from './MessageBubble';
 
 export default function AgentChat({ agentName = 'planning_assistent' }) {
+  const { currentCompany, user } = useCompany();
   const [conversations, setConversations] = useState([]);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [messages, setMessages] = useState([]);
