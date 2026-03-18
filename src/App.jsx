@@ -92,6 +92,11 @@ const AuthenticatedApp = () => {
           <PlanningTemplates />
         </LayoutWrapper>
       } />
+      <Route path="/RoosterDashboard" element={
+        <LayoutWrapper currentPageName="RoosterDashboard">
+          <RoosterDashboard />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
