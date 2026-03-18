@@ -108,7 +108,17 @@ export default function PlanningTool() {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('all');
   const [selectedFunctionId, setSelectedFunctionId] = useState('all');
   const [activeEmployee, setActiveEmployee] = useState(null);
-  const [requiredHours, setRequiredHours] = useState({});
+  const [requiredHours, setRequiredHours] = useState(() => {
+    try {
+      const saved = localStorage.getItem('planningTool_requiredHours');
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  // Persist requiredHours to localStorage whenever it changes
+  React.useEffect(() => {
+    localStorage.setItem('planningTool_requiredHours', JSON.stringify(requiredHours));
+  }, [requiredHours]);
   const [currentWeekMonday, setCurrentWeekMonday] = useState(() => {
     const d = new Date();
     const day = d.getDay();
