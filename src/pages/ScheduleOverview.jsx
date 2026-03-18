@@ -135,28 +135,34 @@ export default function ScheduleOverview() {
     enabled: !!companyId
   });
 
-  // Calculate conflicts per schedule
+  // Calculate conflicts per schedule - only flag real understaffing where targetHours > 0 and shifts exist
   const scheduleConflicts = useMemo(() => {
     const conflicts = {};
     
     schedules.forEach(schedule => {
       const scheduleShifts = allShifts.filter(s => s.scheduleId === schedule.id);
+      
+      // No shifts at all = nothing to evaluate
+      if (scheduleShifts.length === 0) {
+        conflicts[schedule.id] = false;
+        return;
+      }
+
       const startDate = parseISO(schedule.start_date);
       const endDate = parseISO(schedule.end_date);
       
       let hasIssues = false;
       
-      // Check each day in the schedule
       const currentDate = new Date(startDate);
       while (currentDate <= endDate) {
         const dateStr = format(currentDate, 'yyyy-MM-dd');
         const dayOfWeek = currentDate.getDay();
         
-        // Check each daypart
         dayparts.forEach(dp => {
           const requirements = staffingRequirements.filter(r => 
             r.daypartId === dp.id && 
-            (r.specific_date === dateStr || r.day_of_week === dayOfWeek)
+            (r.specific_date === dateStr || r.day_of_week === dayOfWeek) &&
+            (r.targetHours || 0) > 0
           );
           
           if (requirements.length > 0) {
@@ -165,9 +171,9 @@ export default function ScheduleOverview() {
               .filter(s => s.date === dateStr && s.daypartId === dp.id)
               .reduce((sum, s) => sum + calculateNetHours(s), 0);
             
-            const percentage = targetHours > 0 ? (scheduledHours / targetHours) * 100 : 100;
+            const percentage = (scheduledHours / targetHours) * 100;
             
-            if (percentage < 80 || percentage > 120) {
+            if (percentage < 80) {
               hasIssues = true;
             }
           }
