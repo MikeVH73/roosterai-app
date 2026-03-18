@@ -437,14 +437,23 @@ export default function RoosterDashboard() {
         {/* === ROOSTERKAARTEN (inklapbaar) === */}
         <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '0.5rem' }}>
           {/* Header van de kaarten sectie */}
-          <button
-            onClick={() => setCardsCollapsed(!cardsCollapsed)}
-            className="w-full flex items-center justify-between px-5 py-3 hover:opacity-80 transition-opacity"
-            style={{ color: 'var(--color-text-primary)' }}
-          >
-            <span className="text-sm font-semibold">Alle Roosters ({sortedSchedules.length})</span>
-            {cardsCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-          </button>
+          <div className="flex items-center justify-between px-5 py-3">
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+              Alle Roosters ({sortedSchedules.length})
+            </span>
+            <button
+              onClick={() => setCardsCollapsed(!cardsCollapsed)}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-semibold transition-all hover:brightness-110"
+              style={{
+                backgroundColor: cardsCollapsed ? 'var(--color-accent)' : 'var(--color-surface-light)',
+                color: cardsCollapsed ? 'white' : 'var(--color-text-secondary)',
+                border: cardsCollapsed ? 'none' : '1px solid var(--color-border)',
+              }}
+            >
+              {cardsCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              {cardsCollapsed ? 'Uitklappen' : 'Inklappen'}
+            </button>
+          </div>
 
           {!cardsCollapsed && (
             <div className="px-4 pb-4">
