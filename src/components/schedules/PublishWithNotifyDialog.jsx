@@ -3,9 +3,40 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Send, Loader2, Check, MessageCircle } from 'lucide-react';
+import { Send, Loader2, Check, MessageCircle, Calendar, Clock, RefreshCw, Bell } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
+
+const NOTIFICATION_TYPES = [
+  {
+    id: 'rooster_gepubliceerd',
+    label: '📋 Rooster gepubliceerd',
+    description: 'Laat medewerkers weten dat er een nieuw rooster klaarstaat',
+    periodLabel: (scheduleName) => `rooster "${scheduleName}"`,
+    rosterUrl: 'Bekijk je rooster in de app of vraag de Planning Assistent.',
+  },
+  {
+    id: 'dienst_herinnering',
+    label: '⏰ Dienstherinnering',
+    description: 'Herinner medewerkers aan hun dienst van morgen',
+    periodLabel: (scheduleName) => `je dienst morgen (${scheduleName})`,
+    rosterUrl: 'Controleer je dienst in de app of vraag de Planning Assistent.',
+  },
+  {
+    id: 'rooster_gewijzigd',
+    label: '🔄 Roosterwijziging',
+    description: 'Informeer medewerkers over een wijziging in het rooster',
+    periodLabel: (scheduleName) => `gewijzigd rooster "${scheduleName}"`,
+    rosterUrl: 'Bekijk de wijzigingen in de app of vraag de Planning Assistent.',
+  },
+  {
+    id: 'algemene_melding',
+    label: '🔔 Algemene melding',
+    description: 'Stuur een algemene update naar medewerkers',
+    periodLabel: (scheduleName) => `update voor ${scheduleName}`,
+    rosterUrl: 'Neem contact op met de planner voor meer info.',
+  },
+];
 
 function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
