@@ -86,36 +86,27 @@ Deno.serve(async (req) => {
 
     const formattedPhone = normalizeNlPhone(phoneNumber);
 
-    // Template parameters
-    const p1 = (employeeName || 'collega').toString(); // {{1}}
-    const p2 = (periodLabel || subject || 'je planning').toString(); // {{2}}
-    const p3 = (rosterUrl || message || '').toString(); // {{3}}
+    // Build message text
+    const p1 = (employeeName || 'collega').toString();
+    const p2 = (periodLabel || subject || 'je planning').toString();
+    const p3 = (rosterUrl || message || '').toString();
 
     if (!p3) {
       return Response.json(
-        { error: 'rosterUrl (or message as fallback) is required for template parameter {{3}}' },
+        { error: 'rosterUrl (or message as fallback) is required' },
         { status: 400 }
       );
     }
 
-    // Send TEMPLATE message (production-safe)
+    const messageText = `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`;
+
+    // Send as regular text message (no template needed)
     const payload = {
       messaging_product: 'whatsapp',
       to: formattedPhone,
-      type: 'template',
-      template: {
-        name: 'rooster_update_notification',
-        language: { code: 'nl_NL' },
-        components: [
-          {
-            type: 'body',
-            parameters: [
-              { type: 'text', text: p1 },
-              { type: 'text', text: p2 },
-              { type: 'text', text: p3 },
-            ],
-          },
-        ],
+      type: 'text',
+      text: {
+        body: messageText,
       },
     };
 
@@ -143,7 +134,7 @@ Deno.serve(async (req) => {
           employee_id: employeeId || undefined,
           scheduleId: scheduleId || null,
           aiSuggestionId: aiSuggestionId || null,
-          message: `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`,
+          message: messageText,
           recipient_name: employeeName || 'Onbekend',
           recipient_phone: formattedPhone,
           direction: 'outbound',
@@ -161,7 +152,6 @@ Deno.serve(async (req) => {
 
     // Log successful message (with employee_id and message for visibility in MijnBerichten)
     if (companyId) {
-      const logMessage = `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`;
       await base44.asServiceRole.entities.WhatsAppMessageLog.create({
         companyId,
         employee_id: employeeId || undefined,
