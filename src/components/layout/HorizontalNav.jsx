@@ -294,6 +294,6 @@ export default function HorizontalNav({ currentPage }) {
     {whatsAppOpen && hasPermission('manage_schedules') && (
       <WhatsAppPanel onClose={() => setWhatsAppOpen(false)} />
     )}
-  </>
+    </div>
   );
 }
