@@ -57,7 +57,18 @@ export default function HorizontalNav({ currentPage }) {
   const { currentCompany, userRole, user, hasPermission, switchCompany } = useCompany();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
   const navigate = useNavigate();
+
+  const companyId = currentCompany?.id;
+
+  const { data: unreadLogs = [] } = useQuery({
+    queryKey: ['whatsapp-unread', companyId],
+    queryFn: () => base44.entities.WhatsAppMessageLog.filter({ companyId, direction: 'inbound', read: false }),
+    enabled: !!companyId && hasPermission('manage_schedules'),
+    refetchInterval: 30000,
+  });
+  const unreadCount = unreadLogs.length;
 
   const handleSwitchCompany = () => {
     switchCompany();
