@@ -106,7 +106,7 @@ Gebruik de medewerkersnaam als de gebruiker vraagt over "mijn" diensten, rooster
       });
       setCurrentConversation(conversation);
       setMessages([]);
-      setConversations([conversation, ...conversations]);
+      setConversations(prev => [conversation, ...prev]);
     } catch (error) {
       console.error('Failed to create conversation:', error);
     }
