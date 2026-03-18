@@ -20,6 +20,7 @@ export default function PlanningTemplates() {
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editWeeks, setEditWeeks] = useState(1);
+  const [editHours, setEditHours] = useState({});
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['planning-templates', companyId],
