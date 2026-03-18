@@ -640,6 +640,7 @@ export default function ScheduleEditor() {
         onOpenChange={setPublishDialogOpen}
         employees={employees}
         scheduleId={scheduleId}
+        scheduleName={schedule?.name || 'dit rooster'}
         companyId={companyId}
         isPublishing={publishMutation.isPending}
         onConfirmPublish={() => publishMutation.mutateAsync()}
