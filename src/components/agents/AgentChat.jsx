@@ -275,7 +275,7 @@ INSTRUCTIES:
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
+        {messages.filter(m => m.role !== 'system').length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="w-12 h-12 text-slate-300 mb-3" />
             <p className="text-slate-600">Start het gesprek met een vraag</p>
@@ -284,7 +284,7 @@ INSTRUCTIES:
             </p>
           </div>
         ) : (
-          messages.map((message, idx) => (
+          messages.filter(m => m.role !== 'system').map((message, idx) => (
             <MessageBubble key={idx} message={message} />
           ))
         )}
