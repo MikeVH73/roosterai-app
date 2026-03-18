@@ -402,6 +402,7 @@ export default function WhatsAppPanel({ onClose }) {
             logs={logs}
             onBack={() => setView('list')}
             onSend={handleSendDirect}
+            onSendTemplate={handleSendTemplate}
             sending={sending}
           />
         )}
