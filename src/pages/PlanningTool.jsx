@@ -397,6 +397,14 @@ export default function PlanningTool() {
               ✦ {activeEmployee.first_name} {activeEmployee.last_name} — klik op een cel
             </span>
           )}
+          <button
+            onClick={() => setSendNotifyOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+            style={{ backgroundColor: 'rgba(22,163,74,0.15)', color: '#22c55e', border: '1px solid rgba(22,163,74,0.4)' }}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            WhatsApp Bericht
+          </button>
           <span>{filteredEmployees.length} / {employees.length} medewerkers</span>
         </div>
       </header>
