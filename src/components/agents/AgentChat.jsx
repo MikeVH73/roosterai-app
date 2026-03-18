@@ -43,8 +43,9 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
 
   const loadConversations = async () => {
     try {
-      const convos = await base44.agents.listConversations({ agent_name: agentName });
-      setConversations(convos || []);
+      const allConvos = await base44.agents.listConversations({ agent_name: agentName });
+      const convos = (allConvos || []).filter(c => !c.metadata?.deleted);
+      setConversations(convos);
       
       // Auto-select the most recent conversation
       if (convos && convos.length > 0) {
