@@ -28,6 +28,7 @@ export default function MedewerkerApp() {
   const { currentCompany, user } = useCompany();
   const companyId = currentCompany?.id;
   const [activeTab, setActiveTab] = useState('home');
+  const [chatStartNew, setChatStartNew] = useState(false);
 
   // Data queries
   const { data: myProfile, isLoading: profileLoading } = useQuery({
@@ -105,7 +106,14 @@ export default function MedewerkerApp() {
     );
   }
 
-  const navigate = (tab) => setActiveTab(tab);
+  const navigate = (tab) => {
+    if (tab === 'chat') {
+      setChatStartNew(true);
+    } else {
+      setChatStartNew(false);
+    }
+    setActiveTab(tab);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -132,7 +140,7 @@ export default function MedewerkerApp() {
           />
         );
       case 'chat':
-        return <MobileChatTab agentName="planning_assistent" />;
+        return <MobileChatTab startNew={chatStartNew} />;
       case 'meldingen':
         return (
           <MobileMeldingenTab
