@@ -35,6 +35,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 const allNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard', permission: null },
   { id: 'schedule-overview', label: 'Roosters Overzicht', icon: CalendarCheck, page: 'ScheduleOverview', permission: null },
+  { id: 'rooster-dashboard', label: 'Rooster Dashboard', icon: CalendarCheck, page: 'RoosterDashboard', permission: 'manage_schedules' },
   { id: 'schedules', label: 'Alle Roosters', icon: Calendar, page: 'Schedules', permission: 'manage_schedules' },
   { id: 'employees', label: 'Medewerkers', icon: Users, page: 'Employees', permission: 'manage_schedules' },
   { id: 'planning-tool', label: 'Planningshulpmiddel', icon: Calendar, page: 'PlanningTool', permission: 'manage_schedules' },
