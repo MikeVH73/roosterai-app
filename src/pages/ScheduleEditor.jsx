@@ -84,6 +84,7 @@ export default function ScheduleEditor() {
   const [selectedTimelineDayparts, setSelectedTimelineDayparts] = useState([]);
   const [undoStack, setUndoStack] = useState([]);
   const [whatsappInboxOpen, setWhatsappInboxOpen] = useState(false);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
