@@ -236,9 +236,12 @@ REGELS:
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Stel een vraag over je rooster</p>
           </div>
         ) : (
-          messages.filter(m => m.role !== 'system').map((msg, idx) => (
-            <MessageBubble key={idx} message={msg} />
-          ))
+          messages.filter(m => m.role !== 'system').map((msg, idx) => {
+            const cleanMsg = msg.role === 'user' && msg.content?.includes('[CONTEXT_START]')
+              ? { ...msg, content: msg.content.replace(/\[CONTEXT_START\][\s\S]*?\[CONTEXT_END\]\s*/g, '').trim() }
+              : msg;
+            return <MessageBubble key={idx} message={cleanMsg} />;
+          })
         )}
         {loading && (
           <div className="flex items-start gap-2">
