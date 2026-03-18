@@ -42,15 +42,17 @@ function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 }
 
-export default function PublishWithNotifyDialog({ open, onOpenChange, employees = [], scheduleId, companyId, onConfirmPublish, isPublishing }) {
+export default function PublishWithNotifyDialog({ open, onOpenChange, employees = [], scheduleId, scheduleName = 'dit rooster', companyId, onConfirmPublish, isPublishing }) {
   const [selected, setSelected] = useState([]);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [notificationType, setNotificationType] = useState('rooster_gepubliceerd');
 
   useEffect(() => {
     if (open) {
       setSelected([]);
       setDone(false);
+      setNotificationType('rooster_gepubliceerd');
     }
   }, [open]);
 
