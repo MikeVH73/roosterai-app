@@ -158,6 +158,8 @@ export default function PlanningTemplates() {
               const totalHours = getTotalHours(tpl.suggested_patch?.requiredHours);
               const byDaypart = summarizeHours(tpl.suggested_patch?.requiredHours);
               const repeatWeeks = tpl.suggested_patch?.repeatWeeks || 1;
+              const templateShifts = tpl.suggested_patch?.shifts || [];
+              const shiftsByDaypart = groupShifts(templateShifts);
 
               return (
                 <div
