@@ -117,12 +117,21 @@ Gebruik de medewerkersnaam als de gebruiker vraagt over "mijn" diensten, rooster
     if (!inputMessage.trim() || !currentConversation || loading) return;
 
     const userMessage = inputMessage.trim();
-    const isFirstMessage = messages.length === 0;
+    const isFirstMessage = messages.filter(m => m.role !== 'system').length === 0;
     
     setInputMessage('');
     setLoading(true);
 
     try {
+      // If first real message, inject context first
+      if (isFirstMessage) {
+        const contextMessage = await buildContextMessage();
+        await base44.agents.addMessage(currentConversation, {
+          role: 'system',
+          content: contextMessage
+        });
+      }
+
       await base44.agents.addMessage(currentConversation, {
         role: 'user',
         content: userMessage
