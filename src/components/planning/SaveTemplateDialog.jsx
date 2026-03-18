@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save, Loader2 } from 'lucide-react';
 
-export default function SaveTemplateDialog({ open, onClose, requiredHours, companyId, onSaved }) {
+export default function SaveTemplateDialog({ open, onClose, requiredHours, weekShifts = [], companyId, onSaved }) {
   const [name, setName] = useState('');
   const [weeks, setWeeks] = useState(1);
 
