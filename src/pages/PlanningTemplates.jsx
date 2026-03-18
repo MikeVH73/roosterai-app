@@ -34,6 +34,12 @@ export default function PlanningTemplates() {
     enabled: !!companyId,
   });
 
+  const { data: employees = [] } = useQuery({
+    queryKey: ['employees', companyId],
+    queryFn: () => base44.entities.EmployeeProfile.filter({ companyId, status: 'active' }),
+    enabled: !!companyId,
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.AISuggestion.update(id, data),
     onSuccess: () => {
