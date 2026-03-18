@@ -435,7 +435,8 @@ export default function PlanningTool() {
            onCellClick={handleCellClick}
            currentWeekMonday={currentWeekMonday}
            onWeekChange={setCurrentWeekMonday}
-          />
+           onWeekShiftsChange={setCurrentWeekShifts}
+           />
         </div>
 
       </div>
