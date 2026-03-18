@@ -711,6 +711,11 @@ export default function RoosterDashboard() {
                     currentWeekStart={currentWeekStart}
                     activeDays={currentSchedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
                     onDepartmentPlan={(deptId) => navigate(`/PlanningTool?departmentId=${deptId}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}`)}
+                    onDepartmentEdit={(deptId) => { const s = currentSchedule; handleOpenEdit(s); }}
+                    onDepartmentDuplicate={(_deptId) => handleDuplicate(currentSchedule)}
+                    onDepartmentArchive={(_deptId) => handleArchive(currentSchedule)}
+                    onDepartmentClearShifts={(_deptId) => handleClearShifts(currentSchedule)}
+                    onDepartmentDelete={(_deptId) => handleDelete(currentSchedule)}
                     onShiftClick={(shift) => {
                       if (!hasPermission('manage_schedules')) return;
                       setSelectedShift(shift);
