@@ -406,6 +406,13 @@ export default function PlanningDaypartsPanel({
                             cursor: isClickable ? 'pointer' : 'text',
                           }}
                         />
+                        {/* Klik-hint wanneer medewerker geselecteerd is en cel leeg is */}
+                        {isClickable && cellShifts.length === 0 && (
+                          <div className="flex items-center justify-center gap-1 text-xs font-medium py-1 rounded" style={{ color: '#6366f1' }}>
+                            <span>+ inplannen</span>
+                          </div>
+                        )}
+
                         {/* Ingeplande medewerkers */}
                         <div className="space-y-0.5">
                           {cellShifts.map(shift => {
