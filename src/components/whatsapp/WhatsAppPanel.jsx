@@ -330,8 +330,7 @@ export default function WhatsAppPanel({ onClose }) {
       employeeName: `${employee.first_name} ${employee.last_name}`,
       employeeId: employee.id,
       companyId,
-      periodLabel: 'een bericht van de planner',
-      rosterUrl: message,
+      directMessage: message,
     };
     await base44.functions.invoke('sendWhatsAppMessage', payload);
     queryClient.invalidateQueries(['whatsapp-logs', companyId]);
