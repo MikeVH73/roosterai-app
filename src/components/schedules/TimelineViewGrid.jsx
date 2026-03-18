@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo, Fragment } from 'react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { nl } from 'date-fns/locale';
-import { GripVertical, Clock, Plus, LayoutGrid, Edit } from 'lucide-react';
+import { GripVertical, Clock, Plus, LayoutGrid, Edit, Copy, Archive, Eraser, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 
