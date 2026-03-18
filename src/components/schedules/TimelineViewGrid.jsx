@@ -420,17 +420,7 @@ export default function TimelineViewGrid({
                                Plannen
                              </button>
                            )}
-                           {onShiftClick && (
-                             <button
-                               title="Bewerken"
-                               onClick={() => onDepartmentEdit?.(dept.id)}
-                               className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
-                               style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}
-                             >
-                               <Edit className="w-3 h-3" />
-                               Bewerken
-                             </button>
-                           )}
+
                          </div>
                        </div>
 
