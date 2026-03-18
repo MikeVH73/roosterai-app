@@ -19,10 +19,13 @@ import {
   Sun,
   Moon,
   Crown,
-  FileText
+  FileText,
+  MessageCircle
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import WhatsAppPanel from '@/components/whatsapp/WhatsAppPanel';
 import {
   DropdownMenu,
   DropdownMenuContent,
