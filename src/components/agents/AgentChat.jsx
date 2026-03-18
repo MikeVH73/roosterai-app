@@ -165,23 +165,21 @@ INSTRUCTIES:
 
   const deleteConversation = async (conversationId, e) => {
     e.stopPropagation();
+    // Remove from UI immediately
+    setConversations(prev => prev.filter(c => c.id !== conversationId));
+    if (currentConversation?.id === conversationId) {
+      setCurrentConversation(null);
+      setMessages([]);
+    }
+    // Try to mark as deleted in backend (best effort)
     try {
-      await base44.agents.updateConversation(conversationId, {
-        metadata: { name: '__deleted__', deleted: true }
-      });
-      setConversations(prev => prev.filter(c => c.id !== conversationId));
-      if (currentConversation?.id === conversationId) {
-        setCurrentConversation(null);
-        setMessages([]);
+      if (typeof base44.agents.updateConversation === 'function') {
+        await base44.agents.updateConversation(conversationId, {
+          metadata: { name: '__deleted__', deleted: true }
+        });
       }
     } catch (error) {
-      console.error('Failed to delete conversation:', error);
-      // Still remove from UI even if API fails
-      setConversations(prev => prev.filter(c => c.id !== conversationId));
-      if (currentConversation?.id === conversationId) {
-        setCurrentConversation(null);
-        setMessages([]);
-      }
+      // Already removed from UI, ignore backend errors
     }
   };
 
@@ -216,27 +214,25 @@ INSTRUCTIES:
           ? userMessage.substring(0, 50) + '...' 
           : userMessage;
         
+        // Update local state immediately
+        setConversations(prev => prev.map(c => 
+          c.id === currentConversation.id 
+            ? { ...c, metadata: { ...c.metadata, name: shortTitle } }
+            : c
+        ));
+        setCurrentConversation(prev => ({
+          ...prev,
+          metadata: { ...prev.metadata, name: shortTitle }
+        }));
+
+        // Try to persist title (best effort)
         try {
-          await base44.agents.updateConversation(currentConversation.id, {
-            metadata: {
-              name: shortTitle,
-              description: 'Planning assistent gesprek'
-            }
-          });
-          
-          // Update local state
-          setConversations(prev => prev.map(c => 
-            c.id === currentConversation.id 
-              ? { ...c, metadata: { ...c.metadata, name: shortTitle } }
-              : c
-          ));
-          setCurrentConversation(prev => ({
-            ...prev,
-            metadata: { ...prev.metadata, name: shortTitle }
-          }));
-        } catch (error) {
-          console.error('Failed to update conversation title:', error);
-        }
+          if (typeof base44.agents.updateConversation === 'function') {
+            await base44.agents.updateConversation(currentConversation.id, {
+              metadata: { name: shortTitle, description: 'Planning assistent gesprek' }
+            });
+          }
+        } catch {}
       }
     } catch (error) {
       console.error('Failed to send message:', error);
