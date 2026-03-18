@@ -1,6 +1,16 @@
 import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Check, Star, UserCheck } from 'lucide-react';
+import { Check, Star, UserCheck, CheckCircle2 } from 'lucide-react';
+
+function calcShiftHours(shift) {
+  if (!shift.start_time || !shift.end_time) return 0;
+  const [sh, sm] = shift.start_time.split(':').map(Number);
+  const [eh, em] = shift.end_time.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60;
+  mins -= (shift.break_duration || 0);
+  return Math.max(0, mins / 60);
+}
 
 function getInitials(first, last) {
   return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
