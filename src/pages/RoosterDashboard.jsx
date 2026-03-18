@@ -106,6 +106,9 @@ export default function RoosterDashboard() {
   const [selectedDaypartId, setSelectedDaypartId] = useState(null);
   const [currentScheduleId, setCurrentScheduleId] = useState(null);
 
+  // --- WhatsApp notify dialog state ---
+  const [sendNotifyOpen, setSendNotifyOpen] = useState(false);
+
   // --- Rooster bewerken dialog state ---
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);

@@ -140,6 +140,7 @@ export default function PlanningTool() {
     d.setHours(0, 0, 0, 0);
     return d;
   });
+  const [sendNotifyOpen, setSendNotifyOpen] = useState(false);
   const [warningOpen, setWarningOpen] = useState(false);
   const [pendingShiftData, setPendingShiftData] = useState(null);
   const [currentWeekShifts, setCurrentWeekShifts] = useState([]);
