@@ -105,12 +105,10 @@ INSTRUCTIES:
     if (creatingConversation) return;
     setCreatingConversation(true);
     try {
-      const ctx = await buildContextMessage();
       const conv = await base44.agents.createConversation({
         agent_name: agentName,
         metadata: { name: 'Nieuw gesprek', description: 'Planning assistent' }
       });
-      await base44.agents.addMessage(conv, { role: 'system', content: ctx });
       setCurrentConversation(conv);
       setMessages([]);
       setConversations(prev => [conv, ...prev]);
