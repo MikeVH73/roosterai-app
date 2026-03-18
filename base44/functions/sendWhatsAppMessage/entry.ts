@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
         employee_id: employeeId || undefined,
         scheduleId: scheduleId || null,
         aiSuggestionId: aiSuggestionId || null,
-        message: logMessage,
+        message: messageText,
         recipient_name: employeeName || 'Onbekend',
         recipient_phone: formattedPhone,
         direction: 'outbound',
@@ -171,8 +171,6 @@ Deno.serve(async (req) => {
       messageId: responseData.messages?.[0]?.id,
       to: formattedPhone,
       employeeName,
-      template: 'rooster_update_notification',
-      language: 'nl_NL',
     });
   } catch (error) {
     console.error('Error sending WhatsApp:', error);
