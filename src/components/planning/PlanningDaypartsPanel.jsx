@@ -571,6 +571,7 @@ export default function PlanningDaypartsPanel({
         open={saveTemplateOpen}
         onClose={() => setSaveTemplateOpen(false)}
         requiredHours={requiredHours}
+        weekShifts={weekShifts}
         companyId={companyId}
         onSaved={() => {
           setSaveTemplateOpen(false);
