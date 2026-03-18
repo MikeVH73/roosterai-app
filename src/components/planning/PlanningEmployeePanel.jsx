@@ -131,8 +131,12 @@ export default function PlanningEmployeePanel({
   activeEmployee,
   onSelectEmployee,
   neonGreen = '#39ff14',
+  weekShifts = [],
 }) {
   const getFuncName = (id) => functions.find(f => f.id === id)?.name || '';
+
+  const getWeekHours = (empId) =>
+    weekShifts.filter(s => s.employeeId === empId).reduce((sum, s) => sum + calcShiftHours(s), 0);
 
   const matchIds = new Set(filteredEmployees.map(e => e.id));
   const matchingEmployees = allEmployees.filter(e => matchIds.has(e.id));
