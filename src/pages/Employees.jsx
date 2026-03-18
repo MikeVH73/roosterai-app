@@ -185,6 +185,10 @@ export default function Employees() {
           hasPermission('manage_schedules') && (
             <div className="flex gap-2">
               <EmployeeExport employees={employees} departments={departments} functions={functions} />
+              <Button variant="outline" onClick={() => setWhatsAppInviteOpen(true)}>
+                <MessageCircle className="w-4 h-4 mr-2 text-green-500" />
+                WhatsApp Uitnodigingen
+              </Button>
               <Button onClick={() => setDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-2" />
                 Medewerker toevoegen
