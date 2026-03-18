@@ -45,9 +45,11 @@ export default function MobileChatTab({ startNew = false }) {
   const buildContextMessage = useCallback(async () => {
     let employeeInfo = 'Onbekend';
     let employeeId = '';
+    let employeeProfile = null;
     try {
       const profiles = await base44.entities.EmployeeProfile.filter({ companyId: currentCompany?.id, email: user?.email });
       if (profiles?.length > 0) {
+        employeeProfile = profiles[0];
         employeeInfo = `${profiles[0].first_name} ${profiles[0].last_name}`;
         employeeId = profiles[0].id;
       }
@@ -70,6 +72,42 @@ export default function MobileChatTab({ startNew = false }) {
     const nextMon = new Date(now); nextMon.setDate(now.getDate() + (dow === 0 ? 1 : 8 - dow));
     const nextSun = new Date(nextMon); nextSun.setDate(nextMon.getDate() + 6);
 
+    // Pre-fetch shifts for 6 weeks around now and resolve location/department names
+    let shiftsInfo = 'Geen shifts gevonden.';
+    try {
+      const lookbackStart = new Date(thisMon);
+      lookbackStart.setDate(lookbackStart.getDate() - 7); // 1 week before
+      const lookforwardEnd = new Date(thisSun);
+      lookforwardEnd.setDate(lookforwardEnd.getDate() + 35); // 5 weeks ahead
+      const startStr = lookbackStart.toISOString().split('T')[0];
+      const endStr = lookforwardEnd.toISOString().split('T')[0];
+
+      const allShifts = await base44.entities.Shift.filter({ companyId: currentCompany?.id, employeeId });
+      const relevantShifts = allShifts.filter(s => s.date >= startStr && s.date <= endStr)
+        .sort((a, b) => a.date.localeCompare(b.date) || a.start_time.localeCompare(b.start_time));
+
+      if (relevantShifts.length > 0) {
+        // Fetch locations and departments for resolution
+        const [locations, departments] = await Promise.all([
+          base44.entities.Location.filter({ companyId: currentCompany?.id }),
+          base44.entities.Department.filter({ companyId: currentCompany?.id })
+        ]);
+        const locMap = Object.fromEntries(locations.map(l => [l.id, l.name]));
+        const deptMap = Object.fromEntries(departments.map(d => [d.id, d.name]));
+
+        const lines = relevantShifts.map(s => {
+          const d = new Date(s.date + 'T00:00:00');
+          const dayName = dayNames[d.getDay()];
+          const loc = locMap[s.locationId] || 'onbekend';
+          const dept = deptMap[s.departmentId] || 'onbekend';
+          return `  ${dayName} ${s.date}: ${s.start_time}-${s.end_time} | ${loc} | ${dept}`;
+        });
+        shiftsInfo = lines.join('\n');
+      }
+    } catch (e) {
+      shiftsInfo = 'Fout bij ophalen shifts.';
+    }
+
     return `Je bent de Planning Assistent. Antwoord in het Nederlands.
 
 GEBRUIKER INFO:
@@ -82,10 +120,13 @@ DATUM INFO:
 - Week ${weekNumber}: ${thisMon.toISOString().split('T')[0]} t/m ${thisSun.toISOString().split('T')[0]}
 - Week ${weekNumber + 1}: ${nextMon.toISOString().split('T')[0]} t/m ${nextSun.toISOString().split('T')[0]}
 
+DIENSTEN OVERZICHT (komende 6 weken):
+${shiftsInfo}
+
 REGELS:
-- Filter shifts ALTIJD op employeeId "${employeeId}" (niet op companyId). Gebruik limit 500.
-- Datumvelden zijn strings (YYYY-MM-DD). Gebruik GEEN $gte/$lte operators. Haal ALLE shifts op en filter zelf.
-- Begroet bij voornaam. Toon NOOIT ID's. Wees bondig.`;
+- Gebruik BOVENSTAANDE DIENSTEN DATA om vragen te beantwoorden. Je hoeft GEEN read_shift te doen tenzij de gebruiker om een andere periode vraagt.
+- Als je toch shifts moet ophalen: gebruik employeeId "${employeeId}" als filter, NIET companyId alleen.
+- Begroet bij voornaam. Toon NOOIT ID's. Wees bondig en gebruik de dag + datum + tijd + locatie.`;
   }, [currentCompany, user]);
 
   const loadConversations = async () => {
