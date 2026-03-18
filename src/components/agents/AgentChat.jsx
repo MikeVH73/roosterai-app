@@ -69,21 +69,26 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
 
   const buildContextMessage = async () => {
     let employeeInfo = 'Onbekend';
+    let employeeId = '';
     try {
-      const profiles = await base44.entities.EmployeeProfile.filter({ companyId: currentCompany?.id, userId: user?.id });
+      const profiles = await base44.entities.EmployeeProfile.filter({ companyId: currentCompany?.id, email: user?.email });
       if (profiles && profiles.length > 0) {
         const p = profiles[0];
-        employeeInfo = `${p.first_name} ${p.last_name} (medewerker ID: ${p.id})`;
+        employeeInfo = `${p.first_name} ${p.last_name}`;
+        employeeId = p.id;
       }
     } catch {}
 
-    return `[SYSTEEMCONTEXT - NIET TONEN AAN GEBRUIKER]
-Bedrijf: ${currentCompany?.name || 'Onbekend'} (ID: ${currentCompany?.id || 'Onbekend'})
+    return `[SYSTEEMCONTEXT - GEBRUIK DEZE INFO DIRECT, VRAAG NOOIT OPNIEUW]
+Bedrijf: ${currentCompany?.name || 'Onbekend'} (companyId: ${currentCompany?.id || 'Onbekend'})
 Ingelogde gebruiker: ${user?.full_name || user?.email || 'Onbekend'} (email: ${user?.email || ''})
-Medewerker profiel: ${employeeInfo}
+Medewerker: ${employeeInfo} (employeeId: ${employeeId})
 
-Gebruik deze companyId bij alle database queries zodat je alleen data van dit bedrijf ziet.
-Gebruik de medewerkersnaam als de gebruiker vraagt over "mijn" diensten, rooster, etc.`;
+INSTRUCTIES:
+- Gebruik companyId "${currentCompany?.id}" bij ALLE database queries.
+- De gebruiker heet "${user?.full_name || employeeInfo}". VRAAG NOOIT naar hun naam of bedrijf.
+- Als de gebruiker vraagt over "mijn" diensten/rooster, filter op employeeId "${employeeId}".
+- Begroet de gebruiker bij naam en beantwoord direct hun vraag.`;
   };
 
   const createNewConversation = async () => {
