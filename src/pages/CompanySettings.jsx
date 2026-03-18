@@ -16,7 +16,8 @@ import {
   Mail,
   UserPlus,
   Crown,
-  ArrowRight
+  ArrowRight,
+  Eye
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import InvitationManager from '@/components/settings/InvitationManager';
+import ColleagueRosterSettings from '@/components/settings/ColleagueRosterSettings';
 
 export default function CompanySettings() {
   const { currentCompany, refreshCompany, hasPermission } = useCompany();
@@ -70,6 +72,10 @@ export default function CompanySettings() {
       email_new_schedule: true,
       email_shift_changes: true,
       email_vacation_updates: true
+    },
+    colleague_roster_settings: {
+      enabled: false,
+      visible_departmentIds: []
     }
   });
 
@@ -100,7 +106,8 @@ export default function CompanySettings() {
       setSettingsData({
         planning_rules: { ...settingsData.planning_rules, ...companySettings.planning_rules },
         ai_preferences: { ...settingsData.ai_preferences, ...companySettings.ai_preferences },
-        notification_settings: { ...settingsData.notification_settings, ...companySettings.notification_settings }
+        notification_settings: { ...settingsData.notification_settings, ...companySettings.notification_settings },
+        colleague_roster_settings: { ...settingsData.colleague_roster_settings, ...companySettings.colleague_roster_settings }
       });
     }
   }, [companySettings]);
@@ -180,6 +187,10 @@ export default function CompanySettings() {
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="w-4 h-4" />
               Notificaties
+            </TabsTrigger>
+            <TabsTrigger value="employee_view" className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Medewerker inzage
             </TabsTrigger>
             <TabsTrigger value="team" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -465,6 +476,27 @@ export default function CompanySettings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="employee_view">
+            <ColleagueRosterSettings
+              settingsData={settingsData}
+              onSettingsChange={setSettingsData}
+            />
+            <div className="pt-4">
+              <Button 
+                onClick={handleSaveSettings}
+                disabled={updateSettingsMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {updateSettingsMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Opslaan
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="team">

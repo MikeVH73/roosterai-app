@@ -1,15 +1,17 @@
 import React from 'react';
-import { Home, Calendar, MessageCircle, Bell, User } from 'lucide-react';
+import { Home, Calendar, MessageCircle, Bell, User, Users } from 'lucide-react';
 
-const tabs = [
+const baseTabs = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'rooster', label: 'Rooster', icon: Calendar },
+  { id: 'collegas', label: "Collega's", icon: Users, conditional: true },
   { id: 'chat', label: 'Berichten', icon: MessageCircle },
   { id: 'meldingen', label: 'Meldingen', icon: Bell },
   { id: 'profiel', label: 'Profiel', icon: User },
 ];
 
-export default function MobileBottomNav({ activeTab, onTabChange, unreadCount = 0 }) {
+export default function MobileBottomNav({ activeTab, onTabChange, unreadCount = 0, showCollegaTab = false }) {
+  const tabs = baseTabs.filter(t => !t.conditional || (t.id === 'collegas' && showCollegaTab));
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t safe-area-bottom"
       style={{ 
