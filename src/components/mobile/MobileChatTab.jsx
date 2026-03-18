@@ -139,11 +139,9 @@ INSTRUCTIES:
     setInputMessage('');
     setLoading(true);
     try {
-      if (isFirst) {
-        const ctx = await buildContextMessage();
-        await base44.agents.addMessage(currentConversation, { role: 'system', content: ctx });
-      }
-      await base44.agents.addMessage(currentConversation, { role: 'user', content: msg });
+      const ctx = await buildContextMessage();
+      const fullMsg = isFirst ? `${ctx}\n\n---\n\nVraag van de gebruiker: ${msg}` : msg;
+      await base44.agents.addMessage(currentConversation, { role: 'user', content: fullMsg });
       if (isFirst) {
         const title = msg.length > 40 ? msg.substring(0, 40) + '...' : msg;
         setConversations(prev => prev.map(c => c.id === currentConversation.id ? { ...c, metadata: { ...c.metadata, name: title } } : c));
