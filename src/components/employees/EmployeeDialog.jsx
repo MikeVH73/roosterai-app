@@ -249,7 +249,7 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
               })}
             </TabsList>
 
-            <div className="overflow-y-auto py-4" style={{ height: '420px' }}>
+            <div className="overflow-y-auto py-4" style={{ height: '840px' }}>
               <TabsContent value="general" className="space-y-4 mt-0 h-full">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
