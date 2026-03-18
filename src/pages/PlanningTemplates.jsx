@@ -167,9 +167,7 @@ export default function PlanningTemplates() {
                       {/* Bewerkbaar urengrid */}
                       {(() => {
                         const byDaypart = summarizeHours(editHours);
-                        const dpIds = [...new Set(
-                          Object.keys(editHours).map(k => k.split('_').slice(0, -1).join('_'))
-                        )].filter(Boolean);
+                        const dpIds = Object.keys(byDaypart);
                         if (dpIds.length === 0) return null;
                         return (
                           <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-border)' }}>
