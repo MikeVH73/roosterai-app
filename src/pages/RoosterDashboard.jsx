@@ -710,7 +710,7 @@ export default function RoosterDashboard() {
                     dayparts={dayparts}
                     currentWeekStart={currentWeekStart}
                     activeDays={currentSchedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
-                    onDepartmentPlan={(deptId) => navigate(`/PlanningTool?departmentId=${deptId}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}`)}
+                    onDepartmentPlan={(deptId) => navigate(`/PlanningTool?departmentId=${deptId}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}&scheduleId=${currentSchedule.id}&returnTo=RoosterDashboard`)}
                     onDepartmentEdit={(deptId) => { const s = currentSchedule; handleOpenEdit(s); }}
                     onDepartmentDuplicate={(_deptId) => handleDuplicate(currentSchedule)}
                     onDepartmentArchive={(_deptId) => handleArchive(currentSchedule)}
