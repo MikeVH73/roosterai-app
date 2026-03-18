@@ -316,18 +316,10 @@ export default function WhatsAppPanel({ onClose }) {
       employeeName: `${employee.first_name} ${employee.last_name}`,
       employeeId: employee.id,
       companyId,
-      periodLabel: 'je planning',
+      periodLabel: 'een bericht van de planner',
       rosterUrl: message,
     };
     await base44.functions.invoke('sendWhatsAppMessage', payload);
-    await base44.entities.WhatsAppMessageLog.create({
-      companyId,
-      employee_id: employee.id,
-      message,
-      direction: 'outbound',
-      status: 'sent',
-      sent_by: user?.email,
-    });
     queryClient.invalidateQueries(['whatsapp-logs', companyId]);
     setSending(false);
   };
