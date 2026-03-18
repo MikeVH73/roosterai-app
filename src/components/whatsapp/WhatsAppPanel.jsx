@@ -312,10 +312,12 @@ export default function WhatsAppPanel({ onClose }) {
   const handleSendDirect = async (employee, message) => {
     setSending(true);
     const payload = {
-      to: employee.phone?.replace(/\D/g, ''),
-      message,
-      employee_id: employee.id,
-      company_id: companyId,
+      phoneNumber: employee.phone,
+      employeeName: `${employee.first_name} ${employee.last_name}`,
+      employeeId: employee.id,
+      companyId,
+      periodLabel: 'je planning',
+      rosterUrl: message,
     };
     await base44.functions.invoke('sendWhatsAppMessage', payload);
     await base44.entities.WhatsAppMessageLog.create({
