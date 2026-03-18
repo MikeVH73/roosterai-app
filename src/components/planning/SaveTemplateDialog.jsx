@@ -62,6 +62,11 @@ export default function SaveTemplateDialog({ open, onClose, requiredHours, compa
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
               De planner kan deze template later in één klik voor {weeks} {weeks === 1 ? 'week' : 'weken'} aaneen inroosteren.
             </p>
+          {!Object.values(requiredHours || {}).some(v => parseFloat(v) > 0) && (
+            <p className="text-xs font-medium" style={{ color: '#b45309' }}>
+              ⚠️ Vul eerst uren in bij de dagdelen voordat je opslaat.
+            </p>
+          )}
           </div>
         </div>
         <DialogFooter>
