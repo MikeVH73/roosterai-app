@@ -125,6 +125,10 @@ export default function PlanningTool() {
     localStorage.setItem('planningTool_requiredHours', JSON.stringify(requiredHours));
   }, [requiredHours]);
   const [currentWeekMonday, setCurrentWeekMonday] = useState(() => {
+    if (urlWeekStart) {
+      const d = new Date(urlWeekStart);
+      if (!isNaN(d)) { d.setHours(0, 0, 0, 0); return d; }
+    }
     const d = new Date();
     const day = d.getDay();
     const diff = day === 0 ? -6 : 1 - day;
