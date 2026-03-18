@@ -140,11 +140,8 @@ INSTRUCTIES:
     setInputMessage('');
     setLoading(true);
     try {
-      let fullMsg = msg;
-      if (isFirst) {
-        const ctx = await buildContextMessage();
-        fullMsg = `[CONTEXT_START]${ctx}[CONTEXT_END]\n\n${msg}`;
-      }
+      const ctx = await buildContextMessage();
+      const fullMsg = `[CONTEXT_START]${ctx}[CONTEXT_END]\n\n${msg}`;
       await base44.agents.addMessage(currentConversation, { role: 'user', content: fullMsg });
       if (isFirst) {
         const title = msg.length > 40 ? msg.substring(0, 40) + '...' : msg;
