@@ -287,6 +287,44 @@ export default function Dashboard() {
             {departments.length > 0 && (
               <DepartmentDistribution employees={employees} departments={departments} />
             )}
+
+            {/* WhatsApp AI Koppelen - alleen voor medewerkers */}
+            {isEmployee && (
+              <Card className="border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' }}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <MessageCircle className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">WhatsApp Planning Assistent</h3>
+                      <p className="text-sm text-white/80">Stel vragen via WhatsApp</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-white/90 mb-4">
+                    Koppel WhatsApp om je rooster op te vragen, diensten te ruilen of verlof aan te vragen — direct via je telefoon.
+                  </p>
+                  {myProfile?.whatsapp_opt_in ? (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-white/20">
+                      <CheckCircle2 className="w-4 h-4 text-white" />
+                      <span className="text-sm text-white font-medium">WhatsApp is gekoppeld</span>
+                    </div>
+                  ) : (
+                    <a
+                      href={base44.agents.getWhatsAppConnectURL('planning_assistent')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button className="w-full bg-white text-green-700 hover:bg-white/90 font-semibold">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Koppel WhatsApp
+                      </Button>
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* AI Assistant Card */}
             {hasPermission('use_ai') && (
               <Card className="border-0 shadow-sm" style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%)' }}>
