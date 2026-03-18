@@ -79,7 +79,7 @@ function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen 
                 ACTIEF
               </span>
             )}
-            {!isActive && isFull && (
+            {isFull && (
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: isOver ? 'rgba(239,68,68,0.15)' : 'rgba(22,163,74,0.15)', color: isOver ? '#ef4444' : '#16a34a' }}>
                 {isOver ? 'OVER' : 'VOL'}
               </span>
