@@ -402,31 +402,49 @@ export default function TimelineViewGrid({
                    return (
                      <div key={dept.id}>
                        {/* Department label header */}
-                       <div className="w-full border-b px-3 py-1.5 flex items-center justify-between" style={{
+                       <div className="w-full border-b px-3 py-1.5 flex items-center gap-2 flex-wrap" style={{
                          borderColor: 'var(--color-border)',
                          backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
                        }}>
-                         <span className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                         <span className="font-medium text-sm mr-2" style={{ color: 'var(--color-text-primary)' }}>
                            {dept.name}
                          </span>
-                         <div className="flex items-center gap-1">
-                           {onDepartmentPlan && (
-                             <button
-                               title="Openen in Planningshulpmiddel"
-                               onClick={() => onDepartmentPlan(dept.id)}
-                               className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold transition-all hover:brightness-110"
-                               style={{
-                                 backgroundColor: 'rgba(57,220,20,0.18)',
-                                 color: '#4ade80',
-                                 border: '1px solid rgba(74,222,128,0.4)',
-                               }}
-                             >
-                               <LayoutGrid className="w-3 h-3" />
-                               Plannen
-                             </button>
-                           )}
-
-                         </div>
+                         {onDepartmentPlan && (
+                           <button onClick={() => onDepartmentPlan(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold transition-all hover:brightness-110"
+                             style={{ backgroundColor: 'rgba(57,220,20,0.18)', color: '#4ade80', border: '1px solid rgba(74,222,128,0.4)' }}
+                           ><LayoutGrid className="w-3 h-3" /> Plannen</button>
+                         )}
+                         {onDepartmentEdit && (
+                           <button onClick={() => onDepartmentEdit(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
+                             style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+                           ><Edit className="w-3 h-3" /> Bewerken</button>
+                         )}
+                         {onDepartmentDuplicate && (
+                           <button onClick={() => onDepartmentDuplicate(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
+                             style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+                           ><Copy className="w-3 h-3" /> Dupliceren</button>
+                         )}
+                         {onDepartmentArchive && (
+                           <button onClick={() => onDepartmentArchive(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
+                             style={{ color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-surface)' }}
+                           ><Archive className="w-3 h-3" /> Archiveren</button>
+                         )}
+                         {onDepartmentClearShifts && (
+                           <button onClick={() => onDepartmentClearShifts(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
+                             style={{ color: '#f97316', border: '1px solid rgba(249,115,22,0.3)', backgroundColor: 'rgba(249,115,22,0.08)' }}
+                           ><Eraser className="w-3 h-3" /> Rooster leegmaken</button>
+                         )}
+                         {onDepartmentDelete && (
+                           <button onClick={() => onDepartmentDelete(dept.id)}
+                             className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all hover:opacity-80"
+                             style={{ color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', backgroundColor: 'rgba(239,68,68,0.08)' }}
+                           ><Trash2 className="w-3 h-3" /> Verwijderen</button>
+                         )}
                        </div>
 
                        {Array.from({ length: totalRows }).map((_, rowIdx) => (
