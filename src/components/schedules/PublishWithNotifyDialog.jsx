@@ -113,7 +113,29 @@ export default function PublishWithNotifyDialog({ open, onOpenChange, employees 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-3">
+        <div className="flex-1 overflow-y-auto space-y-4">
+          {/* Notification type selector */}
+          <div>
+            <p className="text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Type melding:</p>
+            <div className="grid grid-cols-2 gap-2">
+              {NOTIFICATION_TYPES.map((type) => (
+                <button
+                  key={type.id}
+                  onClick={() => setNotificationType(type.id)}
+                  className="text-left p-3 rounded-lg border-2 transition-all text-xs"
+                  style={{
+                    borderColor: notificationType === type.id ? '#38bdf8' : 'var(--color-border)',
+                    backgroundColor: notificationType === type.id ? 'rgba(56,189,248,0.08)' : 'var(--color-surface-light)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                >
+                  <div className="font-medium">{type.label}</div>
+                  <div className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{type.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {connectedEmployees.length === 0 ? (
             <div className="rounded-lg p-4 text-center" style={{ backgroundColor: 'var(--color-surface-light)' }}>
               <MessageCircle className="w-8 h-8 mx-auto mb-2 text-slate-400" />
