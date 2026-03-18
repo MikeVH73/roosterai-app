@@ -19,11 +19,15 @@ function getInitials(first, last) {
 const DAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
 const DAY_KEYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
-function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen = '#39ff14' }) {
+function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen = '#39ff14', weekHours = 0 }) {
   const preferredDays = emp.preferences?.preferred_days || [];
   const activeDayIndices = DAY_KEYS
     .map((key, i) => preferredDays.includes(key) ? i : null)
     .filter(i => i !== null);
+
+  const contractHours = emp.contract_hours || 0;
+  const isFull = contractHours > 0 && weekHours >= contractHours;
+  const isOver = contractHours > 0 && weekHours > contractHours;
 
   return (
     <button
@@ -32,27 +36,37 @@ function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen 
       style={{
         backgroundColor: isActive
           ? 'rgba(99,102,241,0.18)'
+          : isFull
+          ? 'rgba(22,163,74,0.06)'
           : 'transparent',
         borderLeft: isActive
           ? '3px solid #6366f1'
           : isMatch
           ? `3px solid ${neonGreen}`
           : '3px solid transparent',
-        opacity: isMatch ? 1 : 0.5,
+        opacity: isFull && !isActive ? 0.55 : isMatch ? 1 : 0.5,
         cursor: 'pointer',
       }}
     >
-      <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5" style={{
-        boxShadow: isActive ? '0 0 0 2px #6366f1' : 'none',
-      }}>
-        <AvatarImage src={emp.avatar_url} />
-        <AvatarFallback
-          className="text-xs text-white"
-          style={{ background: emp.color || 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}
-        >
-          {getInitials(emp.first_name, emp.last_name)}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative flex-shrink-0 mt-0.5">
+        <Avatar className="w-8 h-8" style={{
+          boxShadow: isActive ? '0 0 0 2px #6366f1' : isFull ? '0 0 0 2px #16a34a' : 'none',
+          filter: isFull && !isActive ? 'grayscale(60%)' : 'none',
+        }}>
+          <AvatarImage src={emp.avatar_url} />
+          <AvatarFallback
+            className="text-xs text-white"
+            style={{ background: emp.color || 'linear-gradient(135deg, #38bdf8 0%, #94a3b8 100%)' }}
+          >
+            {getInitials(emp.first_name, emp.last_name)}
+          </AvatarFallback>
+        </Avatar>
+        {isFull && (
+          <div className="absolute -bottom-1 -right-1 rounded-full" style={{ backgroundColor: '#16a34a' }}>
+            <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+          </div>
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
@@ -65,14 +79,23 @@ function EmployeeRow({ emp, isActive, isMatch, onSelect, getFuncName, neonGreen 
                 ACTIEF
               </span>
             )}
-            {!isActive && isMatch && (
+            {!isActive && isFull && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded" style={{ backgroundColor: isOver ? 'rgba(239,68,68,0.15)' : 'rgba(22,163,74,0.15)', color: isOver ? '#ef4444' : '#16a34a' }}>
+                {isOver ? 'OVER' : 'VOL'}
+              </span>
+            )}
+            {!isActive && !isFull && isMatch && (
               <Star className="w-3 h-3" style={{ color: neonGreen, filter: `drop-shadow(0 0 4px ${neonGreen})` }} />
             )}
           </div>
         </div>
-        <div className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
+        <div className="text-xs truncate flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
           {getFuncName(emp.functionId) || '—'}
-          {emp.contract_hours ? ` · ${emp.contract_hours}u/wk` : ''}
+          {contractHours > 0 && (
+            <span style={{ color: isFull ? (isOver ? '#ef4444' : '#16a34a') : 'var(--color-text-muted)' }}>
+              · {weekHours.toFixed(1)}/{contractHours}u
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-0.5 mt-1 flex-wrap">
           {DAY_LABELS.map((label, i) => {
