@@ -209,6 +209,7 @@ export default function PlanningEmployeePanel({
                 onSelect={onSelectEmployee}
                 getFuncName={getFuncName}
                 neonGreen={neonGreen}
+                weekHours={getWeekHours(emp.id)}
               />
             ))}
 
@@ -229,6 +230,7 @@ export default function PlanningEmployeePanel({
                 onSelect={onSelectEmployee}
                 getFuncName={getFuncName}
                 neonGreen={neonGreen}
+                weekHours={getWeekHours(emp.id)}
               />
             ))}
           </>
