@@ -97,6 +97,18 @@ export default function MedewerkerApp() {
     refetchInterval: 15000,
   });
 
+  // Fetch company settings to check if colleague roster is enabled
+  const { data: companySettingsData } = useQuery({
+    queryKey: ['company-settings', companyId],
+    queryFn: async () => {
+      const settings = await base44.entities.CompanySettings.filter({ companyId });
+      return settings[0] || null;
+    },
+    enabled: !!companyId,
+  });
+  const showCollegaTab = companySettingsData?.colleague_roster_settings?.enabled &&
+    (companySettingsData?.colleague_roster_settings?.visible_departmentIds?.length > 0);
+
   // Count unread notifications
   const unreadMessages = messageLogs.filter(m => m.direction === 'outbound' && !m.read).length;
 
@@ -199,18 +211,6 @@ export default function MedewerkerApp() {
 
   // Determine which bottom tab is truly active (for sub-views map to parent)
   const bottomTab = ['verlof', 'ruil'].includes(activeTab) ? 'home' : activeTab;
-
-  // Fetch company settings to check if colleague roster is enabled
-  const { data: companySettingsData } = useQuery({
-    queryKey: ['company-settings', companyId],
-    queryFn: async () => {
-      const settings = await base44.entities.CompanySettings.filter({ companyId });
-      return settings[0] || null;
-    },
-    enabled: !!companyId,
-  });
-  const showCollegaTab = companySettingsData?.colleague_roster_settings?.enabled &&
-    (companySettingsData?.colleague_roster_settings?.visible_departmentIds?.length > 0);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)' }}>
