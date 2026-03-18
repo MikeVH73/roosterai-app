@@ -406,6 +406,13 @@ export default function Employees() {
         functions={functions}
         employeeCount={employees.filter(e => e.status === 'active').length}
       />
+
+      <WhatsAppInviteDialog
+        open={whatsAppInviteOpen}
+        onClose={() => setWhatsAppInviteOpen(false)}
+        employees={employees}
+        companyId={companyId}
+      />
     </div>
   );
 }
