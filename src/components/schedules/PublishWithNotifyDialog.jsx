@@ -16,7 +16,7 @@ export default function PublishWithNotifyDialog({ open, onOpenChange, employees 
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
       setSelected([]);
       setDone(false);
