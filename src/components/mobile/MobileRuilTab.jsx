@@ -34,7 +34,8 @@ export default function MobileRuilTab({ swapRequests = [], myProfile, companyId,
 
   const myRequests = swapRequests.filter(r => r.requesterId === myProfile?.id)
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
-  const myShifts = shifts.filter(s => s.employeeId === myProfile?.id);
+  const myShifts = [...shifts.filter(s => s.employeeId === myProfile?.id)]
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const getShift = (id) => shifts.find(s => s.id === id);
   const getEmployee = (id) => employees.find(e => e.id === id);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, ArrowLeftRight, Bot, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, ArrowLeftRight, Bot, ChevronRight, Plus } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, isWithinInterval, parseISO, isSameDay } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
@@ -152,6 +152,20 @@ export default function MobileHomeTab({
           </div>
         </div>
       )}
+
+      {/* Quick actions: Verlof & Ruil aanvragen */}
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={() => onNavigate('verlof')} className="rounded-xl p-3 flex items-center gap-2 text-left active:scale-[0.98] transition-transform"
+          style={{ backgroundColor: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}>
+          <Plus className="w-4 h-4 flex-shrink-0" style={{ color: '#f59e0b' }} />
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Verlof aanvragen</span>
+        </button>
+        <button onClick={() => onNavigate('ruil')} className="rounded-xl p-3 flex items-center gap-2 text-left active:scale-[0.98] transition-transform"
+          style={{ backgroundColor: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}>
+          <Plus className="w-4 h-4 flex-shrink-0" style={{ color: '#8b5cf6' }} />
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Dienst ruilen</span>
+        </button>
+      </div>
 
       {/* Planning Assistent CTA */}
       <button onClick={() => onNavigate('chat')} className="w-full rounded-xl p-4 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
