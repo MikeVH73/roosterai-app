@@ -211,6 +211,18 @@ export default function PlanningTool() {
       return;
     }
 
+    // Auto-fill uren van het dagdeel als het vakje nog leeg is
+    const key = `${dp.id}_${dayIndex}`;
+    if (!requiredHours[key] || parseFloat(requiredHours[key]) === 0) {
+      const [sh, sm] = dp.startTime.split(':').map(Number);
+      const [eh, em] = dp.endTime.split(':').map(Number);
+      let mins = (eh * 60 + em) - (sh * 60 + sm);
+      if (mins < 0) mins += 24 * 60;
+      mins -= (dp.break_duration || 0);
+      const hours = Math.max(0, mins / 60);
+      setRequiredHours(prev => ({ ...prev, [key]: hours.toString() }));
+    }
+
     const weekDate = addDays(currentWeekMonday, dayIndex);
     const date = format(weekDate, 'yyyy-MM-dd');
 
