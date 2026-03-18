@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
       periodLabel,
       rosterUrl,
       message,
+      directMessage,
     } = await req.json();
 
     if (!phoneNumber) {
@@ -87,18 +88,25 @@ Deno.serve(async (req) => {
     const formattedPhone = normalizeNlPhone(phoneNumber);
 
     // Build message text
-    const p1 = (employeeName || 'collega').toString();
-    const p2 = (periodLabel || subject || 'je planning').toString();
-    const p3 = (rosterUrl || message || '').toString();
+    let messageText;
+    
+    if (directMessage) {
+      // Pre-built message from template selector or other sources - send as-is
+      messageText = directMessage;
+    } else {
+      const p1 = (employeeName || 'collega').toString();
+      const p2 = (periodLabel || subject || 'je planning').toString();
+      const p3 = (rosterUrl || message || '').toString();
 
-    if (!p3) {
-      return Response.json(
-        { error: 'rosterUrl (or message as fallback) is required' },
-        { status: 400 }
-      );
+      if (!p3) {
+        return Response.json(
+          { error: 'rosterUrl (or message as fallback) is required' },
+          { status: 400 }
+        );
+      }
+
+      messageText = `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`;
     }
-
-    const messageText = `Hoi ${p1},\n\nEr is een update over ${p2}.\n\n${p3}`;
 
     // Send as regular text message (no template needed)
     const payload = {
