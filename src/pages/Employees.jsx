@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import EmployeeDialog from '@/components/employees/EmployeeDialog';
 import EmployeeExport from '@/components/employees/EmployeeExport';
+import WhatsAppInviteDialog from '@/components/whatsapp/WhatsAppInviteDialog';
 import {
   Plus,
   Search,
@@ -17,7 +18,8 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
-  X
+  X,
+  MessageCircle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
