@@ -17,31 +17,42 @@ export default function SaveTemplateDialog({ open, onClose, requiredHours, weekS
   const [name, setName] = useState('');
   const [weeks, setWeeks] = useState(1);
 
+  const templateData = {
+    companyId,
+    context_type: 'alternative_schedule',
+    trigger: 'manual',
+    description: name,
+    suggested_patch: {
+      requiredHours,
+      repeatWeeks: weeks,
+      shifts: weekShifts.map(s => ({
+        employeeId: s.employeeId,
+        departmentId: s.departmentId,
+        daypartId: s.daypartId,
+        functionId: s.functionId,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        break_duration: s.break_duration,
+        shift_type: s.shift_type,
+        dayOfWeek: new Date(s.date).getDay() === 0 ? 6 : new Date(s.date).getDay() - 1,
+      })),
+    },
+    status: 'pending',
+  };
+
   const saveMutation = useMutation({
-    mutationFn: () =>
-      base44.entities.AISuggestion.create({
+    mutationFn: async () => {
+      // Check if a template with this name already exists → update instead of create
+      const existing = await base44.entities.AISuggestion.filter({
         companyId,
         context_type: 'alternative_schedule',
-        trigger: 'manual',
-        description: name,
-        suggested_patch: {
-          requiredHours,
-          repeatWeeks: weeks,
-          shifts: weekShifts.map(s => ({
-            employeeId: s.employeeId,
-            departmentId: s.departmentId,
-            daypartId: s.daypartId,
-            functionId: s.functionId,
-            start_time: s.start_time,
-            end_time: s.end_time,
-            break_duration: s.break_duration,
-            shift_type: s.shift_type,
-            // store day-of-week (0=MA..6=ZO) instead of specific date so template is reusable
-            dayOfWeek: new Date(s.date).getDay() === 0 ? 6 : new Date(s.date).getDay() - 1,
-          })),
-        },
-        status: 'pending',
-      }),
+        description: name.trim(),
+      });
+      if (existing && existing.length > 0) {
+        return base44.entities.AISuggestion.update(existing[0].id, templateData);
+      }
+      return base44.entities.AISuggestion.create(templateData);
+    },
     onSuccess: onSaved,
   });
 
