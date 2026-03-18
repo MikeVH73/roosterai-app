@@ -451,6 +451,16 @@ export default function PlanningTool() {
 
       </div>
 
+      {/* WhatsApp Notify dialog */}
+      <SendNotifyDialog
+        open={sendNotifyOpen}
+        onOpenChange={setSendNotifyOpen}
+        employees={employees}
+        scheduleId={schedules.find(s => s.departmentIds?.includes(selectedDepartmentId))?.id}
+        scheduleName={schedules.find(s => s.departmentIds?.includes(selectedDepartmentId))?.name || 'dit rooster'}
+        companyId={companyId}
+      />
+
       {/* Warning dialog */}
       <Dialog open={warningOpen} onOpenChange={setWarningOpen}>
         <DialogContent style={{
