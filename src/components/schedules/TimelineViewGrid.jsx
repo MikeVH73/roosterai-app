@@ -404,7 +404,8 @@ export default function TimelineViewGrid({
                        {/* Department label header */}
                        <div className="w-full border-b px-3 py-1.5 flex items-center gap-2 flex-wrap" style={{
                          borderColor: 'var(--color-border)',
-                         backgroundColor: locIdx % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface-light)'
+                         backgroundColor: 'rgba(14, 165, 233, 0.07)',
+                         borderLeft: '3px solid var(--color-accent)'
                        }}>
                          <span className="font-medium text-sm mr-2" style={{ color: 'var(--color-text-primary)' }}>
                            {dept.name}
