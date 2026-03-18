@@ -34,6 +34,7 @@ export default function TimelineViewGrid({
   onShiftClick,
   onCellClick,
   onShiftUpdate,
+  onDepartmentPlan,
   currentWeekStart,
   activeDays = [0, 1, 2, 3, 4, 5, 6]
 }) {
