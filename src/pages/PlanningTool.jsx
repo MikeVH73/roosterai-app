@@ -408,12 +408,13 @@ export default function PlanningTool() {
           style={{ width: 300, backgroundColor: 'var(--color-surface)', borderColor: `${NEON_GREEN}33` }}
         >
           <PlanningEmployeePanel
-            allEmployees={employees}
-            filteredEmployees={filteredEmployees}
-            functions={functions}
-            activeEmployee={activeEmployee}
-            onSelectEmployee={handleSelectEmployee}
-            neonGreen={NEON_GREEN}
+           allEmployees={employees}
+           filteredEmployees={filteredEmployees}
+           functions={functions}
+           activeEmployee={activeEmployee}
+           onSelectEmployee={handleSelectEmployee}
+           neonGreen={NEON_GREEN}
+           weekShifts={currentWeekShifts}
           />
         </div>
 
