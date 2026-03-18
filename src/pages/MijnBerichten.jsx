@@ -6,9 +6,10 @@ import TopBar from '@/components/layout/TopBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MessageCircle, Send, Loader2 } from 'lucide-react';
+import { MessageCircle, Send, Loader2, Bot } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import AgentChat from '@/components/agents/AgentChat';
 
 export default function MijnBerichten() {
   const { currentCompany, user } = useCompany();
