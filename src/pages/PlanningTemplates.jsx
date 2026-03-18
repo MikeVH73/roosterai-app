@@ -163,6 +163,61 @@ export default function PlanningTemplates() {
                           />
                         </div>
                       </div>
+
+                      {/* Bewerkbaar urengrid */}
+                      {(() => {
+                        const byDaypart = summarizeHours(editHours);
+                        const dpIds = [...new Set(
+                          Object.keys(editHours).map(k => k.split('_').slice(0, -1).join('_'))
+                        )].filter(Boolean);
+                        if (dpIds.length === 0) return null;
+                        return (
+                          <div className="overflow-x-auto rounded-lg border" style={{ borderColor: 'var(--color-border)' }}>
+                            <table className="text-xs w-full">
+                              <thead>
+                                <tr style={{ backgroundColor: 'var(--color-surface-light)' }}>
+                                  <th className="text-left px-3 py-2 font-medium" style={{ color: 'var(--color-text-secondary)' }}>Dagdeel</th>
+                                  {DAYS.map(d => (
+                                    <th key={d} className="text-center py-2 font-medium w-16" style={{ color: 'var(--color-text-secondary)' }}>{d}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {dpIds.map(dpId => (
+                                  <tr key={dpId} style={{ borderTop: '1px solid var(--color-border)' }}>
+                                    <td className="px-3 py-1.5 font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                                      {getDaypartName(dpId)}
+                                    </td>
+                                    {DAYS.map((_, dayIndex) => {
+                                      const key = `${dpId}_${dayIndex}`;
+                                      return (
+                                        <td key={dayIndex} className="py-1.5 px-1 text-center">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            max="24"
+                                            step="0.5"
+                                            value={editHours[key] || ''}
+                                            onChange={e => setEditHours(prev => ({ ...prev, [key]: e.target.value }))}
+                                            placeholder="—"
+                                            className="w-14 text-center rounded border px-1 py-1 text-xs font-mono focus:outline-none focus:ring-1"
+                                            style={{
+                                              backgroundColor: editHours[key] ? 'rgba(99,102,241,0.08)' : 'var(--color-surface-light)',
+                                              borderColor: editHours[key] ? '#6366f1' : 'var(--color-border)',
+                                              color: 'var(--color-text-primary)',
+                                            }}
+                                          />
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })()}
+
                       <div className="flex gap-2 justify-end">
                         <Button variant="outline" size="sm" onClick={() => setEditingId(null)}>
                           <X className="w-3.5 h-3.5 mr-1" /> Annuleren
