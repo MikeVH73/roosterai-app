@@ -291,7 +291,7 @@ export default function PlanningTemplates() {
                         </div>
                       </div>
 
-                      {/* Hours grid preview */}
+                      {/* Hours + employees grid preview */}
                       {Object.keys(byDaypart).length > 0 && (
                         <div className="mt-3 overflow-x-auto">
                           <table className="text-xs w-full">
@@ -307,26 +307,39 @@ export default function PlanningTemplates() {
                             <tbody>
                               {Object.entries(byDaypart).map(([dpId, days]) => {
                                 const rowTotal = Object.values(days).reduce((s, v) => s + v, 0);
+                                const dpShifts = shiftsByDaypart[dpId] || {};
                                 return (
                                   <tr key={dpId}>
-                                    <td className="pr-3 py-0.5 font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                                    <td className="pr-3 py-1 font-medium align-top" style={{ color: 'var(--color-text-primary)' }}>
                                       {getDaypartName(dpId)}
                                     </td>
                                     {DAYS.map((_, i) => (
-                                      <td key={i} className="text-center py-0.5 w-10">
-                                        {days[i] ? (
-                                          <span
-                                            className="inline-block px-1.5 py-0.5 rounded font-mono font-bold"
-                                            style={{ backgroundColor: 'rgba(99,102,241,0.12)', color: '#6366f1' }}
-                                          >
-                                            {days[i]}
-                                          </span>
-                                        ) : (
-                                          <span style={{ color: 'var(--color-text-muted)' }}>—</span>
-                                        )}
+                                      <td key={i} className="text-center py-1 w-10 align-top">
+                                        <div className="flex flex-col items-center gap-0.5">
+                                          {days[i] ? (
+                                            <span
+                                              className="inline-block px-1.5 py-0.5 rounded font-mono font-bold"
+                                              style={{ backgroundColor: 'rgba(99,102,241,0.12)', color: '#6366f1' }}
+                                            >
+                                              {days[i]}u
+                                            </span>
+                                          ) : (
+                                            <span style={{ color: 'var(--color-text-muted)' }}>—</span>
+                                          )}
+                                          {(dpShifts[i] || []).map((s, si) => (
+                                            <span
+                                              key={si}
+                                              className="inline-block px-1 py-0.5 rounded text-xs truncate max-w-[80px]"
+                                              style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#059669', fontSize: 10 }}
+                                              title={getEmployeeName(s.employeeId)}
+                                            >
+                                              {getEmployeeName(s.employeeId).split(' ')[0]}
+                                            </span>
+                                          ))}
+                                        </div>
                                       </td>
                                     ))}
-                                    <td className="text-center py-0.5 font-mono font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                                    <td className="text-center py-1 font-mono font-bold align-top" style={{ color: 'var(--color-text-primary)' }}>
                                       {rowTotal}u
                                     </td>
                                   </tr>
@@ -334,6 +347,12 @@ export default function PlanningTemplates() {
                               })}
                             </tbody>
                           </table>
+                          {templateShifts.length > 0 && (
+                            <div className="mt-2 flex items-center gap-1 text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                              <Users className="w-3 h-3" />
+                              {templateShifts.length} dienst{templateShifts.length !== 1 ? 'en' : ''} opgeslagen
+                            </div>
+                          )}
                         </div>
                       )}
                     </>
