@@ -35,7 +35,8 @@ export default function MobileChatTab({ agentName = 'planning_assistent' }) {
   const loadConversations = async () => {
     try {
       const allConvos = await base44.agents.listConversations({ agent_name: agentName });
-      const convos = (allConvos || []).filter(c => !c.metadata?.deleted);
+      // Only show conversations created from this mobile app (have our metadata marker)
+      const convos = (allConvos || []).filter(c => !c.metadata?.deleted && c.metadata?.source === 'mobile_app');
       setConversations(convos);
       if (convos.length > 0) {
         await loadConversation(convos[0].id);
@@ -107,7 +108,7 @@ INSTRUCTIES:
     try {
       const conv = await base44.agents.createConversation({
         agent_name: agentName,
-        metadata: { name: 'Nieuw gesprek', description: 'Planning assistent' }
+        metadata: { name: 'Nieuw gesprek', description: 'Planning assistent', source: 'mobile_app' }
       });
       setCurrentConversation(conv);
       setMessages([]);
@@ -139,8 +140,11 @@ INSTRUCTIES:
     setInputMessage('');
     setLoading(true);
     try {
-      const ctx = await buildContextMessage();
-      const fullMsg = isFirst ? `${ctx}\n\n---\n\nVraag van de gebruiker: ${msg}` : msg;
+      let fullMsg = msg;
+      if (isFirst) {
+        const ctx = await buildContextMessage();
+        fullMsg = `[CONTEXT_START]${ctx}[CONTEXT_END]\n\n${msg}`;
+      }
       await base44.agents.addMessage(currentConversation, { role: 'user', content: fullMsg });
       if (isFirst) {
         const title = msg.length > 40 ? msg.substring(0, 40) + '...' : msg;
@@ -236,9 +240,13 @@ INSTRUCTIES:
             <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Stel een vraag over je rooster</p>
           </div>
         ) : (
-          messages.filter(m => m.role !== 'system').map((msg, idx) => (
-            <MessageBubble key={idx} message={msg} />
-          ))
+          messages.filter(m => m.role !== 'system').map((msg, idx) => {
+            // Hide context block from user messages
+            const displayMsg = msg.role === 'user' && msg.content?.includes('[CONTEXT_START]')
+              ? { ...msg, content: msg.content.replace(/\[CONTEXT_START\][\s\S]*?\[CONTEXT_END\]\s*/, '') }
+              : msg;
+            return <MessageBubble key={idx} message={displayMsg} />;
+          })
         )}
         {loading && (
           <div className="flex items-start gap-2">
