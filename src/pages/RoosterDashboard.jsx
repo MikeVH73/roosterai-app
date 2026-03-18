@@ -87,7 +87,7 @@ export default function RoosterDashboard() {
   const queryClient = useQueryClient();
 
   // --- Kaarten sectie state ---
-  const [cardsCollapsed, setCardsCollapsed] = useState(false);
+  const [cardsCollapsed, setCardsCollapsed] = useState(true);
 
   // --- Weekoverzicht state ---
   const [selectedScheduleId, setSelectedScheduleId] = useState(null);
