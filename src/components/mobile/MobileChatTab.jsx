@@ -81,7 +81,24 @@ export default function MobileChatTab({ agentName = 'planning_assistent' }) {
     const nextMon = new Date(now); nextMon.setDate(now.getDate() + (dow === 0 ? 1 : 8 - dow));
     const nextSun = new Date(nextMon); nextSun.setDate(nextMon.getDate() + 6);
 
-    return `[SYSTEEMCONTEXT] Bedrijf: ${currentCompany?.name} (companyId: ${currentCompany?.id}). Gebruiker: ${user?.full_name || user?.email} (email: ${user?.email}). Medewerker: ${employeeInfo} (employeeId: ${employeeId}). Vandaag: ${dayNames[dow]} ${currentDate}, week ${weekNumber}. Deze week: ${thisMon.toISOString().split('T')[0]} t/m ${thisSun.toISOString().split('T')[0]}. Volgende week: ${nextMon.toISOString().split('T')[0]} t/m ${nextSun.toISOString().split('T')[0]}. Gebruik companyId bij queries. Filter op employeeId voor "mijn" data.`;
+    return `[SYSTEEMCONTEXT - GEBRUIK DEZE INFO DIRECT, VRAAG NOOIT OPNIEUW]
+Bedrijf: ${currentCompany?.name || 'Onbekend'} (companyId: ${currentCompany?.id || 'Onbekend'})
+Ingelogde gebruiker: ${user?.full_name || user?.email || 'Onbekend'} (email: ${user?.email || ''})
+Medewerker: ${employeeInfo} (employeeId: ${employeeId})
+
+DATUM CONTEXT (BELANGRIJK):
+- Vandaag is: ${dayNames[dow]} ${currentDate}
+- Huidige week: week ${weekNumber}
+- Deze week: ${thisMon.toISOString().split('T')[0]} t/m ${thisSun.toISOString().split('T')[0]}
+- Volgende week (week ${weekNumber + 1}): ${nextMon.toISOString().split('T')[0]} t/m ${nextSun.toISOString().split('T')[0]}
+
+INSTRUCTIES:
+- Gebruik companyId "${currentCompany?.id}" bij ALLE database queries.
+- De gebruiker heet "${user?.full_name || employeeInfo}". VRAAG NOOIT naar hun naam of bedrijf.
+- Als de gebruiker vraagt over "mijn" diensten/rooster, filter op employeeId "${employeeId}".
+- Begroet de gebruiker bij naam en beantwoord direct hun vraag.
+- DATUM FILTERING: Als de gebruiker vraagt over "volgende week", zoek shifts met date TUSSEN ${nextMon.toISOString().split('T')[0]} EN ${nextSun.toISOString().split('T')[0]}. Gebruik GEEN scheduleId filter - zoek ALLE shifts voor de companyId en filter op datum. Haal ruim voldoende resultaten op.
+- Zoek altijd in ALLE roosters/schedules van het bedrijf, niet alleen in één specifiek rooster.`;
   };
 
   const createNewConversation = async () => {
