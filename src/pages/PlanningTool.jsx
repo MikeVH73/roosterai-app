@@ -350,6 +350,15 @@ export default function PlanningTool() {
         }}
       >
         <div className="flex items-center gap-3">
+          {returnTo && (
+            <button
+              onClick={() => navigate(`/${returnTo}`)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80"
+              style={{ backgroundColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              <ChevronLeft className="w-3.5 h-3.5" /> Terug
+            </button>
+          )}
           <div>
             <h1 className="text-base font-bold" style={{ color: NEON_GREEN, textShadow: `0 0 12px ${NEON_GREEN}88` }}>
               Planningshulpmiddel
