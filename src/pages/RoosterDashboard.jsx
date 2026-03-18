@@ -690,10 +690,20 @@ export default function RoosterDashboard() {
                     {fullscreenSchedule === currentSchedule.id ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                   </Button>
                   {hasPermission('manage_schedules') && (
-                    <Button size="sm" className="h-7 px-3 text-xs" onClick={() => navigate(`/PlanningTool?scheduleId=${currentSchedule.id}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}&returnTo=RoosterDashboard`)} style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}>
-                      <LayoutGrid className="w-3 h-3 mr-1" />
-                      Openen in Planner
-                    </Button>
+                    <>
+                      <Button 
+                        variant="outline" size="sm" className="h-7 px-3 text-xs"
+                        onClick={() => setSendNotifyOpen(true)}
+                        style={{ borderColor: '#16a34a', color: '#16a34a', backgroundColor: 'var(--color-surface)' }}
+                      >
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        WhatsApp Bericht
+                      </Button>
+                      <Button size="sm" className="h-7 px-3 text-xs" onClick={() => navigate(`/PlanningTool?scheduleId=${currentSchedule.id}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}&returnTo=RoosterDashboard`)} style={{ background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)', color: 'white' }}>
+                        <LayoutGrid className="w-3 h-3 mr-1" />
+                        Openen in Planner
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
