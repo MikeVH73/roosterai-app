@@ -332,7 +332,7 @@ export default function PlanningDaypartsPanel({
                   Inplannen ({activeEmployee.first_name})
                 </button>
               )}
-              {hasAnyHours && (
+              {!!selectedScheduleId && (
                 <Button variant="outline" size="sm" onClick={() => setSaveTemplateOpen(true)} className="gap-1 text-xs h-7">
                   <Save className="w-3 h-3" /> Opslaan als template
                 </Button>
