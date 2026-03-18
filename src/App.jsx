@@ -14,6 +14,7 @@ import PlanningTool from './pages/PlanningTool';
 import PlanningTemplates from './pages/PlanningTemplates';
 import RoosterDashboard from './pages/RoosterDashboard';
 import MijnBerichten from './pages/MijnBerichten';
+import MedewerkerApp from './pages/MedewerkerApp';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -101,6 +102,11 @@ const AuthenticatedApp = () => {
       <Route path="/MijnBerichten" element={
         <LayoutWrapper currentPageName="MijnBerichten">
           <MijnBerichten />
+        </LayoutWrapper>
+      } />
+      <Route path="/MedewerkerApp" element={
+        <LayoutWrapper currentPageName="MedewerkerApp">
+          <MedewerkerApp />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
