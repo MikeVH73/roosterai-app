@@ -16,7 +16,8 @@ import {
   CheckCircle2,
   XCircle,
   CalendarDays,
-  Building2
+  Building2,
+  MessageCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
