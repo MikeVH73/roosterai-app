@@ -381,7 +381,7 @@ export default function ScheduleEditor() {
             )}
             {schedule.status === 'draft' && hasPermission('manage_schedules') && (
               <Button 
-                onClick={() => publishMutation.mutate()}
+                onClick={() => setPublishDialogOpen(true)}
                 disabled={publishMutation.isPending}
                 className="bg-green-600 hover:bg-green-700"
               >
