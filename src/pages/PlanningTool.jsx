@@ -18,6 +18,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import SendNotifyDialog from '@/components/schedules/SendNotifyDialog';
 
 // Compact dropdown filter component
 function FilterDropdown({ icon: Icon, label, value, options, onSelect, accentColor }) {

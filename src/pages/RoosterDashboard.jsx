@@ -65,6 +65,7 @@ import {
 } from "@/components/ui/select";
 import { format, parseISO, differenceInDays, startOfWeek, addDays, addWeeks, startOfMonth, endOfMonth } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import SendNotifyDialog from '@/components/schedules/SendNotifyDialog';
 
 function calculateNetHours(shift) {
   const [startH, startM] = shift.start_time.split(':').map(Number);
