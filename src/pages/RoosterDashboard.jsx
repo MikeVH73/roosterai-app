@@ -701,6 +701,7 @@ export default function RoosterDashboard() {
                     dayparts={dayparts}
                     currentWeekStart={currentWeekStart}
                     activeDays={currentSchedule?.active_days || [0, 1, 2, 3, 4, 5, 6]}
+                    onDepartmentPlan={(deptId) => navigate(`/PlanningTool?departmentId=${deptId}&weekStart=${format(currentWeekStart, 'yyyy-MM-dd')}`)}
                     onShiftClick={(shift) => {
                       if (!hasPermission('manage_schedules')) return;
                       setSelectedShift(shift);
