@@ -140,10 +140,10 @@ REGELS:
     setInputMessage('');
     setLoading(true);
     try {
-      // Always inject fresh context as system message before each user message
+      // Prepend context to user message so agent always has fresh info
       const ctx = await buildContextMessage();
-      await base44.agents.addMessage(currentConversation, { role: 'system', content: ctx });
-      await base44.agents.addMessage(currentConversation, { role: 'user', content: msg });
+      const fullMessage = `[CONTEXT_START]\n${ctx}\n[CONTEXT_END]\n\n${msg}`;
+      await base44.agents.addMessage(currentConversation, { role: 'user', content: fullMessage });
 
       // Update title on first real message
       const userMessages = messages.filter(m => m.role === 'user');
