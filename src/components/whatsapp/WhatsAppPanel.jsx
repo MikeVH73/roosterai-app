@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { nl } from 'date-fns/locale';
+import TemplateSelector from './TemplateSelector';
 
 const getInitials = (first, last) => `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
 
@@ -117,7 +118,7 @@ function ConversationList({ employees, logs, onSelect, onAI }) {
   );
 }
 
-function ChatView({ employee, logs, onBack, onSend, sending }) {
+function ChatView({ employee, logs, onBack, onSend, onSendTemplate, sending }) {
   const [message, setMessage] = useState('');
   const bottomRef = useRef(null);
 
@@ -133,6 +134,10 @@ function ChatView({ employee, logs, onBack, onSend, sending }) {
     if (!message.trim()) return;
     onSend(employee, message);
     setMessage('');
+  };
+
+  const handleTemplateSend = (templateMessage) => {
+    onSendTemplate(employee, templateMessage);
   };
 
   return (
@@ -161,14 +166,14 @@ function ChatView({ employee, logs, onBack, onSend, sending }) {
           <div className="text-center py-8">
             <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-30" style={{ color: 'var(--color-text-muted)' }} />
             <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-              {employee.whatsapp_opt_in ? 'Stuur het eerste bericht' : 'Medewerker heeft WhatsApp nog niet gekoppeld'}
+              {employee.whatsapp_opt_in ? 'Stuur het eerste bericht of kies een sjabloon' : 'Medewerker heeft WhatsApp nog niet gekoppeld'}
             </p>
           </div>
         ) : (
           empLogs.map((log, i) => (
             <div key={i} className={`flex ${log.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}>
               <div
-                className="max-w-[80%] px-3 py-2 rounded-2xl text-sm"
+                className="max-w-[80%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap"
                 style={log.direction === 'outbound'
                   ? { background: 'linear-gradient(135deg, #38bdf8, #60a5fa)', color: 'white' }
                   : { backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-primary)' }
@@ -185,10 +190,19 @@ function ChatView({ employee, logs, onBack, onSend, sending }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+      {/* Template selector */}
+      {employee.whatsapp_opt_in && (
+        <TemplateSelector
+          employeeName={`${employee.first_name} ${employee.last_name}`}
+          onSend={handleTemplateSend}
+          sending={sending}
+        />
+      )}
+
+      {/* Free text input */}
       <div className="p-3 border-t flex gap-2" style={{ borderColor: 'var(--color-border)' }}>
         <Input
-          placeholder={employee.whatsapp_opt_in ? 'Typ een bericht...' : 'Medewerker niet verbonden'}
+          placeholder={employee.whatsapp_opt_in ? 'Of typ een vrij bericht...' : 'Medewerker niet verbonden'}
           value={message}
           onChange={e => setMessage(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
