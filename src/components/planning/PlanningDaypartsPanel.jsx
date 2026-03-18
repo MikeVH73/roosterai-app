@@ -101,7 +101,7 @@ export default function PlanningDaypartsPanel({
   const weekShifts = allShifts.filter(s => s.date >= weekStart && s.date <= weekEnd);
 
   // Notify parent of weekShifts changes
-  React.useEffect(() => {
+  useEffect(() => {
     onWeekShiftsChange?.(weekShifts);
   }, [weekShifts.length, weekStart]);
 
