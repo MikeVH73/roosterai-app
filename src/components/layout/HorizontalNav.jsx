@@ -171,6 +171,25 @@ export default function HorizontalNav({ currentPage }) {
 
           {/* Right: Theme toggle + More menu + User menu */}
           <div className="flex items-center gap-3">
+            {/* WhatsApp icon - planners/admins only */}
+            {hasPermission('manage_schedules') && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setWhatsAppOpen(!whatsAppOpen)}
+                  className="rounded-lg"
+                  style={{ color: whatsAppOpen ? '#22c55e' : 'var(--color-text-secondary)' }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                </Button>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center" style={{ backgroundColor: '#22c55e' }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+            )}
             {/* Theme Toggle */}
             <Button 
               variant="ghost" 
