@@ -701,6 +701,19 @@ export default function RoosterDashboard() {
                 </div>
               ) : (
                 <div className={fullscreenSchedule === currentSchedule.id ? "fixed inset-0 z-50 p-6 overflow-auto" : ""} style={fullscreenSchedule === currentSchedule.id ? { backgroundColor: 'var(--color-background)' } : {}}>
+                  {fullscreenSchedule === currentSchedule.id && (
+                    <div className="flex items-center justify-between mb-4">
+                      <Button
+                        variant="outline" size="sm"
+                        onClick={() => setFullscreenSchedule(null)}
+                        className="h-8 px-3 text-xs gap-1.5"
+                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)', backgroundColor: 'var(--color-surface)' }}
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" /> Terug naar dashboard
+                      </Button>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{currentSchedule.name}</span>
+                    </div>
+                  )}
                   <TimelineViewGrid
                     schedule={currentSchedule}
                     shifts={allShifts.filter(s => s.scheduleId === currentSchedule.id)}
