@@ -338,6 +338,21 @@ export default function WhatsAppPanel({ onClose }) {
     setSending(false);
   };
 
+  const handleSendTemplate = async (employee, fullMessage) => {
+    setSending(true);
+    const payload = {
+      phoneNumber: employee.phone,
+      employeeName: `${employee.first_name} ${employee.last_name}`,
+      employeeId: employee.id,
+      companyId,
+      periodLabel: 'een sjabloonbericht',
+      rosterUrl: fullMessage,
+    };
+    await base44.functions.invoke('sendWhatsAppMessage', payload);
+    queryClient.invalidateQueries(['whatsapp-logs', companyId]);
+    setSending(false);
+  };
+
   const handleSendAI = async (employeeIds, prompt) => {
     setSending(true);
     const targets = employees.filter(e => employeeIds.includes(e.id));
