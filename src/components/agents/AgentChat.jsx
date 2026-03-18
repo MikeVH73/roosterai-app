@@ -251,8 +251,8 @@ INSTRUCTIES:
         <MessageCircle className="w-16 h-16 text-slate-300 mb-4" />
         <h3 className="text-lg font-semibold text-slate-900 mb-2">Geen actief gesprek</h3>
         <p className="text-slate-600 mb-6">Start een nieuw gesprek met de Planning Assistent</p>
-        <Button onClick={createNewConversation} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button onClick={createNewConversation} disabled={creatingConversation} className="bg-blue-600 hover:bg-blue-700">
+          {creatingConversation ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
           Nieuw gesprek starten
         </Button>
       </div>
