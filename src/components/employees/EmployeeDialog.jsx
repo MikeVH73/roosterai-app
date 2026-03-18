@@ -223,43 +223,33 @@ export default function EmployeeDialog({ open, onClose, employee, departments, f
         ) : (
         <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 h-11" style={{ backgroundColor: 'var(--color-surface-light)' }}>
-              <TabsTrigger 
-                value="general" 
-                className="h-full"
-                style={{ 
-                  backgroundColor: activeTab === 'general' ? 'var(--color-accent)' : 'transparent',
-                  color: activeTab === 'general' ? 'white' : 'var(--color-text-primary)',
-                  border: 'none'
-                }}
-              >
-                Algemeen
-              </TabsTrigger>
-              <TabsTrigger 
-                value="contract"
-                className="h-full"
-                style={{ 
-                  backgroundColor: activeTab === 'contract' ? 'var(--color-accent)' : 'transparent',
-                  color: activeTab === 'contract' ? 'white' : 'var(--color-text-primary)',
-                  border: 'none'
-                }}
-              >
-                Contract
-              </TabsTrigger>
-              <TabsTrigger 
-                value="preferences"
-                className="h-full"
-                style={{ 
-                  backgroundColor: activeTab === 'preferences' ? 'var(--color-accent)' : 'transparent',
-                  color: activeTab === 'preferences' ? 'white' : 'var(--color-text-primary)',
-                  border: 'none'
-                }}
-              >
-                Voorkeuren
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 p-1 rounded-xl" style={{ backgroundColor: 'var(--color-surface-light)', border: '1px solid var(--color-border)' }}>
+              {[
+                { value: 'general', label: 'Algemeen' },
+                { value: 'contract', label: 'Contract' },
+                { value: 'preferences', label: 'Voorkeuren' },
+              ].map(tab => {
+                const isActive = activeTab === tab.value;
+                return (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="rounded-lg text-sm font-medium transition-all duration-200"
+                    style={{
+                      backgroundColor: isActive ? '#38bdf8' : 'transparent',
+                      color: isActive ? '#0f172a' : 'var(--color-text-muted)',
+                      boxShadow: isActive ? '0 0 8px rgba(56,189,248,0.5)' : 'none',
+                      border: 'none',
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
 
-            <div className="flex-1 overflow-y-auto py-4 min-h-[400px]">
+            <div className="overflow-y-auto py-4" style={{ height: '420px' }}>
               <TabsContent value="general" className="space-y-4 mt-0 h-full">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
