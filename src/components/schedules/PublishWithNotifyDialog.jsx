@@ -74,16 +74,18 @@ export default function PublishWithNotifyDialog({ open, onOpenChange, employees 
     setSending(true);
     const toNotify = employees.filter(e => selected.includes(e.id));
     let successCount = 0;
+    const selectedType = NOTIFICATION_TYPES.find(t => t.id === notificationType) || NOTIFICATION_TYPES[0];
 
     for (const emp of toNotify) {
       try {
         await base44.functions.invoke('sendWhatsAppMessage', {
           phoneNumber: emp.phone,
-          message: `Hoi ${emp.first_name}! 📋\n\nEr is een nieuw rooster gepubliceerd. Vraag de Planning Assistent om je persoonlijke roosteroverzicht te sturen via WhatsApp.`,
           employeeName: `${emp.first_name} ${emp.last_name}`,
+          periodLabel: selectedType.periodLabel(scheduleName),
+          rosterUrl: selectedType.rosterUrl,
           companyId,
           scheduleId,
-          subject: 'Rooster gepubliceerd'
+          subject: selectedType.label,
         });
         successCount++;
       } catch {
