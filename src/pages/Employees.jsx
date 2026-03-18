@@ -57,6 +57,7 @@ export default function Employees() {
   const [sortDir, setSortDir] = useState('asc');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [whatsAppInviteOpen, setWhatsAppInviteOpen] = useState(false);
 
   // Fetch employees
   const { data: employees = [], isLoading } = useQuery({
