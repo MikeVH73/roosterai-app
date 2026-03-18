@@ -166,8 +166,24 @@ export default function MobileCollegaRoosterTab({
     enabled: !!companyId,
   });
 
-  const rosterSettings = companySettings?.colleague_roster_settings || { enabled: false, visible_departmentIds: [] };
-  const visibleDeptIds = rosterSettings.visible_departmentIds || [];
+  const rosterSettings = companySettings?.colleague_roster_settings || { enabled: false, visibility_mode: 'custom', visible_departmentIds: [] };
+  const mode = rosterSettings.visibility_mode || 'custom';
+
+  // Determine visible department IDs based on mode
+  const visibleDeptIds = useMemo(() => {
+    if (mode === 'own_location') {
+      // Get location IDs of the current employee's departments
+      const myDeptIds = myProfile?.departmentIds || [];
+      const myDepts = departments.filter(d => myDeptIds.includes(d.id));
+      const myLocationIds = new Set();
+      myDepts.forEach(d => (d.locationIds || []).forEach(lid => myLocationIds.add(lid)));
+      // Return all departments that share at least one location
+      return departments
+        .filter(d => (d.locationIds || []).some(lid => myLocationIds.has(lid)))
+        .map(d => d.id);
+    }
+    return rosterSettings.visible_departmentIds || [];
+  }, [mode, rosterSettings.visible_departmentIds, departments, myProfile]);
 
   // Filter departments to only visible ones
   const visibleDepartments = useMemo(
