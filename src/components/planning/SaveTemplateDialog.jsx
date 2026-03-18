@@ -27,6 +27,18 @@ export default function SaveTemplateDialog({ open, onClose, requiredHours, weekS
         suggested_patch: {
           requiredHours,
           repeatWeeks: weeks,
+          shifts: weekShifts.map(s => ({
+            employeeId: s.employeeId,
+            departmentId: s.departmentId,
+            daypartId: s.daypartId,
+            functionId: s.functionId,
+            start_time: s.start_time,
+            end_time: s.end_time,
+            break_duration: s.break_duration,
+            shift_type: s.shift_type,
+            // store day-of-week (0=MA..6=ZO) instead of specific date so template is reusable
+            dayOfWeek: new Date(s.date).getDay() === 0 ? 6 : new Date(s.date).getDay() - 1,
+          })),
         },
         status: 'pending',
       }),
