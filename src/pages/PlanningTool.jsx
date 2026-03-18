@@ -141,6 +141,7 @@ export default function PlanningTool() {
   });
   const [warningOpen, setWarningOpen] = useState(false);
   const [pendingShiftData, setPendingShiftData] = useState(null);
+  const [currentWeekShifts, setCurrentWeekShifts] = useState([]);
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: loadingEmployees } = useQuery({
