@@ -795,6 +795,16 @@ export default function RoosterDashboard() {
         />
       )}
 
+      {/* === WHATSAPP NOTIFY DIALOG === */}
+      <SendNotifyDialog
+        open={sendNotifyOpen}
+        onOpenChange={setSendNotifyOpen}
+        employees={employees}
+        scheduleId={currentSchedule?.id}
+        scheduleName={currentSchedule?.name || 'dit rooster'}
+        companyId={companyId}
+      />
+
       {/* === ROOSTER BEWERKEN/AANMAKEN DIALOG (POP-UP) === */}
       <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setEditDialogOpen(false); setEditingSchedule(null); } }}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" style={{
