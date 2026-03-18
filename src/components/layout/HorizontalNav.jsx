@@ -65,8 +65,7 @@ export default function HorizontalNav({ currentPage }) {
   const userPreferences = user?.preferences || {};
   const preferredMenuIds = userPreferences.horizontal_menu_items || [
     'dashboard',
-    'schedule-overview', 
-    'schedules',
+    'rooster-dashboard',
     'employees',
     'ai-assistant'
   ];
