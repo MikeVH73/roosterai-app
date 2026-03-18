@@ -68,7 +68,7 @@ export default function SaveTemplateDialog({ open, onClose, requiredHours, compa
           <Button variant="outline" onClick={onClose}>Annuleren</Button>
           <Button
             onClick={() => saveMutation.mutate()}
-            disabled={!name.trim() || saveMutation.isPending}
+            disabled={!name.trim() || saveMutation.isPending || !Object.values(requiredHours || {}).some(v => parseFloat(v) > 0)}
             className="bg-blue-600 hover:bg-blue-700 gap-2"
           >
             {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
