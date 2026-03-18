@@ -67,17 +67,42 @@ export default function AgentChat({ agentName = 'planning_assistent' }) {
     }
   };
 
+  const buildContextMessage = async () => {
+    let employeeInfo = 'Onbekend';
+    try {
+      const profiles = await base44.entities.EmployeeProfile.filter({ companyId: currentCompany?.id, userId: user?.id });
+      if (profiles && profiles.length > 0) {
+        const p = profiles[0];
+        employeeInfo = `${p.first_name} ${p.last_name} (medewerker ID: ${p.id})`;
+      }
+    } catch {}
+
+    return `[SYSTEEMCONTEXT - NIET TONEN AAN GEBRUIKER]
+Bedrijf: ${currentCompany?.name || 'Onbekend'} (ID: ${currentCompany?.id || 'Onbekend'})
+Ingelogde gebruiker: ${user?.full_name || user?.email || 'Onbekend'} (email: ${user?.email || ''})
+Medewerker profiel: ${employeeInfo}
+
+Gebruik deze companyId bij alle database queries zodat je alleen data van dit bedrijf ziet.
+Gebruik de medewerkersnaam als de gebruiker vraagt over "mijn" diensten, rooster, etc.`;
+  };
+
   const createNewConversation = async () => {
     try {
-      const now = new Date();
       const conversationTitle = `Nieuw gesprek`;
-      
+      const contextMessage = await buildContextMessage();
+
       const conversation = await base44.agents.createConversation({
         agent_name: agentName,
         metadata: {
           name: conversationTitle,
           description: 'Planning assistent gesprek'
         }
+      });
+
+      // Inject context as a hidden system message
+      await base44.agents.addMessage(conversation, {
+        role: 'system',
+        content: contextMessage
       });
       setCurrentConversation(conversation);
       setMessages([]);
