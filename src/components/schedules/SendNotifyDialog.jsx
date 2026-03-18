@@ -111,19 +111,6 @@ export default function SendNotifyDialog({ open, onOpenChange, employees = [], s
           subject: selectedType.label,
         });
 
-        // Also save in WhatsAppMessageLog so the employee sees it in "Berichten van planner"
-        await base44.entities.WhatsAppMessageLog.create({
-          companyId,
-          employee_id: emp.id,
-          scheduleId: scheduleId || undefined,
-          message: buildPreview(`${emp.first_name} ${emp.last_name}`),
-          recipient_name: `${emp.first_name} ${emp.last_name}`,
-          recipient_phone: emp.phone,
-          direction: 'outbound',
-          status: 'sent',
-          sent_by: 'planner',
-        });
-
         successCount++;
       } catch {
         // continue
