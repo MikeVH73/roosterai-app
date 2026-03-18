@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
 
 function normalizeNlPhone(input: string): string {
   let p = (input || '').replace(/\D/g, '');
