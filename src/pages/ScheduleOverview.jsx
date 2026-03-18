@@ -653,16 +653,7 @@ export default function ScheduleOverview() {
                           </div>
                           </div>
 
-                        {hasConflicts && (
-                          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                            <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
-                            <div>
-                              <p className="text-sm text-red-700">
-                                Bezettingsproblemen gedetecteerd - bekijk details in de rooster editor
-                              </p>
-                            </div>
-                          </div>
-                        )}
+                        
 
                         {/* Schedule Grid - Horizontal Timeline View */}
                         <div 
