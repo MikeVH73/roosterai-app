@@ -99,6 +99,11 @@ export default function PlanningDaypartsPanel({
   // Filter shifts for this week
   const weekShifts = allShifts.filter(s => s.date >= weekStart && s.date <= weekEnd);
 
+  // Notify parent of weekShifts changes
+  React.useEffect(() => {
+    onWeekShiftsChange?.(weekShifts);
+  }, [weekShifts.length, weekStart]);
+
   // Filter shifts for this month
   const monthStart = format(startOfMonth(currentWeekMonday), 'yyyy-MM-dd');
   const monthEnd = format(endOfMonth(currentWeekMonday), 'yyyy-MM-dd');
