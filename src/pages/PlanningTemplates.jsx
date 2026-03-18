@@ -92,6 +92,25 @@ export default function PlanningTemplates() {
   // Get daypart name by id
   const getDaypartName = (dpId) => dayparts.find(d => d.id === dpId)?.name || dpId;
 
+  // Get employee name by id
+  const getEmployeeName = (empId) => {
+    const e = employees.find(emp => emp.id === empId);
+    return e ? `${e.first_name} ${e.last_name}` : '?';
+  };
+
+  // Group template shifts by daypart + dayOfWeek
+  const groupShifts = (shifts = []) => {
+    const result = {};
+    shifts.forEach(s => {
+      const key = s.daypartId;
+      if (!result[key]) result[key] = {};
+      const day = s.dayOfWeek;
+      if (!result[key][day]) result[key][day] = [];
+      result[key][day].push(s);
+    });
+    return result;
+  };
+
   // Summarize required hours nicely per daypart
   const summarizeHours = (requiredHours = {}) => {
     const byDaypart = {};
