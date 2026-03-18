@@ -13,6 +13,7 @@ import Abonnementen from './pages/Abonnementen';
 import PlanningTool from './pages/PlanningTool';
 import PlanningTemplates from './pages/PlanningTemplates';
 import RoosterDashboard from './pages/RoosterDashboard';
+import MijnBerichten from './pages/MijnBerichten';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -95,6 +96,11 @@ const AuthenticatedApp = () => {
       <Route path="/RoosterDashboard" element={
         <LayoutWrapper currentPageName="RoosterDashboard">
           <RoosterDashboard />
+        </LayoutWrapper>
+      } />
+      <Route path="/MijnBerichten" element={
+        <LayoutWrapper currentPageName="MijnBerichten">
+          <MijnBerichten />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
