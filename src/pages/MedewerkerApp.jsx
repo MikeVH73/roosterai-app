@@ -106,8 +106,8 @@ export default function MedewerkerApp() {
     },
     enabled: !!companyId,
   });
-  const showCollegaTab = companySettingsData?.colleague_roster_settings?.enabled &&
-    (companySettingsData?.colleague_roster_settings?.visible_departmentIds?.length > 0);
+  const showCollegaTab = !!(companySettingsData?.colleague_roster_settings?.enabled &&
+    companySettingsData?.colleague_roster_settings?.visible_departmentIds?.length > 0);
 
   // Count unread notifications
   const unreadMessages = messageLogs.filter(m => m.direction === 'outbound' && !m.read).length;
