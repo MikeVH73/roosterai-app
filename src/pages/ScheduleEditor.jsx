@@ -629,10 +629,20 @@ export default function ScheduleEditor() {
         schedule={schedule}
       />
 
-      <WhatsAppInbox
+      <WhatsAppInviteDialog
         open={whatsappInboxOpen}
         onOpenChange={setWhatsappInboxOpen}
+        employees={employees}
+      />
+
+      <PublishWithNotifyDialog
+        open={publishDialogOpen}
+        onOpenChange={setPublishDialogOpen}
+        employees={employees}
         scheduleId={scheduleId}
+        companyId={companyId}
+        isPublishing={publishMutation.isPending}
+        onConfirmPublish={() => publishMutation.mutateAsync()}
       />
     </div>
   );
