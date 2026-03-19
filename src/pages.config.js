@@ -49,6 +49,7 @@
  */
 import AIAssistant from './pages/AIAssistant';
 import AITestSuite from './pages/AITestSuite';
+import Abonnementen from './pages/Abonnementen';
 import Billing from './pages/Billing';
 import CompanyOnboarding from './pages/CompanyOnboarding';
 import CompanySelect from './pages/CompanySelect';
@@ -58,8 +59,14 @@ import DepartmentDetails from './pages/DepartmentDetails';
 import Departments from './pages/Departments';
 import Employees from './pages/Employees';
 import FunctionsSkills from './pages/FunctionsSkills';
+import Landing from './pages/Landing';
 import LocationTypes from './pages/LocationTypes';
 import Locations from './pages/Locations';
+import MedewerkerApp from './pages/MedewerkerApp';
+import MijnBerichten from './pages/MijnBerichten';
+import PlanningTemplates from './pages/PlanningTemplates';
+import PlanningTool from './pages/PlanningTool';
+import RoosterDashboard from './pages/RoosterDashboard';
 import ScheduleEditor from './pages/ScheduleEditor';
 import ScheduleOverview from './pages/ScheduleOverview';
 import Schedules from './pages/Schedules';
@@ -71,6 +78,7 @@ import __Layout from './Layout.jsx';
 export const PAGES = {
     "AIAssistant": AIAssistant,
     "AITestSuite": AITestSuite,
+    "Abonnementen": Abonnementen,
     "Billing": Billing,
     "CompanyOnboarding": CompanyOnboarding,
     "CompanySelect": CompanySelect,
@@ -80,8 +88,14 @@ export const PAGES = {
     "Departments": Departments,
     "Employees": Employees,
     "FunctionsSkills": FunctionsSkills,
+    "Landing": Landing,
     "LocationTypes": LocationTypes,
     "Locations": Locations,
+    "MedewerkerApp": MedewerkerApp,
+    "MijnBerichten": MijnBerichten,
+    "PlanningTemplates": PlanningTemplates,
+    "PlanningTool": PlanningTool,
+    "RoosterDashboard": RoosterDashboard,
     "ScheduleEditor": ScheduleEditor,
     "ScheduleOverview": ScheduleOverview,
     "Schedules": Schedules,

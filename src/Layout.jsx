@@ -102,6 +102,9 @@ export default function Layout({ children, currentPageName }) {
         [class*="bg-white"]:not(.avatar-fallback):not([class*="bg-white/"]) {
           background-color: var(--color-surface) !important;
         }
+        [class*="bg-card"] {
+          background-color: var(--color-surface) !important;
+        }
         [class*="bg-slate-50"], [class*="bg-gray-50"], [class*="bg-blue-50"],
         [class*="bg-slate-100"], [class*="bg-gray-100"] {
           background-color: var(--color-surface-light) !important;
