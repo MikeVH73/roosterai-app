@@ -36,7 +36,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const allNavItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, page: 'Dashboard', permission: null },
+
   { id: 'schedule-overview', label: 'Roosters Overzicht', icon: CalendarCheck, page: 'ScheduleOverview', permission: null },
   { id: 'rooster-dashboard', label: 'Rooster Dashboard', icon: CalendarCheck, page: 'RoosterDashboard', permission: 'manage_schedules' },
   { id: 'schedules', label: 'Alle Roosters', icon: Calendar, page: 'Schedules', permission: 'manage_schedules' },
@@ -105,7 +105,7 @@ export default function HorizontalNav({ currentPage }) {
   };
 
   const handleLogout = async () => {
-    await base44.auth.logout();
+    await base44.auth.logout('/Landing');
   };
 
   return (
@@ -140,10 +140,15 @@ export default function HorizontalNav({ currentPage }) {
             {/* Primary Navigation - Desktop */}
             <div className="hidden lg:flex items-center gap-1">
               <Link
-                to="/Landing"
+                to="/Dashboard"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{ color: 'var(--color-text-muted)' }}
-                title="Terug naar homepage"
+                style={currentPage === 'Dashboard' ? { 
+                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                  color: 'var(--color-accent-light)'
+                } : { 
+                  color: 'var(--color-text-muted)' 
+                }}
+                title="Home"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Home</span>
