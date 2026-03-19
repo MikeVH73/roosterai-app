@@ -111,7 +111,14 @@ export default function MobileHomeTab({
       </div>
 
       {/* Upcoming shifts preview */}
-      {myShiftsThisWeek.length > 0 && (
+      {myShiftsThisWeek.length > 0 && (() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const upcomingShifts = myShiftsThisWeek.filter(s => {
+          try { return parseISO(s.date) >= today; } catch { return false; }
+        });
+        if (upcomingShifts.length === 0) return null;
+        return (
         <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
           <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)' }}>
             <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Komende diensten</h3>
@@ -120,7 +127,7 @@ export default function MobileHomeTab({
             </button>
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
-            {myShiftsThisWeek.slice(0, 3).map((shift, i) => {
+            {upcomingShifts.slice(0, 3).map((shift, i) => {
               const shiftDate = parseISO(shift.date);
               const isToday = isSameDay(shiftDate, now);
               return (
