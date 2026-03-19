@@ -355,7 +355,11 @@ export default function Landing() {
           {[
           { title: 'Product', links: ['Features', 'Prijzen', 'Demo', 'Integraties'] },
           { title: 'Bedrijf', links: ['Over Ons', 'Blog', 'Contact', 'Vacatures'] },
-          { title: 'Legal', links: ['Privacy', 'Voorwaarden', 'Cookiebeleid'] }].
+          { title: 'Legal', links: [
+            { label: 'Privacy', href: '/legal?doc=privacy' },
+            { label: 'Voorwaarden', href: '/legal?doc=voorwaarden' },
+            { label: 'Cookiebeleid', href: '/legal?doc=cookiebeleid' },
+          ] }].
           map((col, i) =>
           <div key={i} className="space-y-6">
               <h4 className="text-white font-bold uppercase tracking-widest text-sm">{col.title}</h4>

@@ -15,6 +15,7 @@ import PlanningTemplates from './pages/PlanningTemplates';
 import RoosterDashboard from './pages/RoosterDashboard';
 import MijnBerichten from './pages/MijnBerichten';
 import MedewerkerApp from './pages/MedewerkerApp';
+import LegalPage from './pages/LegalPage';
 
 const { Pages, Layout } = pagesConfig;
 
@@ -73,6 +74,8 @@ function App() {
             <Route path="/MedewerkerApp" element={
               <ProtectedRoute currentPageName="MedewerkerApp"><MedewerkerApp /></ProtectedRoute>
             } />
+
+            <Route path="/legal" element={<LegalPage />} />
 
             <Route path="*" element={<PageNotFound />} />
           </Routes>
