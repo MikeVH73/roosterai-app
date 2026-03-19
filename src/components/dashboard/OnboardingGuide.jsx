@@ -2,9 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Building2, Briefcase, Users, Calendar, CheckCircle2, Circle, ArrowRight, Rocket } from 'lucide-react';
+import { MapPin, Building2, Briefcase, Users, Calendar, CheckCircle2, Circle, ArrowRight, Rocket, Tag } from 'lucide-react';
 
 const STEPS = [
+  {
+    id: 'location-types',
+    label: 'Locatie Types aanmaken',
+    description: 'Categoriseer je locaties (bijv. Kantoor, Magazijn, Winkel)',
+    icon: Tag,
+    link: '/LocationTypes',
+    checkFn: (data) => data.locationTypes > 0,
+  },
   {
     id: 'locations',
     label: 'Locaties & Afdelingen aanmaken',
@@ -39,13 +47,14 @@ const STEPS = [
   },
 ];
 
-export default function OnboardingGuide({ departments, locations, employees, schedules, functions }) {
+export default function OnboardingGuide({ departments, locations, employees, schedules, functions, locationTypes }) {
   const counts = {
     departments: departments?.length || 0,
     locations: locations?.length || 0,
     employees: employees?.length || 0,
     schedules: schedules?.length || 0,
     functions: functions?.length || 0,
+    locationTypes: locationTypes?.length || 0,
   };
 
   const completedSteps = STEPS.filter(s => s.checkFn(counts)).length;

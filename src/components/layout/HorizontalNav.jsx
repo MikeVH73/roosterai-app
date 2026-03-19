@@ -47,6 +47,7 @@ const allNavItems = [
   { id: 'ai-assistant', label: 'AI Assistent', icon: Sparkles, page: 'AIAssistant', permission: 'use_ai' },
   { id: 'departments', label: 'Afdelingen', icon: Building2, page: 'Departments', permission: 'manage_schedules' },
   { id: 'locations', label: 'Locaties', icon: MapPin, page: 'Locations', permission: 'manage_schedules' },
+  { id: 'location-types', label: 'Locatie Types', icon: MapPin, page: 'LocationTypes', permission: 'manage_schedules' },
   { id: 'functions-skills', label: 'Functies & Vaardigheden', icon: Briefcase, page: 'FunctionsSkills', permission: 'manage_schedules' },
   { id: 'vacation-requests', label: 'Verlofaanvragen', icon: Calendar, page: 'VacationRequests', permission: null },
   { id: 'swap-requests', label: 'Ruilverzoeken', icon: Calendar, page: 'SwapRequests', permission: null },
