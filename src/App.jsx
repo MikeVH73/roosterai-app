@@ -40,7 +40,9 @@ function App() {
             {/* Public routes - no login required */}
             <Route path="/" element={<Landing />} />
             <Route path="/Landing" element={<Landing />} />
-            <Route path="/Abonnementen" element={<Abonnementen />} />
+            <Route path="/Abonnementen" element={
+              <ProtectedRoute currentPageName="Abonnementen"><Abonnementen /></ProtectedRoute>
+            } />
 
             {/* Protected routes from pages.config (legacy) */}
             {Object.entries(Pages).map(([path, Page]) => (

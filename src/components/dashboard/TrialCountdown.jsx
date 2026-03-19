@@ -79,17 +79,15 @@ export default function TrialCountdown({ company, hasManageBilling }) {
             </>
           )}
 
-          {hasManageBilling && (
-            <Link to="/Abonnementen">
-              <Button className="w-full" size="sm" style={{ 
-                background: `linear-gradient(135deg, ${urgencyColor}, ${urgencyColor}cc)`,
-                color: 'white',
-                border: 'none'
-              }}>
-                Abonnement kiezen
-              </Button>
-            </Link>
-          )}
+          <Link to="/Abonnementen">
+            <Button className="w-full" size="sm" style={{ 
+              background: `linear-gradient(135deg, ${urgencyColor}, ${urgencyColor}cc)`,
+              color: 'white',
+              border: 'none'
+            }}>
+              Abonnement kiezen
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>
