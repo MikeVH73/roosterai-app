@@ -25,6 +25,20 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+// Public pages that don't require authentication
+const PublicRoutes = () => (
+  <Routes>
+    <Route path="/" element={<Landing />} />
+    <Route path="/Landing" element={<Landing />} />
+    <Route path="/Abonnementen" element={
+      <LayoutWrapper currentPageName="Abonnementen">
+        <Abonnementen />
+      </LayoutWrapper>
+    } />
+    <Route path="*" element={<AuthenticatedApp />} />
+  </Routes>
+);
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
@@ -48,14 +62,9 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Render the main app
+  // Render the authenticated app
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName="Landing">
-          <Landing />
-        </LayoutWrapper>
-      } />
       {Object.entries(Pages).map(([path, Page]) => (
         <Route
           key={path}
@@ -75,16 +84,6 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         } 
       />
-      <Route path="/Landing" element={
-        <LayoutWrapper currentPageName="Landing">
-          <Landing />
-        </LayoutWrapper>
-      } />
-      <Route path="/Abonnementen" element={
-        <LayoutWrapper currentPageName="Abonnementen">
-          <Abonnementen />
-        </LayoutWrapper>
-      } />
       <Route path="/PlanningTool" element={
         <LayoutWrapper currentPageName="PlanningTool">
           <PlanningTool />
@@ -123,7 +122,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
-          <AuthenticatedApp />
+          <PublicRoutes />
         </Router>
         <Toaster />
         <SonnerToaster position="top-center" richColors />

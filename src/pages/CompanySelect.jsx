@@ -13,6 +13,20 @@ export default function CompanySelect() {
   const navigate = useNavigate();
   const { currentCompany, userMemberships, selectCompany, loading } = useCompany();
 
+  // Auto-redirect if company already selected
+  useEffect(() => {
+    if (!loading && currentCompany) {
+      // Determine destination based on role
+      const membership = userMemberships.find(m => m.companyId === currentCompany.id);
+      const role = membership?.company_role;
+      if (role === 'employee') {
+        navigate('/MedewerkerApp');
+      } else {
+        navigate('/Dashboard');
+      }
+    }
+  }, [loading, currentCompany]);
+
   // Fetch company details for all memberships
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ['companies', userMemberships.map((m) => m.companyId)],
@@ -29,7 +43,14 @@ export default function CompanySelect() {
 
   const handleSelectCompany = async (companyId) => {
     await selectCompany(companyId);
-    navigate(createPageUrl('Dashboard'));
+    // Redirect based on role
+    const membership = userMemberships.find(m => m.companyId === companyId);
+    const role = membership?.company_role;
+    if (role === 'employee') {
+      navigate('/MedewerkerApp');
+    } else {
+      navigate('/Dashboard');
+    }
   };
 
   const getMembershipRole = (companyId) => {
