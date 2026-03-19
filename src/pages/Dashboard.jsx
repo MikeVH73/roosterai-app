@@ -146,6 +146,13 @@ export default function Dashboard() {
     enabled: !!companyId && !isEmployee
   });
 
+  // Fetch location types (for onboarding guide)
+  const { data: locationTypes = [] } = useQuery({
+    queryKey: ['location-types', companyId],
+    queryFn: () => base44.entities.LocationType.filter({ companyId }),
+    enabled: !!companyId && !isEmployee
+  });
+
   // Fetch locations for employee week schedule
   const { data: locations = [] } = useQuery({
     queryKey: ['locations', companyId],
@@ -259,6 +266,7 @@ export default function Dashboard() {
               employees={employees}
               schedules={schedules}
               functions={functions}
+              locationTypes={locationTypes}
             />
           </div>
         )}
