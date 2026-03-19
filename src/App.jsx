@@ -40,9 +40,7 @@ function App() {
             {/* Public routes - no login required */}
             <Route path="/" element={<Landing />} />
             <Route path="/Landing" element={<Landing />} />
-            <Route path="/Abonnementen" element={
-              <LayoutWrapper currentPageName="Abonnementen"><Abonnementen /></LayoutWrapper>
-            } />
+            <Route path="/Abonnementen" element={<Abonnementen />} />
 
             {/* Protected routes from pages.config (legacy) */}
             {Object.entries(Pages).map(([path, Page]) => (
