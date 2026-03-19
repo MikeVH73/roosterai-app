@@ -67,7 +67,16 @@ export function CompanyProvider({ children }) {
   };
 
   const selectCompany = async (companyId) => {
-    const membership = userMemberships.find(m => m.companyId === companyId);
+    let membership = userMemberships.find(m => m.companyId === companyId);
+    
+    // If membership not found in cache, reload memberships (e.g. after creating a new company)
+    if (!membership && user?.email) {
+      const freshMemberships = await base44.entities.CompanyMember.filter({ email: user.email });
+      const activeMemberships = freshMemberships.filter(m => m.status === 'active' || m.status === 'invited');
+      setUserMemberships(activeMemberships);
+      membership = activeMemberships.find(m => m.companyId === companyId);
+    }
+    
     if (!membership) return;
     
     const companies = await base44.entities.Company.filter({ id: companyId });
