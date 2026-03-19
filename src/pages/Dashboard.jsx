@@ -30,6 +30,8 @@ import WeekChart from '@/components/dashboard/WeekChart';
 import DepartmentDistribution from '@/components/dashboard/DepartmentDistribution';
 import ActionItems from '@/components/dashboard/ActionItems';
 import EmployeeWeekSchedule from '@/components/dashboard/EmployeeWeekSchedule';
+import TrialCountdown from '@/components/dashboard/TrialCountdown';
+import OnboardingGuide from '@/components/dashboard/OnboardingGuide';
 
 function StatCard({ title, value, icon: Icon, trend, trendLabel, color }) {
   const iconColors = {
@@ -128,6 +130,20 @@ export default function Dashboard() {
     queryKey: ['ai-suggestions', companyId],
     queryFn: () => base44.entities.AISuggestion.filter({ companyId, status: 'pending' }),
     enabled: !!companyId
+  });
+
+  // Fetch functions (for onboarding guide)
+  const { data: functions = [] } = useQuery({
+    queryKey: ['functions', companyId],
+    queryFn: () => base44.entities.Function.filter({ companyId }),
+    enabled: !!companyId
+  });
+
+  // Fetch locations (for admin onboarding guide too)
+  const { data: allLocations = [] } = useQuery({
+    queryKey: ['all-locations', companyId],
+    queryFn: () => base44.entities.Location.filter({ companyId }),
+    enabled: !!companyId && !isEmployee
   });
 
   // Fetch locations for employee week schedule
@@ -233,6 +249,19 @@ export default function Dashboard() {
             </>
           )}
         </div>
+
+        {/* Onboarding Guide - only for admins/planners when app is not fully set up */}
+        {!isEmployee && (
+          <div className="mb-6">
+            <OnboardingGuide
+              departments={departments}
+              locations={allLocations}
+              employees={employees}
+              schedules={schedules}
+              functions={functions}
+            />
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Quick Actions */}
@@ -451,32 +480,8 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Subscription Status */}
-            <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Abonnement</span>
-                  <Badge style={{ backgroundColor: 'rgba(56,189,248,0.15)', color: '#38bdf8', border: 'none' }}>
-                    {currentCompany?.subscription_plan?.charAt(0).toUpperCase() + currentCompany?.subscription_plan?.slice(1)}
-                  </Badge>
-                </div>
-                {currentCompany?.subscription_status === 'trial' && (
-                  <div className="p-3 rounded-lg text-sm" style={{ backgroundColor: 'rgba(251,191,36,0.1)', color: '#fbbf24' }}>
-                    <p className="font-medium">Proefperiode actief</p>
-                    <p className="text-xs mt-1" style={{ color: '#fcd34d' }}>
-                      Verloopt op {currentCompany?.trial_ends_at ? format(parseISO(currentCompany.trial_ends_at), 'd MMMM yyyy', { locale: nl }) : 'Onbekend'}
-                    </p>
-                  </div>
-                )}
-                {hasPermission('manage_billing') && (
-                  <Link to={createPageUrl('Billing')}>
-                    <Button variant="outline" className="w-full mt-4" size="sm">
-                      Beheer abonnement
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
+            {/* Subscription / Trial Countdown */}
+            <TrialCountdown company={currentCompany} hasManageBilling={hasPermission('manage_billing')} />
           </div>
         </div>
       </div>
