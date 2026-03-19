@@ -5,7 +5,7 @@ import HorizontalNav from './components/layout/HorizontalNav';
 import { Loader2 } from 'lucide-react';
 
 // Pages that don't need company context
-const publicPages = ['CompanySelect', 'CompanyOnboarding', 'Landing'];
+const publicPages = ['CompanySelect', 'CompanyOnboarding', 'Landing', 'Abonnementen'];
 
 // Pages with their own navigation (no HorizontalNav)
 const selfNavigatingPages = ['MedewerkerApp'];
