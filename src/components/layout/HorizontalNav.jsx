@@ -34,6 +34,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import TrialBadge from './TrialBadge';
 
 const allNavItems = [
 
@@ -178,6 +179,9 @@ export default function HorizontalNav({ currentPage }) {
 
           {/* Right: Theme toggle + More menu + User menu */}
           <div className="flex items-center gap-3">
+            {/* Trial countdown badge */}
+            <TrialBadge company={currentCompany} />
+
             {/* WhatsApp icon - planners/admins only */}
             {hasPermission('manage_schedules') && (
               <div className="relative">
