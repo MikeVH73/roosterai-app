@@ -210,7 +210,8 @@ export default function CompanySettings() {
                 <CardDescription>Basis informatie over je organisatie</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
+                <CompanyLogoUpload />
+                <div className="border-t pt-4" style={{ borderColor: 'var(--color-border)' }}>
                   <Label htmlFor="name">Bedrijfsnaam</Label>
                   <Input
                     id="name"
