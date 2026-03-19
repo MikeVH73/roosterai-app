@@ -312,16 +312,21 @@ export default function Abonnementen() {
 
                       {/* CTA Button */}
                       <Button
-                        onClick={() => !isCurrentPlan && handleUpgrade(plan)}
-                        disabled={isCurrentPlan || loading}
+                        onClick={() => !isDisabled && handleUpgrade(plan)}
+                        disabled={isDisabled || loading}
                         className="w-full font-semibold flex items-center justify-center gap-2"
-                        style={isCurrentPlan
+                        style={isDisabled
                           ? { backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)', cursor: 'default' }
                           : { backgroundColor: plan.accentColor, color: '#0f172a' }
                         }
                       >
-                        {isCurrentPlan ? 'Huidig plan' : loading ? (
+                        {isDisabled ? 'Huidig plan' : loading ? (
                           'Even geduld...'
+                        ) : isCurrentPlan && isTrial ? (
+                          <>
+                            Activeer {plan.name}
+                            <ArrowRight className="w-4 h-4" />
+                          </>
                         ) : (
                           <>
                             Upgrade naar {plan.name}
