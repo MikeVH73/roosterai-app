@@ -6,9 +6,8 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import AITestSuite from './pages/AITestSuite';
+import { AuthProvider } from '@/lib/AuthContext';
+import RequireAuth from '@/components/auth/RequireAuth';
 import Landing from './pages/Landing';
 import Abonnementen from './pages/Abonnementen';
 import PlanningTool from './pages/PlanningTool';
@@ -17,112 +16,64 @@ import RoosterDashboard from './pages/RoosterDashboard';
 import MijnBerichten from './pages/MijnBerichten';
 import MedewerkerApp from './pages/MedewerkerApp';
 
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
+const { Pages, Layout } = pagesConfig;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-// Public pages that don't require authentication
-const PublicRoutes = () => (
-  <Routes>
-    <Route path="/" element={<Landing />} />
-    <Route path="/Landing" element={<Landing />} />
-    <Route path="/Abonnementen" element={
-      <LayoutWrapper currentPageName="Abonnementen">
-        <Abonnementen />
-      </LayoutWrapper>
-    } />
-    <Route path="*" element={<AuthenticatedApp />} />
-  </Routes>
+const ProtectedRoute = ({ children, currentPageName }) => (
+  <RequireAuth>
+    <LayoutWrapper currentPageName={currentPageName}>
+      {children}
+    </LayoutWrapper>
+  </RequireAuth>
 );
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
-  }
-
-  // Render the authenticated app
-  return (
-    <Routes>
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route 
-        path="/AITestSuite" 
-        element={
-          <LayoutWrapper currentPageName="AITestSuite">
-            <AITestSuite />
-          </LayoutWrapper>
-        } 
-      />
-      <Route path="/PlanningTool" element={
-        <LayoutWrapper currentPageName="PlanningTool">
-          <PlanningTool />
-        </LayoutWrapper>
-      } />
-      <Route path="/PlanningTemplates" element={
-        <LayoutWrapper currentPageName="PlanningTemplates">
-          <PlanningTemplates />
-        </LayoutWrapper>
-      } />
-      <Route path="/RoosterDashboard" element={
-        <LayoutWrapper currentPageName="RoosterDashboard">
-          <RoosterDashboard />
-        </LayoutWrapper>
-      } />
-      <Route path="/MijnBerichten" element={
-        <LayoutWrapper currentPageName="MijnBerichten">
-          <MijnBerichten />
-        </LayoutWrapper>
-      } />
-      <Route path="/MedewerkerApp" element={
-        <LayoutWrapper currentPageName="MedewerkerApp">
-          <MedewerkerApp />
-        </LayoutWrapper>
-      } />
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
-  );
-};
-
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <NavigationTracker />
-          <PublicRoutes />
+          <Routes>
+            {/* Public routes - no login required */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/Landing" element={<Landing />} />
+            <Route path="/Abonnementen" element={<Landing />} />
+
+            {/* Protected routes from pages.config (legacy) */}
+            {Object.entries(Pages).map(([path, Page]) => (
+              <Route
+                key={path}
+                path={`/${path}`}
+                element={
+                  <ProtectedRoute currentPageName={path}>
+                    <Page />
+                  </ProtectedRoute>
+                }
+              />
+            ))}
+
+            {/* Protected routes added manually */}
+            <Route path="/PlanningTool" element={
+              <ProtectedRoute currentPageName="PlanningTool"><PlanningTool /></ProtectedRoute>
+            } />
+            <Route path="/PlanningTemplates" element={
+              <ProtectedRoute currentPageName="PlanningTemplates"><PlanningTemplates /></ProtectedRoute>
+            } />
+            <Route path="/RoosterDashboard" element={
+              <ProtectedRoute currentPageName="RoosterDashboard"><RoosterDashboard /></ProtectedRoute>
+            } />
+            <Route path="/MijnBerichten" element={
+              <ProtectedRoute currentPageName="MijnBerichten"><MijnBerichten /></ProtectedRoute>
+            } />
+            <Route path="/MedewerkerApp" element={
+              <ProtectedRoute currentPageName="MedewerkerApp"><MedewerkerApp /></ProtectedRoute>
+            } />
+
+            <Route path="*" element={<PageNotFound />} />
+          </Routes>
         </Router>
         <Toaster />
         <SonnerToaster position="top-center" richColors />
