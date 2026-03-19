@@ -229,6 +229,8 @@ export default function Abonnementen() {
             {PLANS.map((plan) => {
               const PlanIcon = plan.icon;
               const isCurrentPlan = currentPlan === plan.id;
+              const isTrial = currentCompany?.subscription_status === 'trial';
+              const isDisabled = isCurrentPlan && !isTrial;
 
               return (
                 <GlowCard key={plan.id} glowColor={plan.glowColor} className="shadow-sm">
