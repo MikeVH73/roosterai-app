@@ -296,11 +296,11 @@ export default function Schedules() {
             ))}
           </div>
         ) : schedules.length === 0 ? (
-          <Card className="border-0 shadow-sm">
+          <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
             <CardContent className="p-12 text-center">
-              <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="font-medium text-slate-900 mb-2">Nog geen roosters</h3>
-              <p className="text-slate-500 text-sm mb-6">
+              <CalendarDays className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+              <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Nog geen roosters</h3>
+              <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                 Maak je eerste rooster aan om diensten in te plannen.
               </p>
               {hasPermission('manage_schedules') && (

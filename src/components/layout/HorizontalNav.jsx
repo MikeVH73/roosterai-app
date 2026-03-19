@@ -51,7 +51,7 @@ const allNavItems = [
   { id: 'swap-requests', label: 'Ruilverzoeken', icon: Calendar, page: 'SwapRequests', permission: null },
   { id: 'mijn-berichten', label: 'Mijn Berichten', icon: MessageCircle, page: 'MijnBerichten', permission: null },
   { id: 'settings', label: 'Instellingen', icon: Settings, page: 'CompanySettings', permission: 'manage_company' },
-  { id: 'ai-test-suite', label: 'AI Test Suite', icon: Sparkles, page: 'AITestSuite', permission: 'manage_company' },
+  { id: 'ai-test-suite', label: 'AI Test Suite', icon: Sparkles, page: 'AITestSuite', permission: 'manage_company', devOnly: true },
 ];
 
 export default function HorizontalNav({ currentPage }) {
@@ -84,10 +84,11 @@ export default function HorizontalNav({ currentPage }) {
     : ['dashboard', 'rooster-dashboard', 'employees', 'ai-assistant'];
   const preferredMenuIds = userPreferences.horizontal_menu_items || defaultMenuIds;
 
-  // Filter items based on permissions
-  const accessibleItems = allNavItems.filter(item => 
-    !item.permission || hasPermission(item.permission)
-  );
+  // Filter items based on permissions (and dev-only items)
+  const accessibleItems = allNavItems.filter(item => {
+    if (item.devOnly && user?.email !== 'e-business@live.nl') return false;
+    return !item.permission || hasPermission(item.permission);
+  });
 
   // Split into primary (shown in menu) and secondary (in dropdown)
   const primaryItems = accessibleItems.filter(item => 

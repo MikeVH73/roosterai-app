@@ -222,7 +222,7 @@ export default function FunctionsSkills() {
   const isSkillSubmitting = createSkillMutation.isPending || updateSkillMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
       <TopBar 
         title="Functies & Vaardigheden" 
         subtitle={`${functions.length} functies, ${skills.length} vaardigheden`}
@@ -266,11 +266,11 @@ export default function FunctionsSkills() {
                 ))}
               </div>
             ) : functions.length === 0 ? (
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <CardContent className="p-12 text-center">
-                  <Briefcase className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-medium text-slate-900 mb-2">Nog geen functies</h3>
-                  <p className="text-slate-500 text-sm mb-6">
+                  <Briefcase className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                  <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Nog geen functies</h3>
+                  <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                     Definieer functies om medewerkers in te delen.
                   </p>
                   {hasPermission('manage_schedules') && (
@@ -284,7 +284,7 @@ export default function FunctionsSkills() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {functions.map((func) => (
-                  <Card key={func.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <Card key={func.id} className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)' }}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
@@ -295,9 +295,9 @@ export default function FunctionsSkills() {
                             <Briefcase className="w-5 h-5" style={{ color: func.color }} />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-slate-900">{func.name}</h3>
+                            <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{func.name}</h3>
                             {func.code && (
-                              <p className="text-sm text-slate-500">{func.code}</p>
+                              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{func.code}</p>
                             )}
                           </div>
                         </div>
@@ -327,7 +327,7 @@ export default function FunctionsSkills() {
                       </div>
 
                       {func.description && (
-                        <p className="text-sm text-slate-600 mb-4">{func.description}</p>
+                        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>{func.description}</p>
                       )}
 
                       {func.required_skillIds?.length > 0 && (
@@ -359,11 +359,11 @@ export default function FunctionsSkills() {
                 ))}
               </div>
             ) : skills.length === 0 ? (
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <CardContent className="p-12 text-center">
-                  <Award className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-medium text-slate-900 mb-2">Nog geen vaardigheden</h3>
-                  <p className="text-slate-500 text-sm mb-6">
+                  <Award className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                  <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Nog geen vaardigheden</h3>
+                  <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                     Definieer vaardigheden en certificeringen voor je team.
                   </p>
                   {hasPermission('manage_schedules') && (
@@ -377,17 +377,17 @@ export default function FunctionsSkills() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {skills.map((skill) => (
-                  <Card key={skill.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                  <Card key={skill.id} className="border-0 shadow-sm hover:shadow-md transition-shadow" style={{ backgroundColor: 'var(--color-surface)' }}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                            <Award className="w-5 h-5 text-amber-600" />
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
+                            <Award className="w-5 h-5 text-amber-500" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-slate-900">{skill.name}</h3>
+                            <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{skill.name}</h3>
                             {skill.code && (
-                              <p className="text-sm text-slate-500">{skill.code}</p>
+                              <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>{skill.code}</p>
                             )}
                           </div>
                         </div>

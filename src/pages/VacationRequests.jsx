@@ -198,11 +198,11 @@ export default function VacationRequests() {
 
           <TabsContent value="mine">
             {myRequests.length === 0 ? (
-              <Card className="border-0 shadow-sm">
+              <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                 <CardContent className="p-12 text-center">
-                  <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                  <h3 className="font-medium text-slate-900 mb-2">Geen verlofaanvragen</h3>
-                  <p className="text-slate-500 text-sm mb-6">
+                  <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                  <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen verlofaanvragen</h3>
+                  <p className="text-sm mb-6" style={{ color: 'var(--color-text-muted)' }}>
                     Je hebt nog geen verlof aangevraagd.
                   </p>
                   <Button onClick={() => setDialogOpen(true)}>
@@ -217,12 +217,12 @@ export default function VacationRequests() {
                   const StatusIcon = statusConfig[request.status].icon;
                   const days = differenceInDays(parseISO(request.end_date), parseISO(request.start_date)) + 1;
                   return (
-                    <Card key={request.id} className="border-0 shadow-sm">
+                    <Card key={request.id} className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)' }}>
                       <CardContent className="p-5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                              <Calendar className="w-6 h-6 text-blue-600" />
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(56, 189, 248, 0.1)' }}>
+                              <Calendar className="w-6 h-6" style={{ color: 'var(--color-accent)' }} />
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-1">
@@ -265,11 +265,11 @@ export default function VacationRequests() {
                   ))}
                 </div>
               ) : filteredRequests.length === 0 ? (
-                <Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)', borderColor: 'var(--color-border)' }}>
                   <CardContent className="p-12 text-center">
-                    <Calendar className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <h3 className="font-medium text-slate-900 mb-2">Geen aanvragen</h3>
-                    <p className="text-slate-500 text-sm">
+                    <Calendar className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
+                    <h3 className="font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>Geen aanvragen</h3>
+                    <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
                       Er zijn geen verlofaanvragen met deze status.
                     </p>
                   </CardContent>
@@ -282,18 +282,18 @@ export default function VacationRequests() {
                     const days = differenceInDays(parseISO(request.end_date), parseISO(request.start_date)) + 1;
                     
                     return (
-                      <Card key={request.id} className="border-0 shadow-sm">
+                      <Card key={request.id} className="border-0 shadow-sm" style={{ backgroundColor: 'var(--color-surface)' }}>
                         <CardContent className="p-5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <Avatar className="w-10 h-10">
-                                <AvatarFallback className="bg-blue-100 text-blue-600 text-sm font-medium">
+                                <AvatarFallback className="text-sm font-medium" style={{ backgroundColor: 'rgba(56, 189, 248, 0.15)', color: 'var(--color-accent)' }}>
                                   {getInitials(employee?.first_name, employee?.last_name)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium text-slate-900">
+                                  <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
                                     {employee?.first_name} {employee?.last_name}
                                   </span>
                                   <Badge style={statusConfig[request.status].style}>
