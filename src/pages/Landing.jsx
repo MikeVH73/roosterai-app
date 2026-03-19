@@ -364,11 +364,15 @@ export default function Landing() {
           <div key={i} className="space-y-6">
               <h4 className="text-white font-bold uppercase tracking-widest text-sm">{col.title}</h4>
               <ul className="space-y-4 text-slate-400 text-sm">
-                {col.links.map((link, j) =>
-              <li key={j}><a href="#" style={{ transition: 'color 0.2s' }}
-                onMouseEnter={(e) => e.target.style.color = '#39FF14'}
-                onMouseLeave={(e) => e.target.style.color = ''}>{link}</a></li>
-              )}
+                {col.links.map((link, j) => {
+                  const label = typeof link === 'string' ? link : link.label;
+                  const href = typeof link === 'string' ? '#' : link.href;
+                  return (
+                    <li key={j}><a href={href} style={{ transition: 'color 0.2s' }}
+                      onMouseEnter={(e) => e.target.style.color = '#39FF14'}
+                      onMouseLeave={(e) => e.target.style.color = ''}>{label}</a></li>
+                  );
+                })}
               </ul>
             </div>
           )}
