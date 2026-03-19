@@ -3,23 +3,20 @@ import Stripe from 'npm:stripe@14.14.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_API_KEY'));
 
-// Map plan IDs to Stripe price configuration
+// Map plan IDs to Stripe lookup keys and app limits
 const PLAN_CONFIG = {
   starter: {
-    name: 'RoosterAI Starter',
-    price: 3900, // cents
+    lookup_key: 'starter_monthly',
     employeeLimit: 25,
     aiActions: 500,
   },
   pro: {
-    name: 'RoosterAI Pro',
-    price: 7900,
+    lookup_key: 'pro_monthly',
     employeeLimit: 75,
     aiActions: 1500,
   },
   business: {
-    name: 'RoosterAI Business',
-    price: 14900,
+    lookup_key: 'business_monthly',
     employeeLimit: 200,
     aiActions: 5000,
   },
@@ -44,22 +41,36 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    // Create Stripe Checkout session with a recurring subscription
+    // Look up the Stripe price by lookup_key
+    const prices = await stripe.prices.list({
+      lookup_keys: [planConfig.lookup_key],
+      active: true,
+      limit: 1,
+    });
+
+    if (!prices.data.length) {
+      return Response.json({ error: `Stripe price not found for lookup key: ${planConfig.lookup_key}` }, { status: 404 });
+    }
+
+    const stripePriceId = prices.data[0].id;
+
+    // Create Stripe Checkout session using the existing price
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card', 'ideal'],
       customer_email: user.email,
+      subscription_data: {
+        trial_period_days: 14,
+        metadata: {
+          companyId,
+          planId,
+          employeeLimit: String(planConfig.employeeLimit),
+          aiActions: String(planConfig.aiActions),
+        },
+      },
       line_items: [
         {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: planConfig.name,
-              description: `Tot ${planConfig.employeeLimit} medewerkers, ${planConfig.aiActions} AI acties/maand`,
-            },
-            unit_amount: planConfig.price,
-            recurring: { interval: 'month' },
-          },
+          price: stripePriceId,
           quantity: 1,
         },
       ],
@@ -75,6 +86,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ url: session.url });
   } catch (error) {
+    console.error('Checkout error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
