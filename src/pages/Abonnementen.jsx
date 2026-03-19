@@ -94,23 +94,41 @@ export default function Abonnementen() {
 
   const currentPlanData = PLANS.find(p => p.id === currentPlan);
 
+  const [loading, setLoading] = React.useState(false);
+
+  // Check for Stripe redirect result
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      toast.success('Betaling gelukt! Je abonnement wordt geactiveerd.');
+      refreshCompany();
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('checkout') === 'cancelled') {
+      toast.info('Betaling geannuleerd.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   const handleUpgrade = async (plan) => {
     if (!hasPermission('manage_billing')) {
       toast.error('Je hebt geen rechten om het abonnement te wijzigen.');
       return;
     }
 
-    const planConfig = PLANS.find(p => p.id === plan.id);
-    if (!planConfig) return;
-
-    await base44.entities.Company.update(companyId, {
-      subscription_plan: plan.id,
-      max_users: plan.employeeLimit,
-      ai_actions_limit: plan.aiActions,
+    setLoading(true);
+    const response = await base44.functions.invoke('createCheckoutSession', {
+      planId: plan.id,
+      companyId,
+      returnUrl: window.location.origin + '/Abonnementen',
     });
 
-    await refreshCompany();
-    toast.success(`Abonnement gewijzigd naar ${plan.name}!`);
+    if (response.data?.url) {
+      window.location.href = response.data.url;
+    } else {
+      toast.error('Kon betaalpagina niet openen. Probeer het opnieuw.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -293,14 +311,16 @@ export default function Abonnementen() {
                       {/* CTA Button */}
                       <Button
                         onClick={() => !isCurrentPlan && handleUpgrade(plan)}
-                        disabled={isCurrentPlan}
+                        disabled={isCurrentPlan || loading}
                         className="w-full font-semibold flex items-center justify-center gap-2"
                         style={isCurrentPlan
                           ? { backgroundColor: 'var(--color-surface-light)', color: 'var(--color-text-muted)', cursor: 'default' }
                           : { backgroundColor: plan.accentColor, color: '#0f172a' }
                         }
                       >
-                        {isCurrentPlan ? 'Huidig plan' : (
+                        {isCurrentPlan ? 'Huidig plan' : loading ? (
+                          'Even geduld...'
+                        ) : (
                           <>
                             Upgrade naar {plan.name}
                             <ArrowRight className="w-4 h-4" />
