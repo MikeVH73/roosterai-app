@@ -12,15 +12,15 @@ export default function LegalPage() {
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['legal-documents'],
-    queryFn: () => base44.entities.LegalDocument.filter({ published: true }),
+    queryFn: () => base44.entities.LegalDocument.filter({ published: true })
   });
 
-  const currentDoc = documents.find(d => d.slug === slug);
+  const currentDoc = documents.find((d) => d.slug === slug);
   const tabs = [
-    { slug: 'privacy', label: 'Privacybeleid' },
-    { slug: 'voorwaarden', label: 'Algemene Voorwaarden' },
-    { slug: 'cookiebeleid', label: 'Cookiebeleid' },
-  ];
+  { slug: 'privacy', label: 'Privacybeleid' },
+  { slug: 'voorwaarden', label: 'Algemene Voorwaarden' },
+  { slug: 'cookiebeleid', label: 'Cookiebeleid' }];
+
 
   return (
     <div className="font-sans min-h-screen" style={{ fontFamily: "'Public Sans', sans-serif", background: '#1a0b16' }}>
@@ -42,29 +42,29 @@ export default function LegalPage() {
       <main className="max-w-4xl mx-auto px-6 py-16">
         {/* Tab Navigation */}
         <div className="flex flex-wrap gap-2 mb-10">
-          {tabs.map(tab => (
-            <button
-              key={tab.slug}
-              onClick={() => navigate(`/legal?doc=${tab.slug}`)}
-              className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
-              style={{
-                background: slug === tab.slug ? 'rgba(57,255,20,0.15)' : 'rgba(255,255,255,0.05)',
-                color: slug === tab.slug ? '#39FF14' : '#94a3b8',
-                border: `1px solid ${slug === tab.slug ? 'rgba(57,255,20,0.3)' : 'rgba(255,255,255,0.07)'}`,
-              }}
-            >
+          {tabs.map((tab) =>
+          <button
+            key={tab.slug}
+            onClick={() => navigate(`/legal?doc=${tab.slug}`)}
+            className="px-4 py-2 rounded-lg text-sm font-bold transition-all"
+            style={{
+              background: slug === tab.slug ? 'rgba(57,255,20,0.15)' : 'rgba(255,255,255,0.05)',
+              color: slug === tab.slug ? '#39FF14' : '#94a3b8',
+              border: `1px solid ${slug === tab.slug ? 'rgba(57,255,20,0.3)' : 'rgba(255,255,255,0.07)'}`
+            }}>
+            
               {tab.label}
             </button>
-          ))}
+          )}
         </div>
 
         {/* Content */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-32">
+        {isLoading ?
+        <div className="flex items-center justify-center py-32">
             <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#39FF14' }} />
-          </div>
-        ) : currentDoc ? (
-          <div>
+          </div> :
+        currentDoc ?
+        <div>
             <div className="flex items-center gap-3 mb-8">
               <div className="p-2.5 rounded-xl" style={{ background: 'rgba(57,255,20,0.1)' }}>
                 <FileText size={24} style={{ color: '#39FF14' }} />
@@ -78,24 +78,24 @@ export default function LegalPage() {
             </div>
 
             <div className="rounded-2xl p-8 md:p-12" style={{ background: '#120a10', border: '1px solid rgba(255,255,255,0.07)' }}>
-              <div className="prose prose-invert prose-lg max-w-none
-                prose-headings:text-white prose-headings:font-bold
-                prose-p:text-slate-300 prose-p:leading-relaxed
-                prose-li:text-slate-300
-                prose-strong:text-white
-                prose-a:text-[#39FF14] prose-a:no-underline hover:prose-a:underline
-              ">
+              <div className="text-slate-50 prose prose-invert prose-lg max-w-none prose-headings:text-white prose-headings:font-bold prose-p:text-slate-300 prose-p:leading-relaxed prose-li:text-slate-300 prose-strong:text-white prose-a:text-[#39FF14] prose-a:no-underline hover:prose-a:underline">
+
+
+
+
+
+              
                 <ReactMarkdown>{currentDoc.content}</ReactMarkdown>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-32">
+          </div> :
+
+        <div className="text-center py-32">
             <FileText size={48} className="mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.1)' }} />
             <h2 className="text-white text-xl font-bold mb-2">Document niet gevonden</h2>
             <p className="text-slate-400">Dit document is nog niet beschikbaar. Neem contact met ons op voor meer informatie.</p>
           </div>
-        )}
+        }
       </main>
 
       {/* Minimal Footer */}
@@ -103,12 +103,12 @@ export default function LegalPage() {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">© {new Date().getFullYear()} RoosterAI</p>
           <div className="flex gap-6 text-slate-500 text-xs font-bold">
-            {tabs.map(tab => (
-              <a key={tab.slug} href={`/legal?doc=${tab.slug}`} className="hover:text-white transition-colors">{tab.label}</a>
-            ))}
+            {tabs.map((tab) =>
+            <a key={tab.slug} href={`/legal?doc=${tab.slug}`} className="hover:text-white transition-colors">{tab.label}</a>
+            )}
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
