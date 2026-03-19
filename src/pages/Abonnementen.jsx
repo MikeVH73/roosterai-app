@@ -102,8 +102,8 @@ export default function Abonnementen() {
     if (params.get('checkout') === 'success') {
       toast.success('Betaling gelukt! Je abonnement wordt geactiveerd.');
       refreshCompany();
-      // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => navigate('/Dashboard'), 2000);
     } else if (params.get('checkout') === 'cancelled') {
       toast.info('Betaling geannuleerd.');
       window.history.replaceState({}, '', window.location.pathname);
