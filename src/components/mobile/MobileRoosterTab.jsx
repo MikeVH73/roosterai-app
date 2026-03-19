@@ -62,7 +62,7 @@ export default function MobileRoosterTab({ shifts = [], locations = [], departme
   const getDaypartName = (id) => dayparts.find(dp => dp.id === id)?.name || '';
 
   return (
-    <div className="px-4 pb-4">
+    <div className="px-4 pb-4" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* Week navigator */}
       <div className="flex items-center justify-between py-3">
         <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 rounded-lg active:scale-95 transition-transform"
