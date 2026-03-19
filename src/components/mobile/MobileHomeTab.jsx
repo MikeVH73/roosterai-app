@@ -158,7 +158,8 @@ export default function MobileHomeTab({
             })}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Quick actions: Verlof & Ruil aanvragen */}
       <div className="grid grid-cols-2 gap-2">
