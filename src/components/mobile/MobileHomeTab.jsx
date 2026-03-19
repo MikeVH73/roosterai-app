@@ -111,7 +111,7 @@ export default function MobileHomeTab({
       </div>
 
       {/* Upcoming shifts preview */}
-      {myShiftsThisWeek.length > 0 && (() => {
+      {(() => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const upcomingShifts = myShiftsThisWeek.filter(s => {
@@ -119,45 +119,45 @@ export default function MobileHomeTab({
         });
         if (upcomingShifts.length === 0) return null;
         return (
-        <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
-          <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)' }}>
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Komende diensten</h3>
-            <button onClick={() => onNavigate('rooster')} className="text-xs font-medium" style={{ color: 'var(--color-accent)' }}>
-              Bekijk alles
-            </button>
-          </div>
-          <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
-            {upcomingShifts.slice(0, 3).map((shift, i) => {
-              const shiftDate = parseISO(shift.date);
-              const isToday = isSameDay(shiftDate, now);
-              return (
-                <div key={i} className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-11 text-center flex-shrink-0">
-                    <p className="text-[10px] uppercase font-medium" 
-                      style={{ color: isToday ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
-                      {format(shiftDate, 'EEE', { locale: nl })}
-                    </p>
-                    <p className="text-lg font-bold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
-                      {format(shiftDate, 'd')}
-                    </p>
+          <div className="rounded-xl overflow-hidden" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+            <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border)' }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Komende diensten</h3>
+              <button onClick={() => onNavigate('rooster')} className="text-xs font-medium" style={{ color: 'var(--color-accent)' }}>
+                Bekijk alles
+              </button>
+            </div>
+            <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
+              {upcomingShifts.slice(0, 3).map((shift, i) => {
+                const shiftDate = parseISO(shift.date);
+                const isToday = isSameDay(shiftDate, now);
+                return (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-11 text-center flex-shrink-0">
+                      <p className="text-[10px] uppercase font-medium" 
+                        style={{ color: isToday ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
+                        {format(shiftDate, 'EEE', { locale: nl })}
+                      </p>
+                      <p className="text-lg font-bold leading-tight" style={{ color: 'var(--color-text-primary)' }}>
+                        {format(shiftDate, 'd')}
+                      </p>
+                    </div>
+                    <div className="w-px h-8 flex-shrink-0" style={{ backgroundColor: 'var(--color-border)' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
+                        {getLocationName(shift.locationId) || 'Dienst'}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                        {getDepartmentName(shift.departmentId)}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium flex-shrink-0" style={{ color: 'var(--color-text-primary)' }}>
+                      {shift.start_time} - {shift.end_time}
+                    </span>
                   </div>
-                  <div className="w-px h-8 flex-shrink-0" style={{ backgroundColor: 'var(--color-border)' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>
-                      {getLocationName(shift.locationId) || 'Dienst'}
-                    </p>
-                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                      {getDepartmentName(shift.departmentId)}
-                    </p>
-                  </div>
-                  <span className="text-sm font-medium flex-shrink-0" style={{ color: 'var(--color-text-primary)' }}>
-                    {shift.start_time} - {shift.end_time}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
         );
       })()}
 
