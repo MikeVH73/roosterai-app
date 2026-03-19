@@ -1,10 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Clock, Calendar, FileText } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, isWithinInterval, parseISO, isSameDay } from 'date-fns';
 import { nl } from 'date-fns/locale';
 
 export default function MobileRoosterTab({ shifts = [], locations = [], departments = [], dayparts = [] }) {
   const [weekOffset, setWeekOffset] = useState(0);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY.current);
+    // Only trigger if horizontal swipe is dominant and > 50px
+    if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > deltaY) {
+      if (deltaX < 0) setWeekOffset(w => w + 1); // swipe left = next week
+      else setWeekOffset(w => w - 1); // swipe right = previous week
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
 
   const currentWeekStart = startOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
   const currentWeekEnd = endOfWeek(addWeeks(new Date(), weekOffset), { weekStartsOn: 1 });
