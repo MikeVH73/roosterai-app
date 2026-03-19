@@ -42,6 +42,7 @@ import {
 import { toast } from "sonner";
 import InvitationManager from '@/components/settings/InvitationManager';
 import ColleagueRosterSettings from '@/components/settings/ColleagueRosterSettings';
+import CompanyLogoUpload from '@/components/settings/CompanyLogoUpload';
 
 export default function CompanySettings() {
   const { currentCompany, refreshCompany, hasPermission } = useCompany();
