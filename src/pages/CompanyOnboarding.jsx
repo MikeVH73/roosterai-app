@@ -146,6 +146,17 @@ export default function CompanyOnboarding() {
         }
       });
 
+      // Create default "Planner" function (can be renamed later via Functies & Vaardigheden)
+      const defaultFunction = await base44.entities.Function.create({
+        companyId: company.id,
+        name: 'Planner',
+        code: 'PLN',
+        description: 'Standaard plannerfunctie — naam aanpasbaar via Functies & Vaardigheden',
+        color: '#3B82F6',
+        required_skillIds: [],
+        status: 'active'
+      });
+
       // Create company membership for current user as admin
       await base44.entities.CompanyMember.create({
         companyId: company.id,
@@ -156,13 +167,14 @@ export default function CompanyOnboarding() {
         joined_at: new Date().toISOString()
       });
 
-      // Create employee profile for current user
+      // Create employee profile for current user, linked to the default function
       await base44.entities.EmployeeProfile.create({
         companyId: company.id,
         userId: user?.id,
         first_name: user?.full_name?.split(' ')[0] || 'Admin',
         last_name: user?.full_name?.split(' ').slice(1).join(' ') || '',
         email: user?.email,
+        functionId: defaultFunction.id,
         contract_type: 'fulltime',
         status: 'active'
       });

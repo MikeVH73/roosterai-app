@@ -1,18 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/lib/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Calendar, Users, Zap, Clock, MessageSquare, TrendingUp, ChevronRight } from 'lucide-react';
+import { Calendar, Users, Zap, Clock, MessageSquare, TrendingUp, ChevronRight, X } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { isAuthenticated, login, register } = useAuth();
 
-  const handleLogin = async () => {
-    const isAuth = await base44.auth.isAuthenticated();
-    if (isAuth) {
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState('login'); // 'login' | 'register'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  const handleLogin = () => {
+    if (isAuthenticated) {
       navigate('/CompanySelect');
     } else {
-      base44.auth.redirectToLogin('/CompanySelect');
+      setModalMode('login');
+      setAuthError('');
+      setShowModal(true);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthLoading(true);
+    try {
+      if (modalMode === 'login') {
+        await login(email, password);
+      } else {
+        await register(email, password);
+      }
+      setShowModal(false);
+      navigate('/CompanySelect');
+    } catch (err) {
+      const msg = err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password'
+        ? 'Ongeldig e-mailadres of wachtwoord.'
+        : err.code === 'auth/email-already-in-use'
+        ? 'Dit e-mailadres is al in gebruik.'
+        : err.code === 'auth/weak-password'
+        ? 'Wachtwoord moet minimaal 6 tekens zijn.'
+        : 'Er is een fout opgetreden. Probeer opnieuw.';
+      setAuthError(msg);
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -344,6 +379,57 @@ export default function Landing() {
           </div>
         </section>
       </main>
+
+      {/* Login / Register Modal */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setShowModal(false)}>
+          <div style={{ background: '#1a0b16', border: '1px solid rgba(57,255,20,0.2)', borderRadius: '20px', padding: '40px', width: '100%', maxWidth: '400px', position: 'relative' }}
+            onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+            <h2 style={{ color: 'white', fontWeight: 900, fontSize: '1.5rem', marginBottom: '8px' }}>
+              {modalMode === 'login' ? 'Inloggen' : 'Account aanmaken'}
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '0.875rem', marginBottom: '28px' }}>
+              {modalMode === 'login' ? 'Welkom terug bij RoosterAI' : 'Start gratis met RoosterAI'}
+            </p>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '6px' }}>E-mailadres</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '12px 16px', color: 'white', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(57,255,20,0.5)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  placeholder="jouw@email.nl" />
+              </div>
+              <div>
+                <label style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Wachtwoord</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '12px 16px', color: 'white', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
+                  onFocus={(e) => e.target.style.borderColor = 'rgba(57,255,20,0.5)'}
+                  onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  placeholder="••••••••" />
+              </div>
+              {authError && (
+                <p style={{ color: '#f87171', fontSize: '0.875rem', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', padding: '10px 14px' }}>{authError}</p>
+              )}
+              <button type="submit" disabled={authLoading}
+                style={{ background: '#39FF14', color: '#1a0b16', fontWeight: 900, fontSize: '1rem', padding: '14px', borderRadius: '10px', border: 'none', cursor: authLoading ? 'not-allowed' : 'pointer', opacity: authLoading ? 0.7 : 1, marginTop: '4px' }}>
+                {authLoading ? 'Bezig...' : modalMode === 'login' ? 'Inloggen' : 'Account aanmaken'}
+              </button>
+            </form>
+            <p style={{ color: '#64748b', fontSize: '0.875rem', textAlign: 'center', marginTop: '20px' }}>
+              {modalMode === 'login' ? 'Nog geen account?' : 'Al een account?'}{' '}
+              <button onClick={() => { setModalMode(modalMode === 'login' ? 'register' : 'login'); setAuthError(''); }}
+                style={{ color: '#39FF14', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
+                {modalMode === 'login' ? 'Registreren' : 'Inloggen'}
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer style={{ background: '#1a0b16', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '80px', paddingBottom: '40px' }}>

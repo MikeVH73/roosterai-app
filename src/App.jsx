@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider } from '@/lib/AuthContext';
 import RequireAuth from '@/components/auth/RequireAuth';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import Landing from './pages/Landing';
 import Abonnementen from './pages/Abonnementen';
 import PlanningTool from './pages/PlanningTool';
@@ -26,7 +27,9 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const ProtectedRoute = ({ children, currentPageName }) => (
   <RequireAuth>
     <LayoutWrapper currentPageName={currentPageName}>
-      {children}
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
     </LayoutWrapper>
   </RequireAuth>
 );

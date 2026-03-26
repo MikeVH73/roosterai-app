@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { auth } from '@/api/firebaseClient';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const CompanyContext = createContext(null);
 
@@ -11,12 +13,28 @@ export function CompanyProvider({ children }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    loadUserAndCompanies();
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        loadUserAndCompanies(firebaseUser);
+      } else {
+        setUser(null);
+        setUserMemberships([]);
+        setCurrentCompany(null);
+        setUserRole(null);
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const loadUserAndCompanies = async () => {
+  const loadUserAndCompanies = async (firebaseUser) => {
     try {
-      const currentUser = await base44.auth.me();
+      const currentUser = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email,
+        avatar: firebaseUser.photoURL,
+      };
       setUser(currentUser);
       
       // Get all company memberships for this user (active or invited)
