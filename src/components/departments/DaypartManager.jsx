@@ -114,10 +114,11 @@ export default function DaypartManager({ departmentId, dayparts = [], onUpdate }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const submitData = { 
-      ...formData, 
+    const submitData = {
+      ...formData,
       companyId,
       departmentId,
+      status: 'active',
       break_duration: formData.has_break ? parseInt(formData.break_duration) || 30 : 0
     };
     delete submitData.has_break;
