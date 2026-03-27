@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Companies: lees door elke ingelogde gebruiker (inclusief anonymous = ops tool)
+    // Schrijf alleen door geauthenticeerde gebruikers van de app
+    match /companies/{companyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Alle andere collecties: volledig toegankelijk voor ingelogde gebruikers
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
