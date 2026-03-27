@@ -12,9 +12,9 @@ if (!admin.apps.length) {
 }
 
 const PLAN_CONFIG = {
-  starter: { lookup_key: 'starter_monthly', employeeLimit: 25, aiActions: 500 },
-  pro:     { lookup_key: 'pro_monthly',     employeeLimit: 75, aiActions: 1500 },
-  business:{ lookup_key: 'business_monthly',employeeLimit: 200, aiActions: 5000 },
+  starter: { lookup_key: 'starter_monthly', name: 'RoosterAI Starter', priceInCents: 3900,  employeeLimit: 25,  aiActions: 500  },
+  pro:     { lookup_key: 'pro_monthly',     name: 'RoosterAI Pro',     priceInCents: 7900,  employeeLimit: 75,  aiActions: 1500 },
+  business:{ lookup_key: 'business_monthly',name: 'RoosterAI Business',priceInCents: 14900, employeeLimit: 200, aiActions: 5000 },
 };
 
 module.exports = async function handler(req, res) {
@@ -40,16 +40,6 @@ module.exports = async function handler(req, res) {
 
     const stripe = new Stripe(process.env.STRIPE_API_KEY);
 
-    const prices = await stripe.prices.list({
-      lookup_keys: [planConfig.lookup_key],
-      active: true,
-      limit: 1,
-    });
-
-    if (!prices.data.length) {
-      return res.status(404).json({ error: `Stripe price not found: ${planConfig.lookup_key}` });
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card', 'ideal'],
@@ -62,7 +52,15 @@ module.exports = async function handler(req, res) {
           aiActions: String(planConfig.aiActions),
         },
       },
-      line_items: [{ price: prices.data[0].id, quantity: 1 }],
+      line_items: [{
+        quantity: 1,
+        price_data: {
+          currency: 'eur',
+          recurring: { interval: 'month' },
+          product_data: { name: planConfig.name },
+          unit_amount: planConfig.priceInCents,
+        },
+      }],
       metadata: {
         companyId,
         planId,

@@ -92,7 +92,13 @@ module.exports = async function handler(req, res) {
 
         const item = sub.items?.data?.[0];
         const plan = item?.price?.lookup_key ? LOOKUP_KEY_TO_PLAN[item.price.lookup_key] : null;
-        if (plan) { update.subscription_plan = plan.planId; update.max_users = plan.employeeLimit; update.ai_actions_limit = plan.aiActions; }
+        if (plan) {
+          update.subscription_plan = plan.planId; update.max_users = plan.employeeLimit; update.ai_actions_limit = plan.aiActions;
+        } else if (sub.metadata?.planId && sub.metadata?.employeeLimit && sub.metadata?.aiActions) {
+          update.subscription_plan = sub.metadata.planId;
+          update.max_users = parseInt(sub.metadata.employeeLimit, 10);
+          update.ai_actions_limit = parseInt(sub.metadata.aiActions, 10);
+        }
 
         if (Object.keys(update).length > 0) {
           await admin.firestore().collection('companies').doc(companyId).update(update);
