@@ -1,6 +1,6 @@
-import Stripe from 'stripe';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+const Stripe = require('stripe');
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
 if (!getApps().length) {
   initializeApp({
@@ -18,9 +18,9 @@ const LOOKUP_KEY_TO_PLAN = {
   business_monthly:{ planId: 'business',employeeLimit: 200, aiActions: 5000 },
 };
 
-export const config = { api: { bodyParser: false } };
+module.exports.config = { api: { bodyParser: false } };
 
-async function getRawBody(req) {
+function getRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     req.on('data', (chunk) => chunks.push(chunk));
@@ -29,7 +29,7 @@ async function getRawBody(req) {
   });
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -144,4 +144,4 @@ export default async function handler(req, res) {
     console.error('Webhook handling error:', error.message);
     return res.status(500).json({ error: error.message });
   }
-}
+};

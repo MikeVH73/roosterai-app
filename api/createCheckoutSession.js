@@ -1,6 +1,6 @@
-import Stripe from 'stripe';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+const Stripe = require('stripe');
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 
 if (!getApps().length) {
   initializeApp({
@@ -18,13 +18,12 @@ const PLAN_CONFIG = {
   business:{ lookup_key: 'business_monthly',employeeLimit: 200, aiActions: 5000 },
 };
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Verify Firebase Auth token
     const authHeader = req.headers.authorization || '';
     const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
@@ -82,4 +81,4 @@ export default async function handler(req, res) {
     console.error('createCheckoutSession error:', error.message);
     return res.status(500).json({ error: error.message });
   }
-}
+};
