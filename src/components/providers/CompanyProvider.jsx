@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { auth } from '@/api/firebaseClient';
+import { auth, db } from '@/api/firebaseClient';
 import { onAuthStateChanged } from 'firebase/auth';
+import { doc, updateDoc } from 'firebase/firestore';
 
 const CompanyContext = createContext(null);
 
@@ -66,6 +67,7 @@ export function CompanyProvider({ children }) {
           if (company.length > 0) {
             setCurrentCompany(company[0]);
             setUserRole(membership.company_role);
+            updateDoc(doc(db, 'companies', company[0].id), { last_login: new Date().toISOString() }).catch(() => {});
           }
         }
       } else if (memberships.length === 1) {
@@ -75,6 +77,7 @@ export function CompanyProvider({ children }) {
           setCurrentCompany(company[0]);
           setUserRole(memberships[0].company_role);
           localStorage.setItem('currentCompanyId', company[0].id);
+          updateDoc(doc(db, 'companies', company[0].id), { last_login: new Date().toISOString() }).catch(() => {});
         }
       }
     } catch (error) {
