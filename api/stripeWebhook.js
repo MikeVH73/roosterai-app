@@ -1,10 +1,9 @@
 const Stripe = require('stripe');
-const { initializeApp, getApps, cert } = require('firebase-admin/app');
-const { getFirestore } = require('firebase-admin/firestore');
+const admin = require('firebase-admin');
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -36,7 +35,7 @@ module.exports = async function handler(req, res) {
 
   const stripe = new Stripe(process.env.STRIPE_API_KEY);
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const db = getFirestore();
+  const db = admin.firestore();
 
   let event;
   try {
@@ -54,7 +53,6 @@ module.exports = async function handler(req, res) {
 
   try {
     switch (event.type) {
-
       case 'checkout.session.completed': {
         const session = event.data.object;
         const { companyId, planId, employeeLimit, aiActions } = session.metadata || {};
@@ -71,7 +69,7 @@ module.exports = async function handler(req, res) {
           }
         }
 
-        await db.collection('companies').doc(companyId).update({
+        await admin.firestore().collection('companies').doc(companyId).update({
           subscription_plan: planId,
           subscription_status: subscriptionStatus,
           max_users: parseInt(employeeLimit, 10),
@@ -87,30 +85,17 @@ module.exports = async function handler(req, res) {
         if (!companyId) break;
 
         const update = {};
-        if (sub.status === 'active') {
-          update.subscription_status = 'active';
-          update.trial_ends_at = null;
-        } else if (sub.status === 'trialing') {
-          update.subscription_status = 'trial';
-          update.trial_ends_at = sub.trial_end
-            ? new Date(sub.trial_end * 1000).toISOString().split('T')[0]
-            : null;
-        } else if (sub.status === 'past_due' || sub.status === 'unpaid') {
-          update.subscription_status = 'suspended';
-        } else if (sub.status === 'canceled') {
-          update.subscription_status = 'cancelled';
-        }
+        if (sub.status === 'active') { update.subscription_status = 'active'; update.trial_ends_at = null; }
+        else if (sub.status === 'trialing') { update.subscription_status = 'trial'; update.trial_ends_at = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString().split('T')[0] : null; }
+        else if (sub.status === 'past_due' || sub.status === 'unpaid') { update.subscription_status = 'suspended'; }
+        else if (sub.status === 'canceled') { update.subscription_status = 'cancelled'; }
 
         const item = sub.items?.data?.[0];
         const plan = item?.price?.lookup_key ? LOOKUP_KEY_TO_PLAN[item.price.lookup_key] : null;
-        if (plan) {
-          update.subscription_plan = plan.planId;
-          update.max_users = plan.employeeLimit;
-          update.ai_actions_limit = plan.aiActions;
-        }
+        if (plan) { update.subscription_plan = plan.planId; update.max_users = plan.employeeLimit; update.ai_actions_limit = plan.aiActions; }
 
         if (Object.keys(update).length > 0) {
-          await db.collection('companies').doc(companyId).update(update);
+          await admin.firestore().collection('companies').doc(companyId).update(update);
         }
         break;
       }
@@ -119,7 +104,7 @@ module.exports = async function handler(req, res) {
         const sub = event.data.object;
         const companyId = sub.metadata?.companyId;
         if (!companyId) break;
-        await db.collection('companies').doc(companyId).update({ subscription_status: 'cancelled' });
+        await admin.firestore().collection('companies').doc(companyId).update({ subscription_status: 'cancelled' });
         break;
       }
 
@@ -129,7 +114,7 @@ module.exports = async function handler(req, res) {
           const sub = await stripe.subscriptions.retrieve(invoice.subscription);
           const companyId = sub.metadata?.companyId;
           if (companyId) {
-            await db.collection('companies').doc(companyId).update({ subscription_status: 'suspended' });
+            await admin.firestore().collection('companies').doc(companyId).update({ subscription_status: 'suspended' });
           }
         }
         break;

@@ -1,10 +1,9 @@
 const Stripe = require('stripe');
-const { initializeApp, getApps, cert } = require('firebase-admin/app');
-const { getAuth } = require('firebase-admin/auth');
+const admin = require('firebase-admin');
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -28,8 +27,7 @@ module.exports = async function handler(req, res) {
     const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (!idToken) return res.status(401).json({ error: 'Unauthorized' });
 
-    const auth = getAuth();
-    const decoded = await auth.verifyIdToken(idToken);
+    const decoded = await admin.auth().verifyIdToken(idToken);
     const userEmail = decoded.email;
 
     const { planId, companyId, returnUrl } = req.body;
