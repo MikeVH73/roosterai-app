@@ -253,6 +253,7 @@ export default function Landing() {
                       contentStyle={{ background: '#1a0b16', border: '1px solid rgba(57,255,20,0.2)', borderRadius: 8, color: 'white' }}
                       formatter={(value, name) => [`${value}u`, name === 'voor' ? 'Zonder AI' : 'Met RoosterAI']}
                       labelStyle={{ color: '#94a3b8' }}
+                      cursor={{ fill: 'rgba(255,255,255,0.04)' }}
                     />
                     <Bar dataKey="voor" radius={[4, 4, 0, 0]} fill="rgba(148,163,184,0.25)" />
                     <Bar dataKey="na" radius={[4, 4, 0, 0]} fill="#39FF14" />

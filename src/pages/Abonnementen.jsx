@@ -78,7 +78,7 @@ const FEATURES = [
 
 export default function Abonnementen() {
   const navigate = useNavigate();
-  const { currentCompany, refreshCompany, hasPermission } = useCompany();
+  const { currentCompany, user, refreshCompany, hasPermission } = useCompany();
   const companyId = currentCompany?.id;
 
   const { data: employees = [] } = useQuery({
@@ -133,10 +133,21 @@ export default function Abonnementen() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
-      <TopBar
-        title="Abonnementen"
-        subtitle="Kies het plan dat bij jouw organisatie past"
-      />
+      {!user ? (
+        <header className="sticky top-0 z-10 px-6 h-16 flex items-center" style={{ background: 'rgba(26,11,22,0.95)', borderBottom: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)' }}>
+          <a href="/" className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#39FF14' }}>
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            Terug naar home
+          </a>
+          <span className="mx-auto font-black text-xl italic uppercase text-white tracking-tight">RoosterAI</span>
+          <div className="w-32" />
+        </header>
+      ) : (
+        <TopBar
+          title="Abonnementen"
+          subtitle="Kies het plan dat bij jouw organisatie past"
+        />
+      )}
 
       <div className="p-6 max-w-7xl mx-auto space-y-10">
 
