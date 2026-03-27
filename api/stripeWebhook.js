@@ -114,6 +114,24 @@ module.exports = async function handler(req, res) {
         break;
       }
 
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object;
+        if (!invoice.amount_paid || invoice.amount_paid === 0) break; // gratis/trial, niet loggen
+        const companyId = invoice.subscription
+          ? (await stripe.subscriptions.retrieve(invoice.subscription)).metadata?.companyId
+          : null;
+        await db.collection('transactions').add({
+          stripe_invoice_id: invoice.id,
+          companyId: companyId || null,
+          klant: invoice.customer_email || invoice.customer_name || 'Onbekend',
+          bedrag: invoice.amount_paid / 100,
+          datum: new Date(invoice.created * 1000).toISOString(),
+          type: 'inkomst',
+          omschrijving: invoice.description || `Stripe — ${invoice.customer_email || invoice.id}`,
+        });
+        break;
+      }
+
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         if (invoice.subscription) {
