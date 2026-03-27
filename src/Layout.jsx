@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { CompanyProvider, useCompany } from './components/providers/CompanyProvider';
 import { ThemeProvider } from './components/providers/ThemeProvider';
 import HorizontalNav from './components/layout/HorizontalNav';
 import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Pages that don't need company context
 const publicPages = ['CompanySelect', 'CompanyOnboarding', 'Landing', 'Abonnementen'];
@@ -12,6 +13,28 @@ const selfNavigatingPages = ['MedewerkerApp'];
 
 function LayoutContent({ children, currentPageName }) {
   const { currentCompany, loading } = useCompany();
+  const navigate = useNavigate();
+
+  // Trial / subscription gate
+  useEffect(() => {
+    if (loading) return;
+    if (!currentCompany) return;
+    if (publicPages.includes(currentPageName)) return;
+
+    const status = currentCompany.subscription_status;
+    const isActive = status === 'active';
+    const isTrial = status === 'trial';
+
+    if (isActive) return;
+
+    if (isTrial && currentCompany.trial_ends_at) {
+      const trialEnd = new Date(currentCompany.trial_ends_at);
+      if (trialEnd > new Date()) return; // trial still valid
+    }
+
+    // No active subscription and no valid trial → block access
+    navigate('/Abonnementen', { replace: true });
+  }, [loading, currentCompany, currentPageName, navigate]);
 
   // Show loading state
   if (loading) {

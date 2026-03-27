@@ -55,7 +55,6 @@ module.exports = async function handler(req, res) {
       payment_method_types: ['card', 'ideal'],
       customer_email: userEmail,
       subscription_data: {
-        trial_period_days: 14,
         metadata: {
           companyId,
           planId,
