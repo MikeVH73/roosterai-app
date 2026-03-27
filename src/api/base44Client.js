@@ -108,11 +108,19 @@ export const base44 = {
     logUserInApp: () => Promise.resolve(),
   },
 
-  // Stub: Cloud Functions (will be replaced with Firebase Functions calls)
   functions: {
-    invoke: (name, payload) => {
-      console.warn(`base44.functions.invoke('${name}') called — not yet implemented`);
-      return Promise.resolve({ success: false, error: 'Not implemented' });
+    invoke: async (name, payload) => {
+      const token = await auth.currentUser?.getIdToken();
+      const res = await fetch(`/api/${name}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      return { data };
     },
   },
 
