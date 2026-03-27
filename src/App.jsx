@@ -45,7 +45,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/Landing" element={<Landing />} />
             <Route path="/Abonnementen" element={
-              <ProtectedRoute currentPageName="Abonnementen"><Abonnementen /></ProtectedRoute>
+              <LayoutWrapper currentPageName="Abonnementen"><Abonnementen /></LayoutWrapper>
             } />
 
             {/* Protected routes from pages.config (legacy) */}
