@@ -250,10 +250,10 @@ export default function ScheduleEditor() {
   }, [companyId]);
 
   const handleCreateVervangingTask = async (sickReport) => {
-    const agentId = import.meta.env.VITE_PAPERCLIP_AGENT_VERVANGING;
-    const goalId = import.meta.env.VITE_PAPERCLIP_GOAL_PLANNING;
-    if (!agentId || !goalId) {
-      alert('Paperclip agent-ID of goal-ID is niet geconfigureerd (VITE_PAPERCLIP_AGENT_VERVANGING / VITE_PAPERCLIP_GOAL_PLANNING).');
+    const agentId = import.meta.env.VITE_PAPERCLIP_AGENT_VERVANGING || 'c4e88a87-87bc-45c1-b98d-2bcbe30bbb88';
+    const goalId = import.meta.env.VITE_PAPERCLIP_GOAL_PLANNING || null;
+    if (!agentId) {
+      alert('Paperclip agent-ID is niet geconfigureerd (VITE_PAPERCLIP_AGENT_VERVANGING).');
       return;
     }
     setSickTaskLoading(prev => new Set([...prev, sickReport.shiftId]));
