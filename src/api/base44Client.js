@@ -82,6 +82,7 @@ export const base44 = {
     Shift:               createEntity('shifts'),
     Skill:               createEntity('skills'),
     StaffingRequirement: createEntity('staffing_requirements'),
+    SickReport:          createEntity('sick_reports'),
     SwapRequest:         createEntity('swap_requests'),
     VacationRequest:     createEntity('vacation_requests'),
     WhatsAppMessageLog:  createEntity('whatsapp_message_logs'),

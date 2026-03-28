@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useCompany } from '@/components/providers/CompanyProvider';
 import { base44 } from '@/api/base44Client';
+import { db } from '@/api/firebaseClient';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { createPaperclipTask } from '@/api/paperclipClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import TopBar from '@/components/layout/TopBar';
 import ShiftDialog from '@/components/schedules/ShiftDialog';
@@ -87,6 +90,11 @@ export default function ScheduleEditor() {
   const [whatsappInboxOpen, setWhatsappInboxOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const [sendNotifyOpen, setSendNotifyOpen] = useState(false);
+
+  // Sick report realtime listener
+  const [sickReports, setSickReports] = useState([]);
+  const [sickTaskLoading, setSickTaskLoading] = useState(new Set());
+  const [sickTaskDone, setSickTaskDone] = useState(new Set());
 
   const { data: schedule, isLoading: scheduleLoading } = useQuery({
     queryKey: ['schedule', scheduleId],
@@ -227,6 +235,50 @@ export default function ScheduleEditor() {
       setSelectedTimelineDayparts(relevantDayparts.map(dp => dp.id));
     }
   }, [relevantDayparts, selectedTimelineDayparts.length]);
+
+  // Listen for open sick reports for this company
+  useEffect(() => {
+    if (!companyId) return;
+    const q = query(
+      collection(db, 'sick_reports'),
+      where('companyId', '==', companyId),
+      where('status', '==', 'open')
+    );
+    return onSnapshot(q, (snap) => {
+      setSickReports(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+  }, [companyId]);
+
+  const handleCreateVervangingTask = async (sickReport) => {
+    const agentId = import.meta.env.VITE_PAPERCLIP_AGENT_VERVANGING;
+    const goalId = import.meta.env.VITE_PAPERCLIP_GOAL_PLANNING;
+    if (!agentId || !goalId) {
+      alert('Paperclip agent-ID of goal-ID is niet geconfigureerd (VITE_PAPERCLIP_AGENT_VERVANGING / VITE_PAPERCLIP_GOAL_PLANNING).');
+      return;
+    }
+    setSickTaskLoading(prev => new Set([...prev, sickReport.shiftId]));
+    try {
+      await createPaperclipTask({
+        taskType: 'vervanging',
+        companyId,
+        assigneeAgentId: agentId,
+        goalId,
+        metadata: {
+          scheduleId: sickReport.scheduleId,
+          shiftId: sickReport.shiftId,
+          employeeId: sickReport.employeeId,
+          date: sickReport.date,
+          sickReportId: sickReport.id,
+        },
+      });
+      setSickTaskDone(prev => new Set([...prev, sickReport.shiftId]));
+    } catch (err) {
+      console.error('Vervanger taak aanmaken mislukt:', err);
+      alert(`Fout: ${err.message}`);
+    } finally {
+      setSickTaskLoading(prev => { const s = new Set(prev); s.delete(sickReport.shiftId); return s; });
+    }
+  };
 
   const getInitials = (first, last) => {
     return `${first?.charAt(0) || ''}${last?.charAt(0) || ''}`.toUpperCase();
@@ -456,6 +508,48 @@ export default function ScheduleEditor() {
                 )}
               </div>
             </div>
+
+            {/* Ziekmeldingen banner */}
+            {sickReports.length > 0 && (
+              <div className="p-4 border-b" style={{ borderColor: '#fecaca', backgroundColor: '#fef2f2' }}>
+                <p className="text-sm font-semibold text-red-700 mb-3 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  Ziekmeldingen — {sickReports.length} open
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {sickReports.map(sr => {
+                    const emp = employees.find(e => e.id === sr.employeeId);
+                    const shift = shifts.find(s => s.id === sr.shiftId);
+                    const hasTask = sr.paperclip_issue_id || sickTaskDone.has(sr.shiftId);
+                    const isLoading = sickTaskLoading.has(sr.shiftId);
+                    return (
+                      <div key={sr.id} className="flex items-center gap-3 bg-white rounded-lg px-3 py-2 border border-red-200">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-900">
+                            {emp ? `${emp.first_name} ${emp.last_name}` : 'Onbekend'}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {sr.date}{shift ? ` · ${shift.start_time}–${shift.end_time}` : ''}
+                          </p>
+                        </div>
+                        {hasTask ? (
+                          <span className="text-xs font-medium text-green-600">Taak aangemaakt ✓</span>
+                        ) : (
+                          <button
+                            disabled={isLoading}
+                            onClick={() => handleCreateVervangingTask(sr)}
+                            className="text-xs font-medium text-white px-2 py-1 rounded-md disabled:opacity-60"
+                            style={{ backgroundColor: '#3b82f6' }}
+                          >
+                            {isLoading ? 'Bezig...' : 'Vervanger zoeken'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Schedule Grid */}
             {viewMode === 'vertical-timeline' ? (

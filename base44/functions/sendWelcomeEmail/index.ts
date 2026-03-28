@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
           Open RoosterAI →
         </a>
         <p style="margin-top: 32px; color: #888; font-size: 13px;">
-          Vragen? Mail naar <a href="mailto:hallo@roosterai.nl" style="color: #6366f1;">hallo@roosterai.nl</a>
+          Vragen? Mail naar <a href="mailto:support@roosterai.nl" style="color: #6366f1;">support@roosterai.nl</a>
         </p>
       </div>
     `;
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'hallo@roosterai.nl',
+        from: 'support@roosterai.nl',
         to: email,
         subject: `Welkom bij RoosterAI, ${naam}!`,
         html,
